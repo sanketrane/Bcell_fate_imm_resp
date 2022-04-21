@@ -8,7 +8,7 @@ library(tidyverse)
 ####################################################################################
 
 ## model specific details that needs to be change for every run
-modelName <- "direct_desc_time_loss2"
+modelName <- "GC_desc_dens_timeLoss"
 data_der <- "Bcell_imm_data.csv"    
 
 ## Setting all the directories for opeartions
@@ -67,7 +67,6 @@ ploocv <- data.frame("Model" = modelName,
                      "LooIC" = loo_loglik$estimates[3],
                      "SE" = loo_loglik$estimates[6], 
                      "PLoo" = loo_loglik$estimates[2])
-
 
 write.table(ploocv, file = file.path(outputDir, "stat_table.csv"),
             sep = ",", append = TRUE, quote = FALSE,
@@ -232,14 +231,15 @@ write.csv(out_table, file = file.path(outputDir, paste0('params_', modelName, ".
 time_shape <- function(Time, delta, nu, b0){
   tau=14
   #delta * exp(nu1 * Time)/(1 + exp(nu2 * (Time - tau)))
-  delta/(1 + exp(-nu * (Time - b0)^2))#/(1 + exp(nu2 * (Time - tau)))
-  #delta/(1 + exp(-nu * Time)^1) + b0
+  delta*(1 + exp(-nu * (Time - b0)^2))#/(1 + exp(nu2 * (Time - tau)))
+  #(delta*(1 - exp(-nu * Time)^1)) + b0
+  #(delta*(1 + (Time/nu)^2)) + b0
 }
 
-Time_pred <- time_shape(seq(0, 50), out_table$mean[4], out_table$mean[3], out_table$mean[5])
+Time_pred <- time_shape(seq(0, 30, length.out=100), out_table$mean[4], out_table$mean[3], out_table$mean[5])
 
 p4 <- ggplot() +
-  geom_line(aes(x = seq(0, 50), y = Time_pred), col =4, size=1.52) +
+  geom_line(aes(x = seq(0, 30, length.out=100), y = Time_pred), col =4, size=1.52) +
   labs(title=paste("Time dependent Loss rate"),  y=NULL, x="Days post immunization") + 
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
 
@@ -249,6 +249,30 @@ pdf(file = file.path(outputDir, paste(modelName,"ExtraPlots%03d.pdf", sep = ""))
     width = 6, height = 4.5, onefile = FALSE, useDingbats = FALSE)
 p4
 dev.off()
+
+
+alpha_shape <- function(Time, alpha, nu, b0){
+  tau=14
+  #delta * exp(nu1 * Time)/(1 + exp(nu2 * (Time - tau)))
+  alpha*(1 + exp(-nu * (Time - b0)^2))#/(1 + exp(nu2 * (Time - tau)))
+  #alpha/(1 + exp(-nu * Time)^1) + b0
+}
+
+alpha_pred <- alpha_shape(seq(0, 50), out_table$mean[2], out_table$mean[3], out_table$mean[5])
+
+p4 <- ggplot() +
+  geom_line(aes(x = seq(0, 50), y = alpha_pred), col =4, size=1.52) +
+  labs(title=paste("Time dependent activation rate"),  y=NULL, x="Days post immunization") + 
+  myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
+
+p4
+
+## saving  plots for quality control 
+pdf(file = file.path(outputDir, paste(modelName,"ExtraPlots%03d.pdf", sep = "")),
+    width = 6, height = 4.5, onefile = FALSE, useDingbats = FALSE)
+p4
+dev.off()
+
 
 dens_shape <- function(counts, delta, size_dens_Log){
   size_dens = exp(size_dens_Log)

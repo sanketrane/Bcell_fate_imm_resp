@@ -36,7 +36,7 @@ functions{
 
      //int tau = 7;
      //real alpha_t_MZ = alpha1 * (1 + time * exp(-nu * time));
-     real delta_GC = delta * (1 -  exp(-nu * time)) + b0_delta;      
+     real delta_GC = delta * (1 -  exp(-nu * time)) + b0_delta;
      //real delta_GC = delta * (1 + exp(-nu * (time - b0)^2))
 
      // the system of ODEs

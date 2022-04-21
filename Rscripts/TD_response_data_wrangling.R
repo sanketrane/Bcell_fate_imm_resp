@@ -124,7 +124,7 @@ sol_time <- seq(0, 30, length.out=200)
 
 repFOB_nlm <- nls((fraction_cells/100) ~ phi_func(days.post.imm, b0,r, nu),
                   data = filter(NEW_CAR_prop_df, subpop == "fraction_CAR_in_FOBs"),
-                  start = list(b0=-3, r=0.1, nu=0.5))
+                  start = list(b0=-3, r=0.01, nu=0.5))
 
 par_est <- coef(repFOB_nlm)
 
@@ -155,6 +155,14 @@ imm_data %>%
             "fractionMZ" = mean(fraction_CAR_MZ),
             "countsGC" = log(mean(GCB_cell_numbers)),
             "fractionGC" = mean(fraction_CAR_GC))
+
+# generating data for fitting
+imm_N2ko_data <- B_cell_data %>% filter(genotype == "N2KO") %>%
+  select(days.post.imm, contains("MZ"), contains("GC"), -contains("fraction"), -total_MZBs) %>%
+  mutate(fraction_CAR_MZ = CAR_MZB_numbers/MZB_cell_numbers,
+         fraction_CAR_GC = CAR_GCB_numbers/GCB_cell_numbers)%>%
+  select(days.post.imm, MZB_cell_numbers, GCB_cell_numbers, fraction_CAR_MZ, fraction_CAR_GC)
+
 
 ## Unique time points with indices to map
 unique_times_df <- imm_data %>% distinct(days.post.imm, .keep_all = TRUE) 
