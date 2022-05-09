@@ -8,7 +8,7 @@ library(tidyverse)
 ####################################################################################
 
 ## model specific details that needs to be change for every run
-modelName <- "GC_desc_dens_timeLoss"
+modelName <- "MZB_desc_const"
 data_der <- "Bcell_imm_data.csv"    
 
 ## Setting all the directories for opeartions
@@ -69,8 +69,8 @@ ploocv <- data.frame("Model" = modelName,
                      "PLoo" = loo_loglik$estimates[2])
 
 write.table(ploocv, file = file.path(outputDir, "stat_table.csv"),
-            sep = ",", append = TRUE, quote = FALSE,
-            col.names = FALSE, row.names = FALSE)
+            sep = ",", append = T, quote = FALSE,
+            col.names = F, row.names = FALSE)
 
 
 ################################################################################################
@@ -167,8 +167,9 @@ p1 <- ggplot() +
   geom_line(data = Y1pred, aes(x = timeseries, y = median), col =2) +
   geom_ribbon(data = Y1pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
   #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
-  geom_point(data = imm_data, aes(x = days.post.imm, y = fraction_CAR_MZ), col=2) +
-  labs(title=paste("Fraction CAR in MZ B cells"),  y=NULL, x="Days post immunization") + 
+  geom_point(data = imm_data, aes(x = days.post.imm, y = CAR_MZB_numbers), col=2) +
+  labs(title=paste("CAR positive MZ B cells"),  y=NULL, x="Days post immunization") + 
+  scale_y_continuous(limits = c(1e3, 2e7), trans="log10", breaks=c(1e4, 1e5, 1e6, 1e7, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
 
 p2 <- ggplot() +
