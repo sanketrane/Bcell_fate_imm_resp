@@ -7,7 +7,7 @@ functions{
    }
 
    real CAR_negative_MZB(real time){
-    real M0 = exp(13.745913911); real nu = 0.002745059; real b0 = 15.195255914;
+    real M0 = exp(14); real nu = 0.01; real b0 = 18;
     real value = M0 * (1 + exp(-nu * (time - b0)^2));
     return value;
    }
@@ -85,9 +85,9 @@ transformed parameters{
   real parms[5];               // declaring the array for parameters
   real init_cond[3];           // declaring the array for state variables
 
-  real G0 = exp(11.8);         // transformed parameters for better/faster sampling
-  real CAR_MZ0 = 9.82;           // transformed parameters for better/faster sampling
-  real fG_0 = 0.299;            // transformed parameters for better/faster sampling
+  real G0 = exp(12.2);            // transformed parameters for better/faster sampling
+  real CAR_MZ0 = exp(10.8);            // transformed parameters for better/faster sampling
+  real fG_0 = 0.37;              // transformed parameters for better/faster sampling
 
 
   // initial conditions and parameters

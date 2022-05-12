@@ -15,6 +15,7 @@ functions{
      real delta  = parms[4];
      real alpha2 = parms[5];
      real CAR_negative_FOB = exp(17.15);
+
      // the system of ODEs
      real dydt[3];
      dydt[1] = alpha1 * y[2] - lambda * y[1];
@@ -79,9 +80,9 @@ transformed parameters{
   real parms[5];                  // declaring the array for parameters
   real init_cond[3];              // declaring the array for state variables
 
-  real G0 = exp(11.8);            // transformed parameters for better/faster sampling
-  real CAR_MZ0 = exp(9.82);            // transformed parameters for better/faster sampling
-  real fG_0 = 0.299;              // transformed parameters for better/faster sampling
+  real G0 = exp(12.2);            // transformed parameters for better/faster sampling
+  real CAR_MZ0 = exp(10.8);            // transformed parameters for better/faster sampling
+  real fG_0 = 0.37;              // transformed parameters for better/faster sampling
 
 
   // initial conditions and parameters

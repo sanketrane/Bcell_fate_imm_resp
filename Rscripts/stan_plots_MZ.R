@@ -8,7 +8,7 @@ library(tidyverse)
 ####################################################################################
 
 ## model specific details that needs to be change for every run
-modelName <- "MZB_desc_const"
+modelName <- "B_desc_const"
 data_der <- "Bcell_imm_data.csv"    
 
 ## Setting all the directories for opeartions
@@ -77,7 +77,7 @@ write.table(ploocv, file = file.path(outputDir, "stat_table.csv"),
 ################################################################################################
 ## posterior predictive distributions
 # time sequence for predictions 
-ts_pred <- seq(0, 30, length.out = 300)
+ts_pred <- seq(4, 30, length.out = 300)
 numPred <- length(ts_pred)
 
 
@@ -169,13 +169,15 @@ p1 <- ggplot() +
   #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
   geom_point(data = imm_data, aes(x = days.post.imm, y = CAR_MZB_numbers), col=2) +
   labs(title=paste("CAR positive MZ B cells"),  y=NULL, x="Days post immunization") + 
+  xlim(0, 30) +
   scale_y_continuous(limits = c(1e3, 2e7), trans="log10", breaks=c(1e4, 1e5, 1e6, 1e7, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
 
 p2 <- ggplot() +
   geom_line(data = Y2pred, aes(x = timeseries, y = median), col =6) +
   geom_ribbon(data = Y2pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=6, alpha = 0.25)+
-  geom_point(data = imm_data, aes(x = days.post.imm, y = fraction_CAR_GC), col=6) +
+  geom_point(data = imm_data, aes(x = days.post.imm, y = fraction_CAR_GC), col=6) + 
+  xlim(0, 30) +
   labs(title=paste("Fraction CAR in GC B cells"),  y=NULL, x="Days post immunization") + 
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
 
@@ -183,7 +185,8 @@ p3 <- ggplot() +
   geom_line(data = Y3pred, aes(x = timeseries, y = median), col =4) +
   geom_ribbon(data = Y3pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
   #geom_ribbon(data = GCcounts_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
-  geom_point(data = imm_data, aes(x = days.post.imm, y = GCB_cell_numbers), col=4) +
+  geom_point(data = imm_data, aes(x = days.post.imm, y = GCB_cell_numbers), col=4) + 
+  xlim(0, 30) +
   labs(title=paste("Total numbers of GC B cells"),  y=NULL, x="Days post immunization") + 
   scale_y_continuous(limits = c(1e4, 2e7), trans="log10", breaks=c(1e4, 1e5, 1e6, 1e7, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
@@ -230,14 +233,11 @@ out_table
 write.csv(out_table, file = file.path(outputDir, paste0('params_', modelName, ".csv")))
 
 time_shape <- function(Time, delta, nu, b0){
-  tau=14
-  #delta * exp(nu1 * Time)/(1 + exp(nu2 * (Time - tau)))
-  delta*(1 + exp(-nu * (Time - b0)^2))#/(1 + exp(nu2 * (Time - tau)))
-  #(delta*(1 - exp(-nu * Time)^1)) + b0
-  #(delta*(1 + (Time/nu)^2)) + b0
+  delta*(1 + exp(-nu * (Time - b0)^2))
 }
 
-Time_pred <- time_shape(seq(0, 30, length.out=100), out_table$mean[4], out_table$mean[3], out_table$mean[5])
+Time_pred <- time_shape(seq(0, 30, length.out=100), out_table$mean[2], out_table$mean[6], out_table$mean[7])
+
 
 p4 <- ggplot() +
   geom_line(aes(x = seq(0, 30, length.out=100), y = Time_pred), col =4, size=1.52) +
@@ -252,14 +252,13 @@ p4
 dev.off()
 
 
-alpha_shape <- function(Time, alpha, nu, b0){
-  tau=14
-  #delta * exp(nu1 * Time)/(1 + exp(nu2 * (Time - tau)))
-  alpha*(1 + exp(-nu * (Time - b0)^2))#/(1 + exp(nu2 * (Time - tau)))
-  #alpha/(1 + exp(-nu * Time)^1) + b0
+alpha_shape <-  function(Time, alpha, nu, r){
+  alpha*(1 + (Time/nu)^2)
 }
 
-alpha_pred <- alpha_shape(seq(0, 50), out_table$mean[2], out_table$mean[3], out_table$mean[5])
+alpha_pred <- alpha_shape(seq(0, 50), out_table$mean[2], out_table$mean[6], out_table$mean[7])
+
+alpha_pred <- alpha_shape(seq(0, 50), 0.05, 7)
 
 p4 <- ggplot() +
   geom_line(aes(x = seq(0, 50), y = alpha_pred), col =4, size=1.52) +

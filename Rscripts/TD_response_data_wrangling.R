@@ -48,7 +48,7 @@ NEW_CAR_prop_df <- read_excel("datafiles/NEW_CAR_fractions_TD_response.xlsx", sh
   gather(-c(days.post.imm, genotype), key = 'subpop', value='fraction_cells')
 
 ggplot() +
-  geom_point(data=NEW_NEW_CAR_prop_df, 
+  geom_point(data=NEW_CAR_prop_df, 
              aes(x= as.factor(days.post.imm), y=fraction_cells), col = 4) +
   scale_y_log10() + 
   labs(x='Days post immunization', y='% CAR+')+
@@ -200,7 +200,7 @@ ggplot() +
 
 
 ggplot() +
-  geom_line(aes(x=sol_time, y=exp(phi_vec_m) + exp(17.1527)), col=2, size=0.8) +
+  #geom_line(aes(x=sol_time, y=exp(phi_vec_m) + exp(17.1527)), col=2, size=0.8) +
   #geom_point(data=CAR_PosNeg_df,aes(x=days.post.imm, y=(CAR_Neg_FOB)), size=2, col=2)+
   geom_point(data=CAR_PosNeg_df,
              aes(x=days.post.imm, y=(FOB_cell_numbers)), size=2, col=4)+
@@ -225,9 +225,11 @@ Neg_MZB_nlm <- nls(log(CAR_Neg_MZB) ~ log(phi_func(days.post.imm,  basl, nu, b0)
 par_est <- coef(Neg_MZB_nlm)
 sol_time <- seq(0, 30, length.out=100)
 phi_vec_m <- phi_func(sol_time, basl=par_est[1], nu=par_est[2], b0=par_est[3])
+phi_vec_mm <- phi_func(sol_time, basl=14, nu=0.01, b0=18)
 
 ggplot() +
-  geom_line(aes(x=sol_time, y=(phi_vec_m)), col=2, size=0.8) +
+  #geom_line(aes(x=sol_time, y=(phi_vec_m)), col=2, size=0.8) +
+  geom_line(aes(x=sol_time, y=(phi_vec_mm)), col=2, size=0.8) +
   geom_point(data=CAR_PosNeg_df,
              aes(x=days.post.imm, y=(CAR_Neg_MZB)), size=2, col=2) +
   scale_y_log10(limits = c(1e5, 1e7), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
@@ -242,12 +244,13 @@ imm_data <- B_cell_data %>% filter(genotype == "CAR") %>%
   select(days.post.imm, contains("MZ"), contains("GC"), -contains("fraction"), -total_MZBs) %>%
   mutate(fraction_CAR_MZ = CAR_MZB_numbers/MZB_cell_numbers,
          fraction_CAR_GC = CAR_GCB_numbers/GCB_cell_numbers)%>%
-  select(days.post.imm, CAR_MZB_numbers, GCB_cell_numbers, fraction_CAR_GC)
+  select(days.post.imm, CAR_MZB_numbers, GCB_cell_numbers, fraction_CAR_GC) %>%
+  filter(days.post.imm > 0)
 
 write.csv(imm_data, file.path("datafiles", "Bcell_imm_data.csv"), row.names = F)
 
 imm_data %>% 
-  filter(days.post.imm == 0) %>%
+  filter(days.post.imm == 4) %>%
   summarise("CAR_countsMZ" = log(mean(CAR_MZB_numbers)),
             "countsGC" = log(mean(GCB_cell_numbers)),
             "fractionGC" = mean(fraction_CAR_GC))
@@ -277,20 +280,18 @@ GC_counts <- imm_data$GCB_cell_numbers
 GC_fractions <- imm_data$fraction_CAR_GC
 
 # time sequence for predictions specific to age bins within the data
-ts_pred <- seq(0, 30, length.out = 300)
+ts_pred <- seq(4, 30, length.out = 300)
 numPred <- length(ts_pred)
 
 logit_trans <- function(x) log(x/(1-x))
 asin_trans <- function(x) asin(sqrt(x))
 
 ggplot() +
-  geom_point(aes(data_times, logit_trans(GC_fractions)), col=2)+
-  #geom_point(aes(data_times, asin_trans(MZ_fractions)), col=4)+
-  ylim(0, .42)
+  geom_point(aes(data_times, logit_trans(GC_fractions)), col=2)
 
 
 
-stan_rdump(c("numObs",  "n_shards", "solve_time", "time_index",
+rstan::stan_rdump(c("numObs",  "n_shards", "solve_time", "time_index",
              "CAR_MZ_counts",  "GC_counts", "GC_fractions",
              "ts_pred", "numPred"),
            file = file.path('datafiles', paste0('Bcell_Imm',".Rdump")))
@@ -305,10 +306,31 @@ stanmodel_file <- file.path("stan_models", "totFOB_desc_const.stan")
 expose_stan_functions(stanmodel_file)
 
 
-ts_seq <- c(0, 4, 7, 14, 30)
+ts_seq <- c(4, 7, 14, 30)
 init_cond <- c(exp(9.82), 0.299, exp(11.8))
 params <- c(0.05, 0.02, 0.01, 0.04, 0.2, 0.1)
-solve_ODE(0, init_cond, params)
+
+
+ts_pred <- seq(1, 30, length.out=100)
+ode_df <- solve_ODE(ts_pred, init_cond, params)
+stan_pred_df <- data.frame("time" = ts_pred,
+                           "y_pred" = matrix(unlist(ode_df), nrow = length(ode_df), byrow = TRUE))%>%
+  mutate(GC_counts = y_pred.3 + y_pred.2,
+         CAR_GC = y_pred.2/GC_counts,
+         CAR_MZ = y_pred.1)
+
+
+ggplot(stan_pred_df)+
+  geom_point(aes(x=time, y=GC_counts))+
+  scale_y_log10()
+
+
+carf_vec <- sapply(ts_pred, CAR_positive_FOB)
+carf_vec2 <- sapply(ts_seq, CAR_positive_FOB)
+
+ggplot() +
+  geom_line(aes(x=ts_pred, y=carf_vec)) +
+  geom_point(aes(x=ts_seq, y=carf_vec2))
 
 
 
