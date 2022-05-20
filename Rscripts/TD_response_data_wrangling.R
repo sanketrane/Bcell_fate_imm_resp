@@ -244,7 +244,7 @@ imm_data <- B_cell_data %>% filter(genotype == "CAR") %>%
   select(days.post.imm, contains("MZ"), contains("GC"), -contains("fraction"), -total_MZBs) %>%
   mutate(fraction_CAR_MZ = CAR_MZB_numbers/MZB_cell_numbers,
          fraction_CAR_GC = CAR_GCB_numbers/GCB_cell_numbers)%>%
-  select(days.post.imm, CAR_MZB_numbers, GCB_cell_numbers, fraction_CAR_GC) %>%
+  select(days.post.imm, CAR_MZB_numbers, GCB_cell_numbers, CAR_GCB_numbers, MZB_cell_numbers) %>%
   filter(days.post.imm > 0)
 
 write.csv(imm_data, file.path("datafiles", "Bcell_imm_data.csv"), row.names = F)
@@ -253,46 +253,85 @@ imm_data %>%
   filter(days.post.imm == 4) %>%
   summarise("CAR_countsMZ" = log(mean(CAR_MZB_numbers)),
             "countsGC" = log(mean(GCB_cell_numbers)),
-            "fractionGC" = mean(fraction_CAR_GC))
+            "CAR_countsGC" = log(mean(CAR_GCB_numbers)))
 
 # generating data for fitting
 imm_N2ko_data <- B_cell_data %>% filter(genotype == "N2KO") %>%
   select(days.post.imm, contains("MZ"), contains("GC"), -contains("fraction"), -total_MZBs) %>%
   mutate(fraction_CAR_MZ = CAR_MZB_numbers/MZB_cell_numbers,
-         fraction_CAR_GC = CAR_GCB_numbers/GCB_cell_numbers)%>%
-  select(days.post.imm, MZB_cell_numbers, GCB_cell_numbers, fraction_CAR_MZ, fraction_CAR_GC)
+         fraction_CAR_GC = CAR_GCB_numbers/GCB_cell_numbers,
+         CAR_Neg_MZB = MZB_cell_numbers - CAR_MZB_numbers)%>%
+  select(days.post.imm, CAR_MZB_numbers, GCB_cell_numbers, CAR_GCB_numbers, MZB_cell_numbers)%>%
+  filter(days.post.imm > 0)
+
+imm_N2ko_data %>% 
+  filter(days.post.imm == 0) %>%
+  summarise("CAR_countsMZ" = log(mean(CAR_MZB_numbers)),
+            "countsGC" = log(mean(GCB_cell_numbers)),
+            "CAR_countsGC" = log(mean(CAR_GCB_numbers)))
+
+
+write.csv(imm_N2ko_data, file.path("datafiles", "N2KO_imm_data.csv"), row.names = F)
+
+imm_N2ko_plot <- imm_N2ko_data %>%
+  gather(- days.post.imm, key="subpop", value="cell_numbers")
+
+imm_WT_plot <- imm_data %>%
+  gather(- days.post.imm, key="subpop", value="cell_numbers")
+
+ggplot() +
+  geom_point(data = imm_WT_plot,
+             aes(x= (days.post.imm), y=cell_numbers), col=2) +
+  geom_point(data = imm_N2ko_plot,
+             aes(x= (days.post.imm), y=cell_numbers), col=4) +
+  scale_y_log10(limits = c(1e3, 1e7)) + xlim(0, 30)+
+  labs(x='Days post immunization', y='Cell counts')+
+  facet_wrap(.~ subpop) + myTheme + guides(col="none")
+
 
 
 ## Unique time points with indices to map
-unique_times_df <- imm_data %>% distinct(days.post.imm, .keep_all = TRUE) 
-data_times <- imm_data$days.post.imm 
-solve_times <- unique_times_df$days.post.imm  ## unique time points in the data
+unique_times_df1 <- imm_data %>% distinct(days.post.imm, .keep_all = TRUE) 
+data_times1 <- imm_data$days.post.imm 
+solve_times1 <- unique_times_df1$days.post.imm  ## unique time points in the data
 ## Map of the unique time points on all the timepoints
-time_index <- purrr::map_dbl(data_times, function(x) which(x == solve_times))    # keeping track of index of time point in relation to solve_time
+time_index1 <- purrr::map_dbl(data_times1, function(x) which(x == solve_times1))    # keeping track of index of time point in relation to solve_time
+
+## Unique time points with indices to map
+unique_times_df2 <- imm_N2ko_data %>% distinct(days.post.imm, .keep_all = TRUE) 
+data_times2 <- imm_N2ko_data$days.post.imm 
+solve_times2 <- unique_times_df2$days.post.imm  ## unique time points in the data
+## Map of the unique time points on all the timepoints
+time_index2 <- purrr::map_dbl(data_times2, function(x) which(x == solve_times2))    # keeping track of index of time point in relation to solve_time
 
 ## Data to import in Stan
-numObs <- length(data_times)
-n_shards <- length(solve_times)
-solve_time <- solve_times
-time_index <- time_index
+numObs1 <- length(data_times)
+numObs2 <- length(imm_N2ko_data$CAR_MZB_numbers)
+n_shards1 <- length(solve_times1)
+solve_time1 <- solve_times1
+time_index1 <- time_index1
+n_shards2 <- length(solve_times2)
+solve_time2 <- solve_times2
+time_index2 <- time_index2
 CAR_MZ_counts <- imm_data$CAR_MZB_numbers
+CAR_MZN2_counts <- imm_N2ko_data$CAR_MZB_numbers
 GC_counts <- imm_data$GCB_cell_numbers
-GC_fractions <- imm_data$fraction_CAR_GC
+CAR_GC_counts <- imm_data$CAR_GCB_numbers
+CAR_GCN2_counts <- imm_N2ko_data$CAR_GCB_numbers
+GCN2_counts <- imm_N2ko_data$GCB_cell_numbers
 
 # time sequence for predictions specific to age bins within the data
 ts_pred <- seq(4, 30, length.out = 300)
 numPred <- length(ts_pred)
 
-logit_trans <- function(x) log(x/(1-x))
-asin_trans <- function(x) asin(sqrt(x))
-
 ggplot() +
-  geom_point(aes(data_times, logit_trans(GC_fractions)), col=2)
+  geom_point(aes(data_times, log(CAR_GC_counts)), col=2)
 
 
-
-rstan::stan_rdump(c("numObs",  "n_shards", "solve_time", "time_index",
-             "CAR_MZ_counts",  "GC_counts", "GC_fractions",
+rstan::stan_rdump(c("numObs1",  "n_shards1", "solve_time1", "time_index1",
+                    "numObs2",  "n_shards2", "solve_time2", "time_index2",
+             "CAR_MZ_counts",  "GC_counts", "CAR_GC_counts", 
+             "CAR_MZN2_counts", "CAR_GCN2_counts", "GCN2_counts",
              "ts_pred", "numPred"),
            file = file.path('datafiles', paste0('Bcell_Imm',".Rdump")))
 
@@ -302,7 +341,7 @@ rstan::stan_rdump(c("numObs",  "n_shards", "solve_time", "time_index",
 ## testing models from stan
 library(rstan)
 
-stanmodel_file <- file.path("stan_models", "totFOB_desc_const.stan")
+stanmodel_file <- file.path("stan_models", "totFOB_MZB_timeinflux.stan")
 expose_stan_functions(stanmodel_file)
 
 
@@ -311,7 +350,7 @@ init_cond <- c(exp(9.82), 0.299, exp(11.8))
 params <- c(0.05, 0.02, 0.01, 0.04, 0.2, 0.1)
 
 
-ts_pred <- seq(1, 30, length.out=100)
+ts_pred <- seq(5, 30, length.out=100)
 ode_df <- solve_ODE(ts_pred, init_cond, params)
 stan_pred_df <- data.frame("time" = ts_pred,
                            "y_pred" = matrix(unlist(ode_df), nrow = length(ode_df), byrow = TRUE))%>%

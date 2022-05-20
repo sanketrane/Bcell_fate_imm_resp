@@ -8,8 +8,9 @@ library(tidyverse)
 ####################################################################################
 
 ## model specific details that needs to be change for every run
-modelName <- "B_desc_const"
+modelName <- "carGC_MZB_timeinflux"
 data_der <- "Bcell_imm_data.csv"    
+data_der2 <- "N2KO_imm_data.csv"    
 
 ## Setting all the directories for opeartions
 projectDir <- getwd()
@@ -44,14 +45,19 @@ nPost <- nrow(fit)
 
 ## loading required datasets for plotting
 imm_data <- read_csv(file.path(dataDir, data_der))
+imm_N2ko_data <- read_csv(file.path(dataDir, data_der2))
 
 # ################################################################################################
 # calculating PSIS-L00-CV for the fit
 MZ_fractions_loglik <- extract_log_lik(fit, parameter_name = "log_lik1", merge_chains = TRUE)
 GC_counts_loglik <- extract_log_lik(fit, parameter_name = "log_lik3", merge_chains = TRUE)
 GC_fractions_loglik <- extract_log_lik(fit, parameter_name = "log_lik2", merge_chains = TRUE)
+MZN2_fractions_loglik <- extract_log_lik(fit, parameter_name = "log_lik4", merge_chains = TRUE)
+GCN2_counts_loglik <- extract_log_lik(fit, parameter_name = "log_lik5", merge_chains = TRUE)
+GCN2_fractions_loglik <- extract_log_lik(fit, parameter_name = "log_lik6", merge_chains = TRUE)
 
-log_lik_comb <- cbind(MZ_fractions_loglik, GC_counts_loglik, GC_fractions_loglik)
+log_lik_comb <- cbind(MZ_fractions_loglik, GC_counts_loglik, GC_fractions_loglik,
+                      MZN2_fractions_loglik, GCN2_counts_loglik, GCN2_fractions_loglik)
 # optional but recommended
 ll_array <- extract_log_lik(fit, parameter_name = "log_lik1", merge_chains = FALSE)
 r_eff <- relative_eff(exp(ll_array))
@@ -68,7 +74,7 @@ ploocv <- data.frame("Model" = modelName,
                      "SE" = loo_loglik$estimates[6], 
                      "PLoo" = loo_loglik$estimates[2])
 
-write.table(ploocv, file = file.path(outputDir, "stat_table.csv"),
+write.table(ploocv, file = file.path(outputDir, "stat_table_MZB.csv"),
             sep = ",", append = T, quote = FALSE,
             col.names = F, row.names = FALSE)
 
@@ -119,7 +125,7 @@ Y1pred <- as.data.frame(fit, pars = "y1_mean_pred") %>%
   bind_cols("timeseries" = ts_pred)
 
 
-MZfractions_pred <- as.data.frame(fit, pars = "MZfractions_pred") %>%
+MZfractions_pred <- as.data.frame(fit, pars = "CAR_MZcounts_pred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
   summarize(lb = quantile(value, probs = 0.045),
@@ -136,7 +142,7 @@ Y2pred <- as.data.frame(fit, pars = "y2_mean_pred") %>%
             ub = quantile(value, probs = 0.955))%>%
   bind_cols("timeseries" = ts_pred)
 
-GCfractions_pred <- as.data.frame(fit, pars = "GCfractions_pred") %>%
+GCfractions_pred <- as.data.frame(fit, pars = "CAR_GCcounts_pred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
   summarize(lb = quantile(value, probs = 0.045),
@@ -161,31 +167,70 @@ GCcounts_pred <- as.data.frame(fit, pars = "GCcounts_pred") %>%
             ub = quantile(value, probs = 0.955))%>%
   bind_cols("timeseries" = ts_pred)
 
+Y4pred <- as.data.frame(fit, pars = "y4_mean_pred") %>%
+  gather(factor_key = TRUE) %>%
+  group_by(key) %>%
+  summarize(lb = quantile(value, probs = 0.045),
+            median = quantile(value, probs = 0.5),
+            ub = quantile(value, probs = 0.955)) %>%
+  bind_cols("timeseries" = ts_pred)
+
+
+Y5pred <- as.data.frame(fit, pars = "y5_mean_pred") %>%
+  gather(factor_key = TRUE) %>%
+  group_by(key) %>%
+  summarize(lb = quantile(value, probs = 0.045),
+            median = quantile(value, probs = 0.5),
+            ub = quantile(value, probs = 0.955))%>%
+  bind_cols("timeseries" = ts_pred)
+
+
+Y6pred <- as.data.frame(fit, pars = "y6_mean_pred") %>%
+  gather(factor_key = TRUE) %>%
+  group_by(key) %>%
+  summarize(lb = quantile(value, probs = 0.045),
+            median = quantile(value, probs = 0.5),
+            ub = quantile(value, probs = 0.955)) %>%
+  bind_cols("timeseries" = ts_pred)
+
 
 #### plots
 p1 <- ggplot() +
   geom_line(data = Y1pred, aes(x = timeseries, y = median), col =2) +
   geom_ribbon(data = Y1pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
+  geom_line(data = Y4pred, aes(x = timeseries, y = median), col =4) +
+  geom_ribbon(data = Y4pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
   #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
   geom_point(data = imm_data, aes(x = days.post.imm, y = CAR_MZB_numbers), col=2) +
+  geom_point(data = imm_N2ko_data, aes(x = days.post.imm, y = CAR_MZB_numbers), col=4) +
   labs(title=paste("CAR positive MZ B cells"),  y=NULL, x="Days post immunization") + 
   xlim(0, 30) +
   scale_y_continuous(limits = c(1e3, 2e7), trans="log10", breaks=c(1e4, 1e5, 1e6, 1e7, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
 
 p2 <- ggplot() +
-  geom_line(data = Y2pred, aes(x = timeseries, y = median), col =6) +
-  geom_ribbon(data = Y2pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=6, alpha = 0.25)+
-  geom_point(data = imm_data, aes(x = days.post.imm, y = fraction_CAR_GC), col=6) + 
+  geom_line(data = Y2pred, aes(x = timeseries, y = median), col =2) +
+  geom_ribbon(data = Y2pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
+  #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
+  geom_point(data = imm_data, aes(x = days.post.imm, y = CAR_GCB_numbers), col=2) +
+  geom_line(data = Y5pred, aes(x = timeseries, y = median), col =4) +
+  geom_ribbon(data = Y5pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
+  #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
+  geom_point(data = imm_N2ko_data, aes(x = days.post.imm, y = CAR_GCB_numbers), col=4) +
+  labs(title=paste("CAR positive MZ B cells"),  y=NULL, x="Days post immunization") + 
   xlim(0, 30) +
-  labs(title=paste("Fraction CAR in GC B cells"),  y=NULL, x="Days post immunization") + 
+  scale_y_continuous(limits = c(1e3, 2e7), trans="log10", breaks=c(1e4, 1e5, 1e6, 1e7, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
 
 p3 <- ggplot() +
-  geom_line(data = Y3pred, aes(x = timeseries, y = median), col =4) +
-  geom_ribbon(data = Y3pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
+  geom_line(data = Y3pred, aes(x = timeseries, y = median), col =2) +
+  geom_ribbon(data = Y3pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
   #geom_ribbon(data = GCcounts_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
-  geom_point(data = imm_data, aes(x = days.post.imm, y = GCB_cell_numbers), col=4) + 
+  geom_point(data = imm_data, aes(x = days.post.imm, y = GCB_cell_numbers), col=2) + 
+  #geom_line(data = Y6pred, aes(x = timeseries, y = median), col =4) +
+  #geom_ribbon(data = Y6pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
+  #geom_ribbon(data = GCcounts_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
+  geom_point(data = imm_N2ko_data, aes(x = days.post.imm, y = GCB_cell_numbers), col=4) + 
   xlim(0, 30) +
   labs(title=paste("Total numbers of GC B cells"),  y=NULL, x="Days post immunization") + 
   scale_y_continuous(limits = c(1e4, 2e7), trans="log10", breaks=c(1e4, 1e5, 1e6, 1e7, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
@@ -200,13 +245,13 @@ resid_d3  <- t(as.data.frame(fit, pars = "resid_d3"))[,1]
 p1.1 <- ggplot() +
   geom_hline(yintercept = 0, linetype=2) +
   geom_point(data = (imm_data), aes(x = days.post.imm, y = resid_d1), col=2) +
-  labs(title=paste("Residuals MZ Fractions fit"),  y=NULL, x="Time") + 
+  labs(title=paste("Residuals CAR MZ counts fit"),  y=NULL, x="Time") + 
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
 
 p2.1 <- ggplot() +
   geom_hline(yintercept = 0, linetype=2) +
   geom_point(data = imm_data, aes(x = days.post.imm, y = resid_d2), col=6) +
-  labs(title=paste("Residuals GC Fractions fit"),  y=NULL, x="Time") + 
+  labs(title=paste("Residuals CAR GC counts fit"),  y=NULL, x="Time") + 
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
 
 p3.1 <- ggplot() +
@@ -232,11 +277,11 @@ out_table
 
 write.csv(out_table, file = file.path(outputDir, paste0('params_', modelName, ".csv")))
 
-time_shape <- function(Time, delta, nu, b0){
-  delta*(1 + exp(-nu * (Time - b0)^2))
+time_shape <- function(Time, delta, nu){
+  delta/(1 + exp(-nu *(Time)^2))
 }
 
-Time_pred <- time_shape(seq(0, 30, length.out=100), out_table$mean[2], out_table$mean[6], out_table$mean[7])
+Time_pred <- time_shape(seq(0, 30, length.out=100), out_table$mean[4], out_table$mean[7])
 
 
 p4 <- ggplot() +
@@ -252,17 +297,16 @@ p4
 dev.off()
 
 
-alpha_shape <-  function(Time, alpha, nu, r){
-  alpha*(1 + (Time/nu)^2)
+alpha_shape <-  function(Time, alpha, nu){
+  alpha/(1 + exp(nu * (Time)^2))
 }
 
-alpha_pred <- alpha_shape(seq(0, 50), out_table$mean[2], out_table$mean[6], out_table$mean[7])
+alpha_pred <- alpha_shape(seq(0, 30, length.out=100), out_table$mean[2], out_table$mean[7])
 
-alpha_pred <- alpha_shape(seq(0, 50), 0.05, 7)
 
 p4 <- ggplot() +
-  geom_line(aes(x = seq(0, 50), y = alpha_pred), col =4, size=1.52) +
-  labs(title=paste("Time dependent activation rate"),  y=NULL, x="Days post immunization") + 
+  geom_line(aes(x = seq(0, 30, length.out=100), y = alpha_pred), col =4, size=1.52) +
+  labs(title=paste("Time dependent influx of FOB into GC"),  y=NULL, x="Days post immunization") + 
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
 
 p4
