@@ -305,7 +305,7 @@ solve_times2 <- unique_times_df2$days.post.imm  ## unique time points in the dat
 time_index2 <- purrr::map_dbl(data_times2, function(x) which(x == solve_times2))    # keeping track of index of time point in relation to solve_time
 
 ## Data to import in Stan
-numObs1 <- length(data_times)
+numObs1 <- length(imm_data$days.post.imm)
 numObs2 <- length(imm_N2ko_data$CAR_MZB_numbers)
 n_shards1 <- length(solve_times1)
 solve_time1 <- solve_times1
@@ -321,11 +321,8 @@ CAR_GCN2_counts <- imm_N2ko_data$CAR_GCB_numbers
 GCN2_counts <- imm_N2ko_data$GCB_cell_numbers
 
 # time sequence for predictions specific to age bins within the data
-ts_pred <- seq(4, 30, length.out = 300)
+ts_pred <- seq(4, 30, length.out = 500)
 numPred <- length(ts_pred)
-
-ggplot() +
-  geom_point(aes(data_times, log(CAR_GC_counts)), col=2)
 
 
 rstan::stan_rdump(c("numObs1",  "n_shards1", "solve_time1", "time_index1",

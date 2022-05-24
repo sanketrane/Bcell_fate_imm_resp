@@ -16,19 +16,19 @@ functions{
    real[] ODE_sys1(real time,  real[] y, real[] parms, real[] rdata, int[] idata) {
      // the array of parameters invloved in ode equations
      real alpha1 = parms[1];
-     real lambda = parms[2];
+     real lambda_WT = parms[2];
      real mu     = parms[3];
      real delta  = parms[4];
      real alpha2 = parms[5];
      real nu = parms[6];
-     real alpha3 = parms[7];
      real CAR_negative_FOB = exp(17.15);
+     real t0 = 4.0;
 
-     real delta_GC = delta/(1 + exp(-nu *(time)^2));
+     real delta_GC = delta/(1 + exp(-nu *(time - t0)^2));
 
      // the system of ODEs
      real dydt[3];
-     dydt[1] = alpha1 * CAR_negative_MZB(time) + alpha3 * CAR_negative_MZB(time) - lambda * y[1];
+     dydt[1] = alpha1 * CAR_negative_MZB(time) - lambda_WT * y[1];
      dydt[2] = alpha2 * CAR_positive_FOB(time) + mu * y[3]  - delta_GC * y[2];
      dydt[3] = alpha2 * CAR_negative_FOB - mu * y[3] - delta_GC * y[3];
      return dydt;
@@ -38,19 +38,20 @@ functions{
    real[] ODE_sys2(real time,  real[] y, real[] parms, real[] rdata, int[] idata) {
      // the array of parameters invloved in ode equations
      real alpha1 = parms[1];
-     real lambda = parms[2];
+     real lambda_WT = parms[2];
      real mu     = parms[3];
      real delta  = parms[4];
      real alpha2 = parms[5];
      real nu = parms[6];
-     real alpha3 = parms[7];
+     real lambda_N2KO = parms[7];
      real CAR_negative_FOB = exp(17.15);
+     real t0 = 4.0;
 
-     real delta_GC = delta/(1 + exp(-nu *(time)^2));
+     real delta_GC = delta/(1 + exp(-nu *(time - t0)^2));
 
      // the system of ODEs
      real dydt[3];
-     dydt[1] = alpha3 * CAR_negative_MZB(time) - lambda * y[1];
+     dydt[1] = alpha1 * CAR_negative_MZB(time) - lambda_N2KO * y[1];
      dydt[2] = alpha2 * CAR_positive_FOB(time) + mu * y[3]  - delta_GC * y[2];
      dydt[3] = alpha2 * CAR_negative_FOB - mu * y[3] - delta_GC * y[3];
      return dydt;
@@ -96,9 +97,9 @@ parameters{
   // parameters to sample with boundary conditions
   real<lower = 0> alpha1;
   real<lower = 0> alpha2;
-  real<lower = 0> alpha3;
   real<lower = 0> delta;
-  real<lower = 0> lambda;
+  real<lower = 0> lambda_WT;
+  real<lower = 0> lambda_N2KO;
   real<lower = 0> mu;
   real<lower = 0> nu;
   real<lower = 0> M0N2;
@@ -132,9 +133,9 @@ transformed parameters{
   real init_cond1[3];              // declaring the array for state variables
   real init_cond2[3];              // declaring the array for state variables
 
-  real G0 = exp(12.0);            // transformed parameters for better/faster sampling
-  real CAR_MZ0 = exp(10.8);            // transformed parameters for better/faster sampling
-  real CAR_GC0 = exp(11.1);              // transformed parameters for better/faster sampling
+  real G0 = exp(11.7);            // transformed parameters for better/faster sampling
+  real CAR_MZ0 = exp(10.6);            // transformed parameters for better/faster sampling
+  real CAR_GC0 = exp(10.8);              // transformed parameters for better/faster sampling
   real CAR_MZ0N2k0 = exp(M0N2);              // transformed parameters for better/faster sampling
 
 
@@ -148,12 +149,12 @@ transformed parameters{
   init_cond2[3] = G0 - CAR_GC0;
 
   parms[1] = alpha1;
-  parms[2] = lambda;
+  parms[2] = lambda_WT;
   parms[3] = mu;
   parms[4] = delta;
   parms[5] = alpha2;
   parms[6] = nu;
-  parms[7] = alpha3;
+  parms[7] = lambda_N2KO;
 
   y_hat1[1] = init_cond1;
   // solution of the system of ODEs for the predictor values
@@ -198,12 +199,12 @@ transformed parameters{
 model{
   // prior distribution for model parameters
   alpha1 ~ normal(0.01, 0.5);
-  lambda ~ normal(0.1, 0.5);
+  lambda_WT ~ normal(0.1, 0.5);
+  lambda_N2KO ~ normal(0.1, 0.5);
   mu ~ normal(0.1, 0.5);
   delta ~ normal(0.01, 0.5);
   alpha2 ~ normal(0.01, 0.5);
   nu ~ normal(0.01, 0.5);
-  alpha3 ~ normal(0.01, 0.5);
   M0N2 ~ normal(8, 2);
 
   sigma1 ~ normal(0, 2.5);
@@ -227,6 +228,7 @@ generated quantities{
   // model predictions
   real y1_mean_pred[numPred]; real y2_mean_pred[numPred]; real y3_mean_pred[numPred];
   real y4_mean_pred[numPred]; real y5_mean_pred[numPred]; real y6_mean_pred[numPred];
+  real delta_pred[numPred];
   // model predictions with stdev
   real CAR_MZcounts_pred[numPred]; real CAR_GCcounts_pred[numPred]; real GCcounts_pred[numPred];
   real CAR_MZN2counts_pred[numPred]; real CAR_GCN2counts_pred[numPred]; real GCN2counts_pred[numPred];
@@ -269,6 +271,9 @@ generated quantities{
     //total GC in N2KO
     y6_mean_pred[i] = y_hat_pred2[i, 3] + y_hat_pred2[i, 2];
     GCN2counts_pred[i] = exp(normal_rng(log(y6_mean_pred[i]), sigma3));
+
+    //loss rate
+    delta_pred[i] = delta/(1 + exp(-nu *(ts_pred[i] - 4.0)^2));
   }
 
   // calculating the log predictive accuracy for each point
