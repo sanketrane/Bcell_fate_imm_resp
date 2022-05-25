@@ -8,7 +8,7 @@ library(tidyverse)
 ####################################################################################
 
 ## model specific details that needs to be change for every run
-modelName <- "totFOB_MZB_timeinflux"
+modelName <- "MZB_MZB_timeinflux"
 data_der <- "Bcell_imm_data.csv"    
 data_der2 <- "N2KO_imm_data.csv"    
 
@@ -337,27 +337,13 @@ p4 <- ggplot() +
 
 p4
 
-## saving  plots for quality control 
+## saving  plots for parameter estimates  
 pdf(file = file.path(outputDir, paste(modelName,"ExtraPlots%03d.pdf", sep = "")),
     width = 5, height = 4, onefile = FALSE, useDingbats = FALSE)
 p4
 dev.off()
 
 
-dens_shape <- function(counts, delta, size_dens_Log){
-  size_dens = exp(size_dens_Log)
-  delta/(1 + (counts/size_dens)^2);
-}
-
-dens_pred <- dens_shape(Y3pred$median, out_table$mean[7], out_table$mean[2])
-
-ggplot() +
-  geom_line(aes(x = ts_pred, y = dens_pred), col =4) +
-  labs(title=paste("Total numbers of GC B cells"),  y=NULL, x="Days post immunization") + 
-  myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
-
-
-write.csv(ploocv, file = file.path(outputDir, paste0('stats_', modelName, ".csv")))
 
 ## open graphics device 
 ## saving  plots for quality control 
@@ -409,19 +395,4 @@ mcmc_dens(posterior, parametersToPlot) + myTheme
 
 dev.off()
 
-
-pdf(file = file.path(outputDir, paste(modelName,"Plots%03d.pdf", sep = "")),
-    width = 7, height = 5, onefile = FALSE, useDingbats = FALSE )
-
-lay1 <- rbind(c(1,1,2,2),
-              c(NA,3,3,NA))
-
-
-gridExtra::grid.arrange(counts_facet, nfd_comb, ki67_comb, layout_matrix = lay1)
-
-toprow <- cowplot::plot_grid(counts_facet, nfd_comb,  labels = c("A", "B"), ncol = 2)
-cowplot::plot_grid(toprow, ki67_plot,  labels = c("", "C"), nrow = 2)
-
-
-dev.off()
 

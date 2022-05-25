@@ -94,7 +94,7 @@ parameters{
   real<lower = 0> alpha3;
   real<lower = 0> delta;
   real<lower = 0> lambda_WT;
-  real<lower = 0> lambda_N2KO;
+  real<lower = lambda_WT> lambda_N2KO;
   real<lower = 0> mu;
   real<lower = 0> M0N2;
 
@@ -143,7 +143,7 @@ transformed parameters{
   init_cond2[3] = G0 - CAR_GC0;
 
   parms[1] = alpha1;
-  parms[2] = lambda;
+  parms[2] = lambda_WT;
   parms[3] = mu;
   parms[4] = delta;
   parms[5] = alpha2;

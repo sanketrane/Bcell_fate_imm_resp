@@ -101,7 +101,7 @@ parameters{
   real<lower = 0> alpha3;
   real<lower = 0> delta;
   real<lower = 0> lambda_WT;
-  real<lower = 0> lambda_N2KO;
+  real<lower = lambda_WT> lambda_N2KO;
   real<lower = 0> mu;
   real<lower = 0> nu;
   real<lower = 0> M0N2;
