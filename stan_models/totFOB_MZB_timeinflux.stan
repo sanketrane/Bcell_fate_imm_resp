@@ -236,7 +236,10 @@ generated quantities{
   // model predictions
   real y1_mean_pred[numPred]; real y2_mean_pred[numPred]; real y3_mean_pred[numPred];
   real y4_mean_pred[numPred]; real y5_mean_pred[numPred]; real y6_mean_pred[numPred];
-  real alpha_pred[numPred];
+  real FOtoCARMZ_numbers[numPred]; real MZtoCARMZ_numbers[numPred]; real FOtoCARMZ_pred[numPred]; real MZtoCARMZ_pred[numPred];
+  real FOtoCARGC_numbers[numPred]; real GCtoCARGC_numbers[numPred]; real FOtoCARGC_pred[numPred]; real GCtoCARGC_pred[numPred];
+
+
   // model predictions with stdev
   real CAR_MZcounts_pred[numPred]; real CAR_GCcounts_pred[numPred]; real GCcounts_pred[numPred];
   real CAR_MZN2counts_pred[numPred]; real CAR_GCN2counts_pred[numPred]; real GCN2counts_pred[numPred];
@@ -279,9 +282,17 @@ generated quantities{
     //total GC in N2KO
     y6_mean_pred[i] = y_hat_pred2[i, 3] + y_hat_pred2[i, 2];
     GCN2counts_pred[i] = exp(normal_rng(log(y6_mean_pred[i]), sigma3));
+    // Influx into CAR MZ
+    FOtoCARMZ_numbers[i] = alpha1 * (CAR_positive_FOB(ts_pred[i]) + exp(17.15));
+    MZtoCARMZ_numbers[i] = alpha3 * CAR_negative_MZB(ts_pred[i]);
+    FOtoCARMZ_pred[i] = alpha1 * (CAR_positive_FOB(ts_pred[i]) + exp(17.15))/(y1_mean_pred[i] + CAR_negative_MZB(ts_pred[i]));
+    MZtoCARMZ_pred[i] = alpha3 * CAR_negative_MZB(ts_pred[i])/(y1_mean_pred[i] + CAR_negative_MZB(ts_pred[i]));
 
-    //influx rate
-    alpha_pred[i] = alpha2/(1 + exp(nu * (ts_pred[i] - 4.0)^2));
+    // Influx into CAR GC
+    FOtoCARGC_numbers[i] = alpha2/(1 + exp(nu * (ts_pred[i] - 4.0)^2)) * CAR_positive_FOB(ts_pred[i]);
+    GCtoCARGC_numbers[i] = mu * y3_mean_pred[i];
+    FOtoCARGC_pred[i] = alpha2/(1 + exp(nu * (ts_pred[i] - 4.0)^2)) * CAR_positive_FOB(ts_pred[i])/(y2_mean_pred[i] + y3_mean_pred[i]);
+    GCtoCARGC_pred[i] = mu * y3_mean_pred[i]/(y2_mean_pred[i] + y3_mean_pred[i]);
   }
 
   // calculating the log predictive accuracy for each point
