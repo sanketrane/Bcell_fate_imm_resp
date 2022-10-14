@@ -232,8 +232,7 @@ generated quantities{
   // model predictions
   real y1_mean_pred[numPred]; real y2_mean_pred[numPred]; real y3_mean_pred[numPred];
   real y4_mean_pred[numPred]; real y5_mean_pred[numPred]; real y6_mean_pred[numPred];
-  real GCtoCARMZ_numbers[numPred]; real MZtoCARMZ_numbers[numPred]; real GCtoCARMZ_pred[numPred]; real MZtoCARMZ_pred[numPred];
-  real FOtoCARGC_numbers[numPred]; real GCtoCARGC_numbers[numPred]; real FOtoCARGC_pred[numPred]; real GCtoCARGC_pred[numPred];
+  real GCtoCARMZ_pred[numPred]; real MZtoCARMZ_pred[numPred]; real FOtoGCPred[numPred];
 
   // model predictions with stdev
   real CAR_MZcounts_pred[numPred]; real CAR_GCcounts_pred[numPred]; real GCcounts_pred[numPred];
@@ -278,18 +277,12 @@ generated quantities{
     y6_mean_pred[i] = y_hat_pred2[i, 3] + y_hat_pred2[i, 2];
     GCN2counts_pred[i] = exp(normal_rng(log(y6_mean_pred[i]), sigma3));
 
-
     // Influx into CAR MZ
-    GCtoCARMZ_numbers[i] = alpha1 * y2_mean_pred[i];
-    MZtoCARMZ_numbers[i] = alpha3 * CAR_negative_MZB(ts_pred[i]);
-    GCtoCARMZ_pred[i] = alpha1 * y2_mean_pred[i]/(y1_mean_pred[i] + CAR_negative_MZB(ts_pred[i]));
-    MZtoCARMZ_pred[i] = alpha3 * CAR_negative_MZB(ts_pred[i])/(y1_mean_pred[i] + CAR_negative_MZB(ts_pred[i]));
+    GCtoCARMZ_pred[i] = alpha1 * y2_mean_pred[i]/y1_mean_pred[i];
+    MZtoCARMZ_pred[i] = alpha3 * CAR_negative_MZB(ts_pred[i])/(y1_mean_pred[i]);
 
-    // Influx into CAR GC
-    FOtoCARGC_numbers[i] = alpha2/(1 + exp(nu * (ts_pred[i] - 4.0)^2)) * CAR_positive_FOB(ts_pred[i]);
-    GCtoCARGC_numbers[i] = mu * y3_mean_pred[i];
-    FOtoCARGC_pred[i] = alpha2/(1 + exp(nu * (ts_pred[i] - 4.0)^2)) * CAR_positive_FOB(ts_pred[i])/(y2_mean_pred[i] + y3_mean_pred[i]);
-    GCtoCARGC_pred[i] = mu * y3_mean_pred[i]/(y2_mean_pred[i] + y3_mean_pred[i]);
+    // Efflux out of FOB
+    FOtoGCPred[i] = (alpha2/(1 + exp(nu * (ts_pred[i] - 4.0)^2))) * (CAR_positive_FOB(ts_pred[i]) + exp(17.15))/(y2_mean_pred[i] + y3_mean_pred[i]);
   }
 
   // calculating the log predictive accuracy for each point

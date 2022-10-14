@@ -12,7 +12,10 @@ library(readxl)
 myTheme <- theme(text = element_text(size = 12), axis.text = element_text(size = 12),
                  axis.title =  element_text(size = 12, face = "bold"),
                  plot.title = element_text(size=12,  hjust = 0.5, face = "bold"),
-                 legend.background = element_blank(), legend.key = element_blank())
+                 #legend.title = element_text(size=12,  hjust = 0.5, face = "bold"),
+                 legend.background = element_blank(),
+                 legend.box.background =  element_blank(),
+                 legend.key = element_blank())
 
 # setting ggplot theme for rest fo the plots
 theme_set(theme_bw())
@@ -42,22 +45,38 @@ log10minorbreaks = as.numeric(1:10 %o% 10^(-4:8))
 
 ############################################################
 ## Immune response dynamics of B cells -- reporter induction upon b cell activation
-NEW_CAR_prop_df <- read_excel("datafiles/NEW_CAR_fractions_TD_response.xlsx", sheet =1) %>%
-  filter(genotype == "CAR") %>%
-  select(-contains("counts"), -contains("PCs")) %>%
-  gather(-c(days.post.imm, genotype), key = 'subpop', value='fraction_cells')
+B_cell_data <- read_excel("datafiles/CAR_corrected_data.xlsx", sheet =1) %>%
+  mutate(#### Deriving the counts of each B cell subset
+    total_spleen_counts = total_splenic_counts_millions * 1e6,
+    B_cell_counts = (total_B_cells/100) * total_spleen_counts,
+    CARpos_counts = (CARpos_Bcells/100) * B_cell_counts,
+    CARpos_nonGC_numbers = (nonGC_in_CARpos/100) * CARpos_counts,
+    CARpos_GC_numbers = (GC_in_CARpos/100) * CARpos_counts,
+    CARpos_Fo_numbers = (FoB_in_CARpos/100) * CARpos_nonGC_numbers,
+    CARpos_MZ_numbers = (MZB_in_CARpos/100) * CARpos_nonGC_numbers,
+    CARneg_counts = (CARneg_Bcells/100) * B_cell_counts,
+    CARneg_nonGC_numbers = (nonGC_in_CARneg/100) * CARneg_counts,
+    CARneg_GC_numbers = (GC_in_CARneg/100) * CARneg_counts,
+    CARneg_Fo_numbers = (FoB_in_CARneg/100) * CARneg_nonGC_numbers,
+    CARneg_MZ_numbers = (MZB_in_CARneg/100) * CARneg_nonGC_numbers) 
 
-ggplot() +
-  geom_point(data=NEW_CAR_prop_df, 
-             aes(x= as.factor(days.post.imm), y=fraction_cells), col = 4) +
-  scale_y_log10() + 
-  labs(x='Days post immunization', y='% CAR+')+
-  facet_wrap(.~ subpop) + myTheme + guides(col="none")
+
+B_cell_countsWT_df <- B_cell_data %>%
+  select(days_post_imm, genotype, contains('numbers'), -contains('nonGC')) %>%
+  gather(-c(days_post_imm, genotype), key = "subpop", value="cell_counts")%>%
+  mutate(CARexpr = ifelse(grepl("CARpos", subpop), "CARpos", "CARneg"),
+         subplop = ifelse(grepl("Fo", subpop), "FoB", ifelse(grepl("GC", subpop), "GC", "MZB"))) %>% 
+filter(genotype == "CAR", CARexpr == "CARpos") 
+
+B_cell_countsN2_df <- B_cell_data %>%
+  select(days_post_imm, genotype, contains('numbers'), -contains('nonGC')) %>%
+  gather(-c(days_post_imm, genotype), key = "subpop", value="cell_counts")%>%
+  mutate(CARexpr = ifelse(grepl("CARpos", subpop), "CARpos", "CARneg"),
+         subplop = ifelse(grepl("Fo", subpop), "FoB", ifelse(grepl("GC", subpop), "GC", "MZB"))) %>% 
+  filter(genotype == "N2KO", CARexpr == "CARpos") 
 
 
-
-## Immune response dynamics of B cells -- reporter induction upon b cell activation
-B_cell_data <- read_excel("datafiles/NEW_CAR_fractions_TD_response.xlsx", sheet =1) %>%
+Old_Bcell_data <-  read_excel("datafiles/NEW_CAR_fractions_TD_response.xlsx", sheet =1) %>%
   # filter(genotype == "CAR") 
   mutate(B_cell_numbers = (total_B_cells/100) * total_splenic_counts_millions * 1e6,
          FOB_cell_numbers = (total_FOBs/100) * B_cell_numbers,
@@ -71,105 +90,78 @@ B_cell_data <- read_excel("datafiles/NEW_CAR_fractions_TD_response.xlsx", sheet 
          CAR_PCB_numbers = (fraction_CAR_in_PCs/100)* PCB_cell_numbers) 
 
 
-B_cell_counts_df <- B_cell_data %>% 
-  select(-contains("CAR"))%>%
-  select(days.post.imm, genotype, contains('numbers'), - B_cell_numbers) %>%
-  gather(-c(days.post.imm, genotype), key = 'subpop', value='cell_numbers') %>% na.omit()
-
-CAR_cell_counts_df <- B_cell_data %>% 
+CAR_cell_counts_df <- Old_Bcell_data %>% 
   select(days.post.imm, genotype, contains("CAR"))%>%
-  select(days.post.imm, genotype, contains('numbers'), - CAR_B_numbers) %>%
-  gather(-c(days.post.imm, genotype), key = 'subpop', value='cell_numbers') %>% na.omit()
+  select(days.post.imm, genotype, contains('numbers'), - CAR_B_numbers, -CAR_PCB_numbers) %>%
+  gather(-c(days.post.imm, genotype), key = 'subpop', value='cell_counts') %>%
+  mutate(subplop = ifelse(grepl("FO", subpop), "FoB", ifelse(grepl("GC", subpop), "GC", "MZB"))) %>% 
+  filter(genotype == "CAR", days.post.imm>0) 
 
 
-CAR_PosNeg_df <- B_cell_data %>% 
-  select(days.post.imm, genotype, 
-         contains("FO"), contains("GC"), contains("MZ"),
-         -contains('total'), -contains('fraction')) %>%
-  mutate(CAR_Neg_FOB = FOB_cell_numbers - CAR_FOB_numbers,
-         CAR_Neg_MZB = MZB_cell_numbers - CAR_MZB_numbers,
-         CAR_Neg_GCB = GCB_cell_numbers - CAR_GCB_numbers) #%>% 
-  #select(days.post.imm, genotype, contains("CAR")) %>%
-  #gather(-c(days.post.imm, genotype), key = 'subpop', value='cell_numbers') %>% na.omit()
+blank_data <- data.frame(subplop = c('FoB', 'FoB', 'GC', 'GC', 'MZB', 'MZB'),
+                         cell_counts = c(1e5, 2e6, 1e4, 4e6, 1e4, 1e6),
+                         days_post_imm = rep(c(4, 30), 3),
+                         CARexpr = rep("CARpos", 6))
 
-
-facet_labels1 <- c(`B_cell_numbers` = "Total B cells",
-                  `FOB_cell_numbers` = "FO B cells",
-                  `MZB_cell_numbers` = "MZ B cells",
-                  `GCB_cell_numbers` = "GC B cells",
-                  `PCB_cell_numbers` = "PC B cells")
-
-ggplot() +
-  geom_point(data = filter(B_cell_counts_df, genotype == "CAR"),
-             aes(x= (days.post.imm), y=cell_numbers, col = subpop)) +
-  scale_y_log10(limits = c(1e4, 1e8)) + 
-  labs(x='Days post immunization', y='Cell counts')+
-  facet_wrap(.~ subpop, labeller = as_labeller(facet_labels1)) + myTheme + guides(col="none")
-
+Bcell_all_data <- rbind(B_cell_countsWT_df, B_cell_countsN2_df) %>%
+  mutate(mouse_strain = ifelse(grepl("CAR", genotype), "WT", "N2KO"))
 
 p1 <- ggplot() +
-  geom_point(data = filter(B_cell_counts_df, genotype == "CAR", subpop == "FOB_cell_numbers"),
-             aes(x= (days.post.imm), y=cell_numbers), col=2, size=2) +
-  scale_y_log10(limits = c(5e6, 1e8), breaks=c(1e7, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) + 
-  labs(x='Days post immunization', y='Cell counts', title = "FO B cells") + myTheme
-
-p2 <- ggplot() +
-  geom_point(data = filter(B_cell_counts_df, genotype == "CAR", subpop == "MZB_cell_numbers"),
-             aes(x= (days.post.imm), y=cell_numbers), col=6, size=2) +
-  scale_y_log10(limits = c(1e5, 1e7), minor_breaks = log10minorbreaks, labels =fancy_scientific) + 
-  labs(x='Days post immunization', y='Cell counts', title = "MZ B cells")+ myTheme
+  geom_point(data=Bcell_all_data, aes(x= days_post_imm, y=cell_counts, col= mouse_strain), size=1.7) + 
+  scale_color_manual(values = c("#CA0636", "#0B78BA"), name=NULL) +
+  #geom_point(data=CAR_cell_counts_df, aes(x= (days.post.imm), y=(cell_counts)), col="navy",size=2, alpha=0.7) +
+  geom_blank(data=blank_data, aes(x= (days_post_imm), y=(cell_counts))) +
+  scale_y_log10() + 
+  labs(x='Days post immunization', y='Cell counts')+
+  facet_wrap(. ~ subplop, scales = 'free') + myTheme 
 
 
-p3 <- ggplot() +
-  geom_point(data = filter(B_cell_counts_df, genotype == "CAR", subpop == "GCB_cell_numbers"),
-             aes(x= (days.post.imm), y=cell_numbers), col=4, size=2) +
-  scale_y_log10(limits = c(1e4, 1e7), minor_breaks = log10minorbreaks, labels =fancy_scientific) + 
-  labs(x='Days post immunization', y='Cell counts', title = "GC B cells")+ myTheme
+#### plotting correlations
+CAR_cell_counts22_df <- B_cell_data %>% 
+  filter(genotype == "CAR", days_post_imm > 0) %>% 
+  select(days_post_imm, contains('numbers'), -contains('nonGC')) %>%
+  mutate(days_bin = ifelse(days_post_imm < 7, "1Wk",
+                           ifelse(days_post_imm <14, "2Wk",
+                                  ifelse(days_post_imm <21, "3Wk", "4Wk"))))
+
+library("ggsci")
 
 
+corFOMZ <- cor.test(CAR_cell_counts22_df$CARpos_Fo_numbers, CAR_cell_counts22_df$CARpos_MZ_numbers)
+corGCMZ <- cor.test(CAR_cell_counts22_df$CARpos_GC_numbers, CAR_cell_counts22_df$CARpos_MZ_numbers)
+corFOGC <- cor.test(CAR_cell_counts22_df$CARpos_Fo_numbers, CAR_cell_counts22_df$CARpos_GC_numbers)
 
-facet_labels2 <- c(`CAR_B_numbers` = "Total B cells",
-                   `CAR_FOB_numbers` = "FO B cells",
-                   `CAR_MZB_numbers` = "MZ B cells",
-                   `CAR_GCB_numbers` = "GC B cells",
-                   `CAR_PCB_numbers` = "PC B cells")
-
-ggplot() +
-  geom_point(data = filter(CAR_cell_counts_df, genotype == "CAR"),
-             aes(x= (days.post.imm), y=cell_numbers, col = subpop)) +
-  scale_y_log10(limits = c(1e3, 1e7)) +
-  labs(x='Days post immunization', title ='Number of CAR+ Cells')+
-  facet_wrap(.~ subpop, labeller = as_labeller(facet_labels2)) + myTheme + guides(col="none")
+p11 <-ggplot(data = CAR_cell_counts22_df)+
+  geom_point(aes(x=log(CARpos_Fo_numbers), y=log(CARpos_MZ_numbers), col=days_bin), size=2)+
+  #scale_color_manual(values = wesanderson::wes_palette("Zissou1", n=4, type = 'continuous'))+
+  scale_color_npg()+ guides(col='none') +
+  labs(x="Log(Counts of CAR positive FoB)", y="Log(Counts of CAR positive MZB)")+
+  geom_text(x=12.1, y=12.4, label=paste0("r=", round(corFOMZ$estimate, 2)), size=5) +myTheme
 
 
-p1.1 <- ggplot() +
-  geom_point(data = filter(CAR_cell_counts_df, genotype == "CAR", subpop == "CAR_FOB_numbers"),
-             aes(x= (days.post.imm), y=cell_numbers), col=2, size=2) +
-  scale_y_log10(limits = c(1e3, 1e7), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
-  labs(x='Days post immunization', y='Number of CAR+ Cells') + myTheme
+p22 <-ggplot(data = CAR_cell_counts22_df) +
+  geom_point(aes(x=log(CARpos_GC_numbers), y=log(CARpos_MZ_numbers), col=days_bin), size=2)+
+  #scale_color_manual(values = wesanderson::wes_palette("Zissou1", n=4, type = 'continuous'))+
+  scale_color_npg()+ guides(col='none') +
+  labs(x="Log(Counts of CAR positive GCB)", y="Log(Counts of CAR positive MZB)")+
+  geom_text(x=10.2, y=12.4, label=paste0("r=", round(corGCMZ$estimate, 2)), size=5)+ myTheme
 
 
-p2.1 <- ggplot() +
-  geom_point(data = filter(CAR_cell_counts_df, genotype == "CAR", subpop == "CAR_MZB_numbers"),
-             aes(x= (days.post.imm), y=cell_numbers), col=6, size=2) +
-  scale_y_log10(limits = c(1e3, 1e7), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
-  labs(x='Days post immunization', y='Number of CAR+ Cells') + myTheme
-
-
-p3.1 <- ggplot() +
-  geom_point(data = filter(CAR_cell_counts_df, genotype == "CAR", subpop == "CAR_GCB_numbers"),
-             aes(x= (days.post.imm), y=cell_numbers), col=4, size=2) +
-  scale_y_log10(limits = c(1e3, 1e7), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
-  labs(x='Days post immunization', y='Number of CAR+ Cells') + myTheme
+p33 <- ggplot(data = CAR_cell_counts22_df)+
+  geom_point(aes(x=log(CARpos_Fo_numbers), y=log(CARpos_GC_numbers), col=days_bin), size=2) +
+  labs(x="Log(Counts of CAR positive FoB)", y="Log(Counts of CAR positive GCB)") +
+  geom_text(x=12.1, y=14.2, label=paste0("r=", round(corFOGC$estimate, 2)), size=5) +
+  scale_color_npg(name = "Days post\nimmunization") + myTheme + theme(legend.position = c(0.875, 0.2))
 
 
 
 ## saving  plots for quality control 
-pdf(file = file.path("plots", paste("DataPlots%03d.pdf", sep = "")),
-    width = 12, height = 7.5, onefile = FALSE, useDingbats = FALSE)
-cowplot::plot_grid(p1, p3, p2, p1.1, p3.1, p2.1,
-                   nrow  = 2)
+pdf(file = file.path("plots", paste("New_plotsNatComm/DataPlots%03d.pdf", sep = "")),
+    width = 13, height = 4, onefile = FALSE, useDingbats = FALSE)
+p1
+cowplot::plot_grid( p11, p22, p33, nrow  = 1)
 dev.off()
+
 
 ###############################
 ##############################
@@ -181,32 +173,26 @@ phi_func <- function(Time, basl, theta, n, X, q){
   basl_exp = exp(basl)
   return( basl_exp + (theta_exp * t^n) * (1 - ((t^q)/((X^q) + (t^q)))))
 }
+qplot(sol_time, y= log(phi_func(sol_time, basl = 11.5, theta = 7, n = 3 , X = 10, q = 5)))+
+  geom_line()+
+  geom_point(data = CAR_cell_counts22_df, aes(x=days_post_imm, y=log(CARpos_Fo_numbers)), col=2)
 
-repFOB_nlm <- nls(log(CAR_FOB_numbers) ~ log(phi_func(days.post.imm, basl, theta, n, X, q)),
-                  data = CAR_PosNeg_df,
-                  start = list(basl = 11.2, theta = 7.5, n = 3.5 , X = 8, q = 5))
+
+repFOB_nlm <- nls(log(CARpos_Fo_numbers) ~ log(phi_func(days_post_imm, basl, theta, n, X, q)),
+                  data = CAR_cell_counts22_df,
+                  start = list( basl = 11.5, theta = 7, n = 3 , X = 10, q = 5))
 
 par_est <- coef(repFOB_nlm)
-sol_time <- seq(0, 30, length.out=100)
-phi_vec_m <- phi_func(sol_time, basl=par_est[1], theta=par_est[2], n=par_est[3],
-                    X = par_est[4], q=par_est[5])
+sol_time <- seq(4, 30, length.out=100)
+phi_vec_m <- phi_func(sol_time, basl = 11.5, theta = 7, n = 3 , X = 10, q = 5)
 
 ggplot() +
-  geom_line(aes(x=sol_time, y=(phi_vec_m)), col=2, size=0.8) +
-  geom_point(data=CAR_PosNeg_df,
-             aes(x=days.post.imm, y=(CAR_FOB_numbers)), size=2, col=2) +
-  scale_y_log10(limits = c(1e4, 1e7), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
-  labs(x='Days post immunization', y=NULL, title='Number of CAR+ FO B Cells') + myTheme
-
-
-ggplot() +
-  #geom_line(aes(x=sol_time, y=exp(phi_vec_m) + exp(17.1527)), col=2, size=0.8) +
-  #geom_point(data=CAR_PosNeg_df,aes(x=days.post.imm, y=(CAR_Neg_FOB)), size=2, col=2)+
-  geom_point(data=CAR_PosNeg_df,
-             aes(x=days.post.imm, y=(FOB_cell_numbers)), size=2, col=4)+
-  scale_y_log10(limits = c(1e6, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
-  labs(x='Days post immunization', y=NULL, title='Number of CAR- FO B Cells') + myTheme
-
+  geom_line(aes(x=sol_time, y=(phi_vec_m)), col="#6082B6", size=0.8) +
+  geom_point(data=filter(CAR_cell_counts22_df, days_post_imm >=4),
+             aes(x=days_post_imm, y=(CARpos_Fo_numbers)), size=2, col="#6082B6") + 
+  scale_x_continuous(limits=c(4, 30))+
+  scale_y_log10(limits = c(5e4, 2e6), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
+  labs(x='Days post immunization', y="Cell counts", title='CAR positive FoB Cells') + myTheme
 
 
 ### CAR neg MZ B cells as precursors
@@ -216,24 +202,27 @@ phi_func <- function(Time, basl, nu, b0){
   basl_exp = exp(basl)
   return( basl_exp * (1 + exp(-nu * (Time - b0)^2)))
 }
+qplot(sol_time, y= log(phi_func(sol_time, basl = 14, nu = 0.01, b0=8)))+
+  geom_line()+
+  geom_point(data = B_cell_data, aes(x=days_post_imm, y=log(CARneg_MZ_numbers)), col=2)
 
 
-Neg_MZB_nlm <- nls(log(CAR_Neg_MZB) ~ log(phi_func(days.post.imm,  basl, nu, b0)),
-                  data = CAR_PosNeg_df,
+Neg_MZB_nlm <- nls(log(CARneg_MZ_numbers) ~ log(phi_func(days_post_imm,  basl, nu, b0)),
+                  data = B_cell_data,
                   start = list(basl = 11, nu = 0.01, b0=8))
 
 par_est <- coef(Neg_MZB_nlm)
-sol_time <- seq(0, 30, length.out=100)
+sol_time <- seq(4, 30, length.out=100)
 phi_vec_m <- phi_func(sol_time, basl=par_est[1], nu=par_est[2], b0=par_est[3])
 phi_vec_mm <- phi_func(sol_time, basl=14, nu=0.01, b0=18)
 
 ggplot() +
   #geom_line(aes(x=sol_time, y=(phi_vec_m)), col=2, size=0.8) +
-  geom_line(aes(x=sol_time, y=(phi_vec_mm)), col=2, size=0.8) +
-  geom_point(data=CAR_PosNeg_df,
-             aes(x=days.post.imm, y=(CAR_Neg_MZB)), size=2, col=2) +
+  geom_line(aes(x=sol_time, y=(phi_vec_mm)), col="#CD7F32", size=0.8) +
+  geom_point(data=filter(CAR_PosNeg_df, days.post.imm >=4),
+             aes(x=days.post.imm, y=(CAR_Neg_MZB)), size=2, col="#CD7F32") + scale_x_continuous(limits=c(0, 30))+
   scale_y_log10(limits = c(1e5, 1e7), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
-  labs(x='Days post immunization', y=NULL, title='Number of CAR- MZ B Cells') + myTheme
+  labs(x='Days post immunization', y="Cell counts", title='CAR negative MZ B Cells') + myTheme
 
 
 ###############################

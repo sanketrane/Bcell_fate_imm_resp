@@ -264,22 +264,36 @@ CAR_FOB <- sapply(ts_pred, car_fob_time)
 CAR_neg_MZB <- sapply(ts_pred, car_neg_mzb)
 
 matrix_of_draws1 <- as.data.frame(fit1)   #matrix of parameter draws
-alpha_pred <- as.data.frame(fit1, pars = "alpha_pred") %>%
-  gather(factor_key = TRUE) %>%
-  group_by(key) %>%
-  summarize(lb = quantile(value, probs = 0.16),
-            median = quantile(value, probs = 0.5),
-            ub = quantile(value, probs = 0.84))%>%
-  bind_cols("timeseries" = ts_pred)
 
-#alpha2_pred1 <- matrix_of_draws1$alpha2 * (CAR_FOB + exp(17.15)/ Y1pred1)
+alpha1_pred1 <- quantile(matrix_of_draws1$alpha1, probs = c(0.5, 0.025, 0.975))
+alpha3_pred1 <- quantile(matrix_of_draws1$alpha3, probs = c(0.5, 0.025, 0.975))
+alpha2d4_pred1 <- quantile(matrix_of_draws1$alpha2/(1 + exp(matrix_of_draws1$nu * (4 - 4.0)^2)), probs = c(0.5, 0.025, 0.975))
+alpha2d7_pred1 <- quantile(matrix_of_draws1$alpha2/(1 + exp(matrix_of_draws1$nu * (7 - 4.0)^2)), probs = c(0.5, 0.025, 0.975))
+alpha2d10_pred1 <- quantile(matrix_of_draws1$alpha2/(1 + exp(matrix_of_draws1$nu * (9 - 4.0)^2)), probs = c(0.5, 0.025, 0.975))
+pars_plot <- c("alpha1", "alpha3", "alpha2d04")
+parnames <- c('FO_to_MZ_rate', 'MZ_to_MZ_rate', 'FO_to_GC_rate_d04')
+df_pars_alpha <- data.frame(t(data.frame(alpha1_pred1, alpha3_pred1, alpha2d4_pred1))) %>%
+  mutate(parname = parnames, 
+         pars_plot = pars_plot,
+         Model = "Branched")
 
-alpha1_pred1 <- quantile(matrix_of_draws1$alpha1* (CAR_FOB + exp(17.15)), probs = c(0.5, 0.025, 0.975))
+names(df_pars_alpha) <- c('Estimates', 'par_lb', 'par_ub', 'param', "par_plot", "Model")
+
+ggplot(df_pars_alpha, aes(y=Estimates, x=factor(param), fill=param))+
+  labs(y=NULL) +
+  geom_errorbar(aes(y=Estimates, ymin=par_lb, ymax=par_ub, x=param),
+                width=0.2, linetype=1,  position=position_dodge(0.4)) +
+  geom_point(position=position_dodge(width=0.4), stat = "identity") + scale_y_log10()
+ 
+
+alpha1_pred1 <- quantile(matrix_of_draws1$alpha1, probs = c(0.5, 0.025, 0.975))
 alpha3_pred1 <- quantile(matrix_of_draws1$alpha3 * 100, probs = c(0.5, 0.025, 0.975))
 lambda_WT_pred1 <- quantile(log(2)/matrix_of_draws1$lambda_WT, probs = c(0.5, 0.025, 0.975))
 lambda_N2KO_pred1 <- quantile(log(2)/matrix_of_draws1$lambda_N2KO, probs = c(0.5, 0.025, 0.975))
 delta_pred1 <- quantile(log(2)/matrix_of_draws1$delta, probs = c(0.5, 0.025, 0.975))
-nu_pred1 <- quantile(log(2)/matrix_of_draws1$nu, probs = c(0.5, 0.025, 0.975))
+mu_pred1 <- quantile(log(2)/matrix_of_draws1$mu, probs = c(0.5, 0.025, 0.975))
+
+
 
 pars_plot <- c("lambda_WT", "lambda_N2KO",  "delta", "alpha3" )
 parnames <- c('Clonal half-life of CAR+ MZ in WT mice', 'Clonal half-life of CAR+ MZ in N2KO mice', 'GC clonal half-life', "Propensity to gain CAR expression (%) for CAR- MZ B cells")
@@ -288,24 +302,48 @@ df_pars1 <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pr
          pars_plot = pars_plot,
          Model = "Branched")
 
+
+parnames_lambda <- c('Control/CAR', 'N2KO//CAR', 'Control/CAR', 'N2KO//CAR')
+df_pars_lambda <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pred1, delta_pred1))) %>%
+  mutate(parname = parnames_lambda,
+         Param = c("Clonal half-life of CAR positive MZ B cells", "Clonal half-life of CAR positive MZ B cells",
+                   "Clonal half-life of GC B cells", "Clonal half-life of GC B cells"),
+         cell_subset = c("MZ", "MZ", "GC", "GC"))
+names(df_pars_lambda) <- c('Estimates', 'par_lb', 'par_ub', 'parname', 'Param', "Subset")
+blank_data <- data.frame(Param = c("Clonal half-life of CAR positive MZ B cells", "Clonal half-life of CAR positive MZ B cells",
+                                   "Clonal half-life of GC B cells", "Clonal half-life of GC B cells"),
+                         Estimates = c(5, 5, 18, 18),
+                         parname = parnames_lambda,
+                         Subset =  c("MZ", "MZ", "GC", "GC"))
+
+ggplot(df_pars_lambda, aes(y=Estimates, x=factor(Subset), col=parname))+
+  labs(y=NULL) +
+  geom_errorbar(aes(y=Estimates, ymin=par_lb, ymax=par_ub, x=Subset),
+                width=0.2, linetype=1,  position=position_dodge(0.4)) +
+  geom_blank(data = blank_data)+
+  geom_point(position=position_dodge(width=0.4), stat = "identity", size=4) + 
+  facet_wrap(~ factor(Param), scales = "free") + 
+  expand_limits(y = 0) + scale_y_continuous(expand = c(0, 0))+
+  scale_color_manual(values=c(2, 4), name="Mouse strain")+
+  myTheme + theme(axis.text.x=element_blank(),
+                  axis.title.x=element_blank())+ theme(legend.background = element_blank(), legend.position = c(0.88, 0.88))
+
+
 matrix_of_draws2 <- as.data.frame(fit2)   #matrix of parameter draws
 
-alpha1_pred2 <- quantile(matrix_of_draws2$alpha1* (CAR_FOB + exp(17.15)), probs = c(0.5, 0.025, 0.975))
+alpha1_pred2 <- quantile(matrix_of_draws2$alpha1, probs = c(0.5, 0.025, 0.975))
 alpha3_pred2 <- quantile(matrix_of_draws2$alpha3* 100, probs = c(0.5, 0.025, 0.975))
 lambda_WT_pred2 <- quantile(log(2)/matrix_of_draws2$lambda_WT, probs = c(0.5, 0.025, 0.975))
 lambda_N2KO_pred2 <- quantile(log(2)/matrix_of_draws2$lambda_N2KO, probs = c(0.5, 0.025, 0.975))
 delta_pred2 <- quantile(log(2)/matrix_of_draws2$delta, probs = c(0.5, 0.025, 0.975))
-nu_pred2 <- quantile(log(2)/matrix_of_draws2$nu, probs = c(0.5, 0.025, 0.975))
+mu_pred2 <- quantile(log(2)/matrix_of_draws2$mu, probs = c(0.5, 0.025, 0.975))
 
-MZinflux_pred <- quantile(matrix_of_draws2$alpha1* (CAR_FOB  + exp(17.15)/(Y1pred1$median;
-
-//total influx
-GCinflux_pred[i] = alpha2/(1 + exp(nu * (ts_pred[i] - 4.0)^2)) * (CAR_positive_FOB(ts_pred[i]) + exp(17.15))/y3_mean_pred[i] ;
 
 df_pars2 <- data.frame(t(data.frame(lambda_WT_pred2, lambda_N2KO_pred2, delta_pred2, (alpha3_pred2)))) %>%
   mutate(parname = parnames, 
          pars_plot = pars_plot,
          Model = "Linear")
+
 
 
 all_pars_df <- rbind(df_pars1, df_pars2)
@@ -316,7 +354,7 @@ blank_data <- data.frame(param = c('Clonal half-life of CAR+ MZ in WT mice', 'Cl
                                    'Clonal half-life of CAR+ MZ in N2KO mice', 'Clonal half-life of CAR+ MZ in N2KO mice', 
                                    "Propensity to gain CAR expression (%) for CAR- MZ B cells", "Propensity to gain CAR expression (%) for CAR- MZ B cells",
                                    'GC clonal half-life', 'GC clonal half-life'),
-                        Estimates = c(8, 8, 8, 8, 2, 2, 25, 25),
+                        Estimates = c(8, 8, 8, 8, 1.5, 1.5, 18, 18),
                          Model = rep(c('Branched', "Linear"), 4))
 
 ggplot(all_pars_df, aes(y=Estimates, x=param, col=Model))+
@@ -332,76 +370,75 @@ ggplot(all_pars_df, aes(y=Estimates, x=param, col=Model))+
                 axis.title.x=element_blank())
 
 
-MZinflux_pred1 <- as.data.frame(fit1, pars = "MZinflux_pred") %>%
+FOtoCARMZ_pred1 <- as.data.frame(fit1, pars = "FOtoCARMZ_pred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
   summarize(lb = quantile(value, probs = 0.16),
             median = quantile(value, probs = 0.5),
             ub = quantile(value, probs = 0.84))%>%
   bind_cols("timeseries" = ts_pred,
-            "param" = "FO B to MZ",
+            "param" = "FOB to CAR+ MZB",
+            "Model" = "CARMZ")
+
+MZtoCARMZ_pred1 <- as.data.frame(fit1, pars = "MZtoCARMZ_pred") %>%
+  gather(factor_key = TRUE) %>%
+  group_by(key) %>%
+  summarize(lb = quantile(value, probs = 0.16),
+            median = quantile(value, probs = 0.5),
+            ub = quantile(value, probs = 0.84))%>%
+  bind_cols("timeseries" = ts_pred,
+            "param" = "CAR- MZB to CAR+ MZB",
             "Model" = "Branched")
 
 
-MZinflux_pred2 <- as.data.frame(fit2, pars = "MZinflux_pred") %>%
-  gather(factor_key = TRUE) %>%
-  group_by(key) %>%
-  summarize(lb = quantile(value, probs = 0.16),
-            median = quantile(value, probs = 0.5),
-            ub = quantile(value, probs = 0.84))%>%
-  bind_cols("timeseries" = ts_pred,
-            "param" = "GC to MZ",
-            "Model" = "Linear")
+## plots
+FOtoBranch_pred <- rbind(FOtoCARMZ_pred1, MZtoCARMZ_pred1)
 
-GCinflux_pred1 <- as.data.frame(fit1, pars = "CARGCinflux_pred") %>%
+ggplot() +
+  geom_line(data = FOtoBranch_pred, aes(x = timeseries, y = median*100, col = param)) +
+  #geom_line(data = MZinflux_pred2, aes(x = timeseries, y = median*100), col =4) +
+  geom_ribbon(data = FOtoBranch_pred, aes(x = timeseries, ymin = lb*100, ymax = ub*100, fill=param), alpha = 0.25) +
+  #geom_ribbon(data = MZinflux_pred2, aes(x = timeseries, ymin = lb*100, ymax = ub*100), fill=4, alpha = 0.25)+
+  labs(title=paste("Influx into CAR+ MZ (as % of CAR+ MZ)"),  y=NULL, x="Days post immunization") + 
+  myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal") +
+  scale_x_log10(limits=c(3, 30)) +  scale_y_log10(limits=c(3, 125), breaks=c(3, 10, 30, 100)) +
+  facet_wrap(~ param, scales = "free") + guides(col="none", fill="none")
+
+
+FOtoCARGC_pred1 <- as.data.frame(fit1, pars = "FOtoGCPred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
-  summarize(lb = quantile(value, probs = 0.16),
+  summarize(lb = quantile(value, probs = 0.45),
             median = quantile(value, probs = 0.5),
-            ub = quantile(value, probs = 0.84))%>%
+            ub = quantile(value, probs = 0.975))%>%
   bind_cols("timeseries" = ts_pred,
-            "param" = "FO B to GC",
+            "param" = "FO_to_GC",
             "Model" = "Branched")
 
 
-GCinflux_pred2 <- as.data.frame(fit2, pars = "CARGCinflux_pred") %>%
+FOtoCARGC_pred2 <- as.data.frame(fit2, pars = "FOtoGCPred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
   summarize(lb = quantile(value, probs = 0.16),
             median = quantile(value, probs = 0.5),
             ub = quantile(value, probs = 0.84))%>%
   bind_cols("timeseries" = ts_pred,
-            "param" = "FO B to GC",
+            "param" = "FO_to_GC",
             "Model" = "Linear")
 
 
-facetnames <- c('', 'Lifespan of CAR+ MZ in N2KO mice', 'GC clonal lifespan', "Propensity for activation MZ B cells (%)")
-MZ_influx_pred <- rbind(MZinflux_pred1, MZinflux_pred2)
+ggplot() +
+  geom_line(data = FOtoCARGC_pred1, aes(x = timeseries, y = median, col = Model), size=1.2) +
+  geom_ribbon(data = FOtoCARGC_pred1, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
+  #geom_line(data = FOtoCARGC_pred2, aes(x = timeseries, y = median, col = Model), size=1.2) +
+  #geom_ribbon(data = FOtoCARGC_pred2, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
+  labs(title=paste("Influx into GC B cells (as % of GC)"),  y=NULL, x="Days post immunization") + 
+  myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal") + 
+  ylim(0, 8) + guides(col="none", fill="none") +
+  scale_x_log10(limits=c(4, 30), breaks=c(5, 10, 20)) + #scale_y_log10(limits=c(1e-0, 10)) 
+  facet_wrap(~ Model, scales = "free") 
 
-
-p1 <- ggplot() +
-  geom_line(data = MZ_influx_pred, aes(x = timeseries, y = median*100, col = param)) +
-  #geom_line(data = MZinflux_pred2, aes(x = timeseries, y = median*100), col =4) +
-  geom_ribbon(data = MZ_influx_pred, aes(x = timeseries, ymin = lb*100, ymax = ub*100, fill=param), alpha = 0.25) +
-  #geom_ribbon(data = MZinflux_pred2, aes(x = timeseries, ymin = lb*100, ymax = ub*100), fill=4, alpha = 0.25)+
-  labs(title=paste("Influx into MZ (as % of MZ)"),  y=NULL, x="Days post immunization") + 
-  myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal") +
-  scale_x_log10(limits=c(3, 30)) + #scale_y_log10(limits=c(1e-5, 1)) +
-  facet_wrap(~ Model, scales = "free") + guides(col="none", fill="none")
-
-GC_influx_pred <- rbind(GCinflux_pred1, GCinflux_pred2)
-
-
-p2 <- ggplot() +
-  geom_line(data = GC_influx_pred, aes(x = timeseries, y = median*100, col = Model)) +
-  #geom_line(data = MZinflux_pred2, aes(x = timeseries, y = median*100), col =4) +
-  geom_ribbon(data = GC_influx_pred, aes(x = timeseries, ymin = lb*100, ymax = ub*100, fill=Model), alpha = 0.25) +
-  #geom_ribbon(data = MZinflux_pred2, aes(x = timeseries, ymin = lb*100, ymax = ub*100), fill=4, alpha = 0.25)+
-  labs(title=paste("Influx into GC (as % of GC)"),  y=NULL, x="Days post immunization") + 
-  myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal") +
-  scale_x_log10(limits=c(3, 30)) + #scale_y_log10(limits=c(1e-5, 1)) +
-  facet_wrap(~ Model, scales = "free") + guides(col="none", fill="none")
-
-cowplot::plot_grid(p1, p2, align = "v", nrow = 2)
+cowplot::plot_grid(p1, p1.2, align = "v", nrow = 2)
+cowplot::plot_grid(p2, p2.2, align = "v", nrow = 2)
 
 

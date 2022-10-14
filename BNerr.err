@@ -1,0 +1,160 @@
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45: ode parameters and data[6] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:Exception: Exception: integrate_ode_rk45: ode parameters and data[6] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+
+Exception: Exception: integrate_ode_rk45: ode parameters and data[6] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.Exception: Exception: integrate_ode_rk45: ode parameters and data[6] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+
+
+
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45: ode parameters and data[6] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45: ode parameters and data[6] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45: ode parameters and data[6] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+
+
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45: ode parameters and data[6] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: normal_lpdf: Location parameter[4] is nan, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 139, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: normal_lpdf: Location parameter[4] is nan, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 139, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: normal_lpdf: Location parameter[4] is nan, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 139, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: normal_lpdf: Location parameter[4] is nan, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 139, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45:  Failed to integrate to next output time (7) in less than max_num_steps steps (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45:  Failed to integrate to next output time (7) in less than max_num_steps steps (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45:  Failed to integrate to next output time (7) in less than max_num_steps steps (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45:  Failed to integrate to next output time (7) in less than max_num_steps steps (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45:  Failed to integrate to next output time (7) in less than max_num_steps steps (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45:  Failed to integrate to next output time (7) in less than max_num_steps steps (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45:  Failed to integrate to next output time (7) in less than max_num_steps steps (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45: initial state[4] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45: initial state[4] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45: initial state[4] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45: initial state[4] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45: initial state[4] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45: initial state[4] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45:  Failed to integrate to next output time (7) in less than max_num_steps steps (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45: initial state[4] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45: initial state[4] is inf, but must be finite! (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45:  Failed to integrate to next output time (7) in less than max_num_steps steps (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45:  Failed to integrate to next output time (7) in less than max_num_steps steps (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45:  Failed to integrate to next output time (7) in less than max_num_steps steps (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+
+Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:
+Exception: Exception: integrate_ode_rk45:  Failed to integrate to next output time (7) in less than max_num_steps steps (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 43, column 5 to column 88) (in 'MZ_munich/stan_models/New_modelsCAR/Branched_neutral.stan', line 110, column 2 to column 62)
+If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,
+but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.
+

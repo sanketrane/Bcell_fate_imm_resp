@@ -22,7 +22,7 @@ functions{
      real delta  = parms[4];
      real alpha2 = parms[5];
      real nu = parms[6];
-     real alpha3 = parms[7];
+     //real alpha3 = parms[7];
      real CAR_negative_FOB = exp(17.15);
      real t0 = 4.0;
 
@@ -31,7 +31,7 @@ functions{
      // the system of ODEs
      real dydt[3];
      // CAR MZ, CAR + N2KO GC
-     dydt[1] = alpha1 * (CAR_positive_FOB(time) + (CAR_negative_FOB)) + alpha3 * CAR_negative_MZB(time) - lambda_WT * y[1];
+     dydt[1] = alpha_GC * (CAR_positive_FOB(time) + (CAR_negative_FOB)) + alpha1 * CAR_negative_MZB(time) - lambda_WT * y[1];
      dydt[2] = alpha_GC * CAR_positive_FOB(time) + mu * y[3]  - delta * y[2];
      dydt[3] = alpha_GC * CAR_negative_FOB - mu * y[3] - delta * y[3];
      return dydt;
@@ -46,8 +46,8 @@ functions{
      real delta  = parms[4];
      real alpha2 = parms[5];
      real nu = parms[6];
-     real alpha3 = parms[7];
-     real lambda_N2KO = parms[8];
+     //real alpha3 = parms[7];
+     real lambda_N2KO = parms[7];
      real CAR_negative_FOB = exp(17.15);
      real t0 = 4.0;
 
@@ -56,7 +56,7 @@ functions{
      // the system of ODEs
      real dydt[3];
      // CAR MZ, CAR + N2KO GC
-     dydt[1] = alpha3 * CAR_negative_MZB(time)  - lambda_N2KO * y[1];
+     dydt[1] = alpha_GC * CAR_negative_MZB(time)  - lambda_N2KO * y[1];
      dydt[2] = alpha_GC * CAR_positive_FOB(time) + mu * y[3]  - delta * y[2];
      dydt[3] = alpha_GC * CAR_negative_FOB - mu * y[3] - delta * y[3];
      return dydt;
@@ -102,7 +102,7 @@ parameters{
   // parameters to sample with boundary conditions
   real<lower = 0> alpha1;
   real<lower = 0> alpha2;
-  real<lower = 0> alpha3;
+  //real<lower = 0> alpha3;
   real<lower = 0> delta;
   real<lower = 0> lambda_WT;
   real<lower = lambda_WT> lambda_N2KO;
@@ -135,7 +135,7 @@ transformed parameters{
   real CAR_GCN2counts_mean[numObs2];
   real GCN2_counts_mean[numObs2];
 
-  real parms[8];                  // declaring the array for parameters
+  real parms[7];                  // declaring the array for parameters
   real init_cond1[3];              // declaring the array for state variables
   real init_cond2[3];              // declaring the array for state variables
 
@@ -160,8 +160,7 @@ transformed parameters{
   parms[4] = delta;
   parms[5] = alpha2;
   parms[6] = nu;
-  parms[7] = alpha3;
-  parms[8] = lambda_N2KO;
+  parms[7] = lambda_N2KO;
 
   y_hat1[1] = init_cond1;
   // solution of the system of ODEs for the predictor values
@@ -211,7 +210,6 @@ model{
   mu ~ normal(0.1, 0.5);
   delta ~ normal(0.01, 0.5);
   alpha2 ~ normal(0.01, 0.5);
-  alpha3 ~ normal(0.01, 0.5);
   nu ~ normal(0.01, 0.5);
   M0N2 ~ normal(8, 2);
 

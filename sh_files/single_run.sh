@@ -6,4 +6,4 @@ do
     esac
 done
 
-./stan_models/${modelname} sample num_warmup=500 num_samples=1500 data file=datafiles/Bcell_Imm.Rdump output file=save_csv/sf_${modelname}.csv 
+./stan_models/New_modelsCAR/${modelname} sample num_warmup=500 num_samples=1500 data file=datafiles/Bcell_Imm.Rdump output file=save_csv/ßsf_${modelname}.csv 
