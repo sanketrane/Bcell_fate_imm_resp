@@ -47,8 +47,8 @@ saveDir <- file.path(projectDir, 'save_csv')
 LooDir <- file.path('loo_fit') 
 
 ## model specific details that needs to be change for every run
-modelName1 <- "totFOB_MZB_timeinflux"
-modelName2 <- "carGC_MZB_timeinflux"
+modelName1 <- "Branched_timeinflux"
+modelName2 <- "Linear_timeinflux"
 
 # compiling multiple stan objects together that ran on different nodes
 stanfit1 <- read_stan_csv(file.path(saveDir, paste0(modelName1, "_1", ".csv")))
@@ -243,7 +243,7 @@ p3 <- ggplot() +
 ## saving  plots for quality control 
 pdf(file = file.path(outputDir, paste("Combinedfit.pdf", sep = "")),
     width = 14, height = 4, onefile = FALSE, useDingbats = FALSE)
-cowplot::plot_grid(p1, p2,  p3, ncol  = 3)
+cowplot::plot_grid(p1, p2, ncol  = 3)
 dev.off()
 
 
@@ -265,8 +265,8 @@ CAR_neg_MZB <- sapply(ts_pred, car_neg_mzb)
 
 matrix_of_draws1 <- as.data.frame(fit1)   #matrix of parameter draws
 
-alpha1_pred1 <- quantile(matrix_of_draws1$alpha1, probs = c(0.5, 0.025, 0.975))
-alpha3_pred1 <- quantile(matrix_of_draws1$alpha3, probs = c(0.5, 0.025, 0.975))
+alpha_pred1 <- quantile(matrix_of_draws1$alpha, probs = c(0.5, 0.025, 0.975))
+mu_pred1 <- quantile(matrix_of_draws1$mu, probs = c(0.5, 0.025, 0.975))
 alpha2d4_pred1 <- quantile(matrix_of_draws1$alpha2/(1 + exp(matrix_of_draws1$nu * (4 - 4.0)^2)), probs = c(0.5, 0.025, 0.975))
 alpha2d7_pred1 <- quantile(matrix_of_draws1$alpha2/(1 + exp(matrix_of_draws1$nu * (7 - 4.0)^2)), probs = c(0.5, 0.025, 0.975))
 alpha2d10_pred1 <- quantile(matrix_of_draws1$alpha2/(1 + exp(matrix_of_draws1$nu * (9 - 4.0)^2)), probs = c(0.5, 0.025, 0.975))
@@ -286,19 +286,20 @@ ggplot(df_pars_alpha, aes(y=Estimates, x=factor(param), fill=param))+
   geom_point(position=position_dodge(width=0.4), stat = "identity") + scale_y_log10()
  
 
-alpha1_pred1 <- quantile(matrix_of_draws1$alpha1, probs = c(0.5, 0.025, 0.975))
-alpha3_pred1 <- quantile(matrix_of_draws1$alpha3 * 100, probs = c(0.5, 0.025, 0.975))
+alpha_pred1 <- quantile(matrix_of_draws1$alpha, probs = c(0.5, 0.025, 0.975))
+beta_pred1 <- quantile(matrix_of_draws1$beta, probs = c(0.5, 0.025, 0.975))
 lambda_WT_pred1 <- quantile(log(2)/matrix_of_draws1$lambda_WT, probs = c(0.5, 0.025, 0.975))
 lambda_N2KO_pred1 <- quantile(log(2)/matrix_of_draws1$lambda_N2KO, probs = c(0.5, 0.025, 0.975))
 delta_pred1 <- quantile(log(2)/matrix_of_draws1$delta, probs = c(0.5, 0.025, 0.975))
-mu_pred1 <- quantile(log(2)/matrix_of_draws1$mu, probs = c(0.5, 0.025, 0.975))
+mu_pred1 <- quantile(matrix_of_draws1$mu, probs = c(0.5, 0.025, 0.975))
+nu_pred1 <- quantile(log(2)/matrix_of_draws1$nu, probs = c(0.5, 0.025, 0.975))
 
 
 
-pars_plot <- c("lambda_WT", "lambda_N2KO",  "delta", "alpha3" )
+pars_plot <- c("lambda_WT", "lambda_N2KO",  "delta", "alpha", "beta", "mu")
 parnames <- c('Clonal half-life of CAR+ MZ in WT mice', 'Clonal half-life of CAR+ MZ in N2KO mice', 'GC clonal half-life', "Propensity to gain CAR expression (%) for CAR- MZ B cells")
-df_pars1 <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pred1, (alpha3_pred1) ))) %>%
-  mutate(parname = parnames, 
+df_pars1 <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pred1, (alpha_pred1), beta_pred1, mu_pred1))) %>%
+  mutate(parname = pars_plot, 
          pars_plot = pars_plot,
          Model = "Branched")
 
@@ -331,16 +332,17 @@ ggplot(df_pars_lambda, aes(y=Estimates, x=factor(Subset), col=parname))+
 
 matrix_of_draws2 <- as.data.frame(fit2)   #matrix of parameter draws
 
-alpha1_pred2 <- quantile(matrix_of_draws2$alpha1, probs = c(0.5, 0.025, 0.975))
-alpha3_pred2 <- quantile(matrix_of_draws2$alpha3* 100, probs = c(0.5, 0.025, 0.975))
+alpha_pred2 <- quantile(matrix_of_draws2$alpha, probs = c(0.5, 0.025, 0.975))
+beta_pred2 <- quantile(matrix_of_draws2$beta, probs = c(0.5, 0.025, 0.975))
 lambda_WT_pred2 <- quantile(log(2)/matrix_of_draws2$lambda_WT, probs = c(0.5, 0.025, 0.975))
 lambda_N2KO_pred2 <- quantile(log(2)/matrix_of_draws2$lambda_N2KO, probs = c(0.5, 0.025, 0.975))
 delta_pred2 <- quantile(log(2)/matrix_of_draws2$delta, probs = c(0.5, 0.025, 0.975))
-mu_pred2 <- quantile(log(2)/matrix_of_draws2$mu, probs = c(0.5, 0.025, 0.975))
+mu_pred2 <- quantile(matrix_of_draws2$mu, probs = c(0.5, 0.025, 0.975))
+nu_pred2 <- quantile(log(2)/matrix_of_draws2$nu, probs = c(0.5, 0.025, 0.975))
 
 
-df_pars2 <- data.frame(t(data.frame(lambda_WT_pred2, lambda_N2KO_pred2, delta_pred2, (alpha3_pred2)))) %>%
-  mutate(parname = parnames, 
+df_pars2 <- data.frame(t(data.frame(lambda_WT_pred2, lambda_N2KO_pred2, delta_pred2, (alpha_pred2), beta_pred2, mu_pred2))) %>%
+  mutate(parname = pars_plot, 
          pars_plot = pars_plot,
          Model = "Linear")
 
@@ -360,10 +362,10 @@ blank_data <- data.frame(param = c('Clonal half-life of CAR+ MZ in WT mice', 'Cl
 ggplot(all_pars_df, aes(y=Estimates, x=param, col=Model))+
   labs(y=NULL)+
   geom_point(position=position_dodge(width=0.4), size=3) +
-  geom_blank(data = blank_data)+
+  #geom_blank(data = blank_data)+
   geom_errorbar(aes(y=Estimates, ymin=par_lb, ymax=par_ub, x=param, col=Model),
                 width=0.2, linetype=1,  position=position_dodge(0.4)) +
-  facet_wrap(~ factor(param, levels = parnames), scales = "free", labeller = label_wrap_gen(width=42)) + 
+  facet_wrap(~ param, scales = "free", labeller = label_wrap_gen(width=42)) + 
   expand_limits(y = 0) + scale_y_continuous(expand = c(0, 0))+
   guides(col='none', fill='none')+
   myTheme + theme(axis.text.x=element_blank(),
@@ -405,7 +407,7 @@ ggplot() +
   facet_wrap(~ param, scales = "free") + guides(col="none", fill="none")
 
 
-FOtoCARGC_pred1 <- as.data.frame(fit1, pars = "FOtoGCPred") %>%
+FOtoCARGC_pred1 <- as.data.frame(fit1, pars = "FOtoCARGC_pred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
   summarize(lb = quantile(value, probs = 0.45),
@@ -416,7 +418,7 @@ FOtoCARGC_pred1 <- as.data.frame(fit1, pars = "FOtoGCPred") %>%
             "Model" = "Branched")
 
 
-FOtoCARGC_pred2 <- as.data.frame(fit2, pars = "FOtoGCPred") %>%
+FOtoCARGC_pred2 <- as.data.frame(fit2, pars = "FOtoCARGC_pred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
   summarize(lb = quantile(value, probs = 0.16),
@@ -430,8 +432,8 @@ FOtoCARGC_pred2 <- as.data.frame(fit2, pars = "FOtoGCPred") %>%
 ggplot() +
   geom_line(data = FOtoCARGC_pred1, aes(x = timeseries, y = median, col = Model), size=1.2) +
   geom_ribbon(data = FOtoCARGC_pred1, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
-  #geom_line(data = FOtoCARGC_pred2, aes(x = timeseries, y = median, col = Model), size=1.2) +
-  #geom_ribbon(data = FOtoCARGC_pred2, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
+  geom_line(data = FOtoCARGC_pred2, aes(x = timeseries, y = median, col = Model), size=1.2) +
+  geom_ribbon(data = FOtoCARGC_pred2, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
   labs(title=paste("Influx into GC B cells (as % of GC)"),  y=NULL, x="Days post immunization") + 
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal") + 
   ylim(0, 8) + guides(col="none", fill="none") +

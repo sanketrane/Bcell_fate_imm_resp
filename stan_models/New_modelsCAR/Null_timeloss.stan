@@ -1,10 +1,10 @@
 functions{
-   // function that describes the changes in CAR+ counts in FO B cells
-   real CAR_positive_FOB(real time){
-     real F0 = exp(11.722278); real B0 = exp(4.475064); real n = 4.781548 ; real X = 6.943644 ; real q = 5;
-     real value = F0 + (B0 * time^n) * (1 - ((time^q)/((X^q) + (time^q))));
-     return value;
-    }
+  // function that describes the changes in CAR+ counts in FO B cells
+  real CAR_positive_FOB(real time){
+    real F0 = exp(11.722278); real B0 = exp(4.475064); real n = 4.781548 ; real X = 6.943644 ; real q = 5;
+    real value = F0 + (B0 * time^n) * (1 - ((time^q)/((X^q) + (time^q))));
+    return value;
+   }
 
    real CAR_negative_MZB(real time){
     real M0 = exp(14.06); real nu = 0.0033; real b0 = 20.58;
@@ -27,13 +27,18 @@ functions{
      real delta = parms[4];
      real lambda_WT = parms[5];
      real lambda_N2KO = parms[6];
+     real nu = parms[7];
+
+     real t0 = 4.0;
+     real delta_tau =  delta/(1 + exp(-nu *(time - t0)^2));
 
      // the system of ODEs
      real dydt[3];
      // CAR positive GCB cells in WT
-     dydt[1] = alpha * Total_FoB(time)  - delta * y[1];
+     dydt[1] = alpha * Total_FoB(time)  - delta_tau * y[1];
      // CAR positive MZB cells in WT
-     dydt[2] = mu * Total_FoB(time) + beta * CAR_negative_MZB(time) - lambda_WT * y[2];
+     dydt[2] = beta * CAR_negative_MZB(time) - lambda_WT * y[2];
+
      // CAR positive MZB cells in N2KO
      dydt[3] = beta * CAR_negative_MZB(time) - lambda_N2KO * y[3];
      return dydt;
@@ -71,6 +76,7 @@ parameters{
   real<lower = 0> delta;
   real<lower = 0> lambda_WT;
   real<lower = lambda_WT> lambda_N2KO;
+  real<lower = 0> nu;
   real<lower = 0> M0N2;
 
   // stdev within individual datasets to be estimated
@@ -88,7 +94,7 @@ transformed parameters{
   real CAR_GCN2counts_mean[numObs2];
   real CAR_MZN2counts_mean[numObs2];
 
-  real parms[6];                  // declaring the array for parameters
+  real parms[7];                  // declaring the array for parameters
   real init_cond[3];              // declaring the array for state variables
 
   real CAR_GC0 = exp(11.5);              // transformed parameters for better/faster sampling
@@ -106,6 +112,7 @@ transformed parameters{
   parms[4] = delta;
   parms[5] = lambda_WT;
   parms[6] = lambda_N2KO;
+  parms[7] = nu;
 
   y_hat[1] = init_cond;
   // solution of the system of ODEs for the predictor values
@@ -127,6 +134,7 @@ model{
   alpha ~ normal(0.01, 0.5);
   beta ~ normal(0.01, 0.5);
   mu ~ normal(0.01, 0.5);
+  nu ~ normal(0.01, 0.5);
   delta ~ normal(0.01, 0.5);
   lambda_WT ~ normal(0.01, 0.5);
   lambda_N2KO ~ normal(0.01, 0.5);
@@ -148,6 +156,7 @@ generated quantities{
    real y_hat_pred[numPred, 3];
    // variables for model predictions
    real y1_mean_pred[numPred]; real y2_mean_pred[numPred]; real y3_mean_pred[numPred]; real y4_mean_pred[numPred];
+   real delta_pred[numPred];
    // variables for model predictions with stdev
    real CAR_MZcounts_pred[numPred]; real CAR_GCcounts_pred[numPred];
    real CAR_MZN2counts_pred[numPred]; real CAR_GCN2counts_pred[numPred];
@@ -175,6 +184,9 @@ generated quantities{
      //CAR MZ in N2KO
      y4_mean_pred[i] = y_hat_pred[i, 3];
      CAR_MZN2counts_pred[i] = exp(normal_rng(log(y4_mean_pred[i]), sigma3));
+
+     //loss rate
+     delta_pred[i] = delta/(1 + exp(-nu *(ts_pred[i] - 4.0)^2));
    }
 
    // calculating the log predictive accuracy for each point

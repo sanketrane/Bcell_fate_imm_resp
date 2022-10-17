@@ -1,13 +1,19 @@
 functions{
-   // function that describes the changes in CAR+ counts in FO B cells
-   real CAR_positive_FOB(real time){
-     real F0 = exp(11.2); real B0 = exp(7.5); real n = 3 ; real X = 10 ; real q = 5;
-     real value = F0 + (B0 * time^n) * (1 - ((time^q)/((X^q) + (time^q))));
-     return value;
-    }
+  // function that describes the changes in CAR+ counts in FO B cells
+  real CAR_positive_FOB(real time){
+    real F0 = exp(11.722278); real B0 = exp(4.475064); real n = 4.781548 ; real X = 6.943644 ; real q = 5;
+    real value = F0 + (B0 * time^n) * (1 - ((time^q)/((X^q) + (time^q))));
+    return value;
+   }
 
    real CAR_negative_MZB(real time){
     real M0 = exp(14.06); real nu = 0.0033; real b0 = 20.58;
+    real value = M0 * (1 + exp(-nu * (time - b0)^2));
+    return value;
+   }
+
+   real Total_FoB(real time){
+    real M0 = exp(16.7); real nu = 0.004; real b0 = 20;
     real value = M0 * (1 + exp(-nu * (time - b0)^2));
     return value;
    }
@@ -24,7 +30,7 @@ functions{
      // the system of ODEs
      real dydt[3];
      // CAR positive GCB cells in WT
-     dydt[1] = alpha * CAR_positive_FOB(time)  - delta * y[1];
+     dydt[1] = alpha * Total_FoB(time)  - delta * y[1];
      // CAR positive MZB cells in WT
      dydt[2] = beta * CAR_negative_MZB(time) - lambda_WT * y[2];
      // CAR positive MZB cells in N2KO
@@ -120,7 +126,7 @@ model{
   delta ~ normal(0.01, 0.5);
   lambda_WT ~ normal(0.01, 0.5);
   lambda_N2KO ~ normal(0.01, 0.5);
-  M0N2 ~ normal(8, 2);
+  M0N2 ~ normal(8, 1);
 
   sigma1 ~ normal(0, 2.5);
   sigma2 ~ normal(0, 2.5);

@@ -136,12 +136,12 @@ phi_func <- function(Time, basl, theta, n, X, q){
 }
 
 sol_time <- seq(0, 30, length.out=100)
-qplot(sol_time, y= log(phi_func(sol_time, basl = 11.2, theta = 7.5, n = 3 , X = 10, q = 5)))+
+qplot(sol_time, y= log(phi_func(sol_time, basl = 17.2, theta = 7.5, n = 3 , X = 10, q = 5)))+
   geom_line()+
-  geom_point(data = B_cell_data, aes(x=days_post_imm, y=log(CARpos_FoB)), col=2)
+  geom_point(data = B_cell_data, aes(x=days_post_imm, y=log(total_FoB)), col=2)
 
 
-repFOB_nlm <- nls(log(CARpos_FoB) ~ log(phi_func(days_post_imm, basl, theta, n, X, q)),
+repFOB_nlm <- nls(log(total_FoB) ~ log(phi_func(days_post_imm, basl, theta, n, X, q)),
                   data = B_cell_data,
                   start = list(basl = 11.2, theta = 7.5, n = 3 , X = 10, q = 5))
 
@@ -150,12 +150,12 @@ phi_vec_m1 <- phi_func(sol_time, basl = par_est[1], theta =  par_est[2], n =  pa
 phi_vec_m <- phi_func(sol_time, basl = 11.2, theta = 7.5, n = 3 , X = 10, q = 5)
 
 ggplot() +
-  geom_line(aes(x=sol_time, y=(phi_vec_m)), col="#6082B6", size=0.8) +
-  #geom_line(aes(x=sol_time, y=(phi_vec_m1)), col=2, size=0.8) +
+  #geom_line(aes(x=sol_time, y=(phi_vec_m)), col="#6082B6", size=0.8) +
+  geom_line(aes(x=sol_time, y=(phi_vec_m1)), col=2, size=0.8) +
   geom_point(data=filter(B_cell_data, days_post_imm >=4),
-             aes(x=days_post_imm, y=(CARpos_FoB)), size=2, col="#6082B6") + 
+             aes(x=days_post_imm, y=(total_FoB)), size=2, col="#6082B6") + 
   scale_x_continuous(limits=c(3.9, 30))+
-  scale_y_log10(limits = c(5e4, 3e6), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
+  scale_y_log10(limits = c(5e6, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
   labs(x='Days post immunization', y="Cell counts", title='CAR positive FoB Cells') + myTheme
 
 ggsave('plots/New_plotsNatComm/CARposFOB.pdf', last_plot(), device = 'pdf', width = 6, height = 4.5)
@@ -191,6 +191,34 @@ ggplot() +
   labs(x='Days post immunization', y="Cell counts", title='CAR negative MZ B Cells') + myTheme
 
 
+### tot FOb
+
+phi2_func <- function(Time, basl, nu, b0){
+  t = Time - 0
+  basl_exp = exp(basl)
+  return( basl_exp * (1 + exp(-nu * (Time - b0)^2)))
+}
+
+totFOB_nlm <- nls(log(total_FoB) ~ log(phi2_func(days_post_imm,  basl, nu, b0)),
+                   data = B_cell_data,
+                   start = list(basl = 11, nu = 0.01, b0=8))
+
+par_est <- coef(totFOB_nlm)
+sol_time <- seq(4, 30, length.out=100)
+phi_vec_m <- phi2_func(sol_time, basl=par_est[1], nu=par_est[2], b0=par_est[3])
+phi_vec_mm <- phi2_func(sol_time, basl=16.7, nu=0.004, b0=20)
+
+
+ggplot() +
+  #geom_line(aes(x=sol_time, y=(phi_vec_m)), col="blue", size=2) +
+  geom_line(aes(x=sol_time, y=(phi_vec_mm)), col="#CD7F32", size=0.8) +
+  geom_point(data=filter(B_cell_data, days_post_imm >=4),
+             aes(x=days_post_imm, y=(total_FoB)), size=2, col="#CD7F32") +
+  scale_x_continuous(limits=c(3.9, 30))+
+  scale_y_log10(limits = c(1e6, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
+  labs(x='Days post immunization', y="Cell counts", title='total FoB Cells') + myTheme
+
+
 ggsave('plots/New_plotsNatComm/CARnegMZB.pdf', last_plot(), device = 'pdf', width = 6, height = 4.5)
 
 ###############################
@@ -211,7 +239,7 @@ imm_data %>%
 # generating data for fitting
 imm_N2ko_data <- B_cell_data %>% filter(genotype == "N2KO") %>%
   select(days_post_imm, contains("CARpos"))  %>%
-  filter(days_post_imm >= 0)
+  filter(days_post_imm > 0)
 
 imm_N2ko_data %>% 
   filter(days_post_imm == 0) %>%
@@ -229,13 +257,13 @@ data_times2 <- imm_N2ko_data$days_post_imm
 unique_times_df1 <- imm_data %>% distinct(days_post_imm, .keep_all = TRUE)
 solve_times <- unique_times_df1$days_post_imm
 ## Map of the unique time points on all the timepoints
-time_index1 <- purrr::map_dbl(data_times1, function(x) which(x == solve_times1))    # keeping track of index of time point in relation to solve_time
-time_index2 <- purrr::map_dbl(data_times2, function(x) which(x == solve_times1))    # keeping track of index of time point in relation to solve_time
+time_index1 <- purrr::map_dbl(data_times1, function(x) which(x == solve_times))    # keeping track of index of time point in relation to solve_time
+time_index2 <- purrr::map_dbl(data_times2, function(x) which(x == solve_times))    # keeping track of index of time point in relation to solve_time
 
 ## Data to import in Stan
 numObs1 <- length(imm_data$days_post_imm)
 numObs2 <- length(imm_N2ko_data$days_post_imm)
-n_shards <- length(solve_times1)
+n_shards <- length(solve_times)
 solve_time <- solve_times
 time_index1 <- time_index1
 time_index2 <- time_index2

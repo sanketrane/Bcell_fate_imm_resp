@@ -8,7 +8,7 @@ library(tidyverse)
 ####################################################################################
 
 ## model specific details that needs to be change for every run
-modelName <- "Null_neutral"
+modelName <- "Branched_timeinflux"
 data_der <- "Bcell_imm_data.csv"    
 data_der2 <- "N2KO_imm_data.csv"    
 
@@ -33,7 +33,7 @@ stanfit4 <- read_stan_csv(file.path(saveDir, paste0(modelName, "_4",".csv")))
 stanfit5 <- read_stan_csv(file.path(saveDir, paste0(modelName, "_5", ".csv")))
 stanfit6 <- read_stan_csv(file.path(saveDir, paste0(modelName, "_6",".csv")))
 
-fit <- sflist2stanfit(list(stanfit1, stanfit2, stanfit3, stanfit4, stanfit5, stanfit6))
+fit <- sflist2stanfit(list(stanfit1, stanfit3, stanfit4, stanfit5, stanfit2))
 
 # finding the parameters used in the model 
 # using the last parameter("sigma4") in the array to get the total number of parameters set in the model
