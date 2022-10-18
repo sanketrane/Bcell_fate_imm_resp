@@ -203,7 +203,7 @@ p1 <- ggplot() +
   geom_point(data = imm_data, aes(x = days.post.imm, y = CAR_MZB_numbers), col=2) +
   geom_point(data = imm_N2ko_data, aes(x = days.post.imm, y = CAR_MZB_numbers), col=4) +
   labs(title=paste("CAR positive MZ B cells"),  y=NULL, x="Days post immunization") + 
-  xlim(0, 30) +
+  xlim(3, 30) +
   scale_y_continuous(limits = c(2e3, 3e5), trans="log10", breaks=c(1e4, 1e5, 1e6, 1e3, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
 
@@ -218,7 +218,7 @@ p2 <- ggplot() +
   #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
   geom_point(data = imm_N2ko_data, aes(x = days.post.imm, y = CAR_GCB_numbers), col=4) +
   labs(title=paste("CAR positive GC B cells"),  y=NULL, x="Days post immunization") + 
-  xlim(0, 30) +
+  xlim(3, 30) +
   scale_y_continuous(limits = c(5e3, 1e7), trans="log10", breaks=c(1e4, 1e5, 1e6, 1e7, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
 
@@ -292,17 +292,25 @@ lambda_WT_pred1 <- quantile(log(2)/matrix_of_draws1$lambda_WT, probs = c(0.5, 0.
 lambda_N2KO_pred1 <- quantile(log(2)/matrix_of_draws1$lambda_N2KO, probs = c(0.5, 0.025, 0.975))
 delta_pred1 <- quantile(log(2)/matrix_of_draws1$delta, probs = c(0.5, 0.025, 0.975))
 mu_pred1 <- quantile(matrix_of_draws1$mu, probs = c(0.5, 0.025, 0.975))
-nu_pred1 <- quantile(log(2)/matrix_of_draws1$nu, probs = c(0.5, 0.025, 0.975))
+nu_pred1 <- quantile(matrix_of_draws1$nu, probs = c(0.5, 0.025, 0.975))
 
 
 
-pars_plot <- c("lambda_WT", "lambda_N2KO",  "delta", "alpha", "beta", "mu")
+pars_plot <- c("lambda_WT", "lambda_N2KO",  "delta", "beta")
 parnames <- c('Clonal half-life of CAR+ MZ in WT mice', 'Clonal half-life of CAR+ MZ in N2KO mice', 'GC clonal half-life', "Propensity to gain CAR expression (%) for CAR- MZ B cells")
-df_pars1 <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pred1, (alpha_pred1), beta_pred1, mu_pred1))) %>%
-  mutate(parname = pars_plot, 
+df_pars1 <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pred1,  beta_pred1))) %>%
+  mutate(parname = parnames, 
          pars_plot = pars_plot,
          Model = "Branched")
 
+
+alphats <- function(timepr){
+  0.09146030/(1 + exp(0.005696415 * (timepr - 4.0)^2))
+}
+
+alphavec <- sapply(ts_pred, alphats)
+
+qplot(x=ts_pred, y=alphavec)
 
 parnames_lambda <- c('Control/CAR', 'N2KO//CAR', 'Control/CAR', 'N2KO//CAR')
 df_pars_lambda <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pred1, delta_pred1))) %>%
@@ -341,29 +349,28 @@ mu_pred2 <- quantile(matrix_of_draws2$mu, probs = c(0.5, 0.025, 0.975))
 nu_pred2 <- quantile(log(2)/matrix_of_draws2$nu, probs = c(0.5, 0.025, 0.975))
 
 
-df_pars2 <- data.frame(t(data.frame(lambda_WT_pred2, lambda_N2KO_pred2, delta_pred2, (alpha_pred2), beta_pred2, mu_pred2))) %>%
-  mutate(parname = pars_plot, 
+df_pars2 <- data.frame(t(data.frame(lambda_WT_pred2, lambda_N2KO_pred2, delta_pred2,  beta_pred2))) %>%
+  mutate(parname = parnames, 
          pars_plot = pars_plot,
          Model = "Linear")
 
-
-
+parnames <- c('Clonal half-life of CAR+ MZ in WT mice', 'Clonal half-life of CAR+ MZ in N2KO mice', 
+              'Clonal half-life of CAR+ GC',  "Propensity to gain CAR expression (%) for CAR- MZ B cells")
+formattable::formattable(all_pars_df)
 all_pars_df <- rbind(df_pars1, df_pars2)
-names(all_pars_df) <- c('Estimates', 'par_lb', 'par_ub', 'param', "par_plot", "Model")
+names(all_pars_df) <- c('Estimates', 'par_lb', 'par_ub', 'param', "pars_plot",  "Model")
 
 
-blank_data <- data.frame(param = c('Clonal half-life of CAR+ MZ in WT mice', 'Clonal half-life of CAR+ MZ in WT mice', 
-                                   'Clonal half-life of CAR+ MZ in N2KO mice', 'Clonal half-life of CAR+ MZ in N2KO mice', 
-                                   "Propensity to gain CAR expression (%) for CAR- MZ B cells", "Propensity to gain CAR expression (%) for CAR- MZ B cells",
-                                   'GC clonal half-life', 'GC clonal half-life'),
-                        Estimates = c(8, 8, 8, 8, 1.5, 1.5, 18, 18),
+blank_data <- data.frame(param = parnames,
+                        Estimates = c(8, 8, 8, 8, 1.5, 1.5, 2, 2),
                          Model = rep(c('Branched', "Linear"), 4))
 
-ggplot(all_pars_df, aes(y=Estimates, x=param, col=Model))+
+
+ggplot(all_pars_df, aes(y=Estimates, x=pars_plot, col=Model))+
   labs(y=NULL)+
   geom_point(position=position_dodge(width=0.4), size=3) +
   #geom_blank(data = blank_data)+
-  geom_errorbar(aes(y=Estimates, ymin=par_lb, ymax=par_ub, x=param, col=Model),
+  geom_errorbar(aes(y=Estimates, ymin=par_lb, ymax=par_ub, x=pars_plot, col=Model),
                 width=0.2, linetype=1,  position=position_dodge(0.4)) +
   facet_wrap(~ param, scales = "free", labeller = label_wrap_gen(width=42)) + 
   expand_limits(y = 0) + scale_y_continuous(expand = c(0, 0))+
@@ -403,7 +410,7 @@ ggplot() +
   #geom_ribbon(data = MZinflux_pred2, aes(x = timeseries, ymin = lb*100, ymax = ub*100), fill=4, alpha = 0.25)+
   labs(title=paste("Influx into CAR+ MZ (as % of CAR+ MZ)"),  y=NULL, x="Days post immunization") + 
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal") +
-  scale_x_log10(limits=c(3, 30)) +  scale_y_log10(limits=c(3, 125), breaks=c(3, 10, 30, 100)) +
+  #scale_x_log10(limits=c(3, 30)) +  scale_y_log10(limits=c(3, 125), breaks=c(3, 10, 30, 100)) +
   facet_wrap(~ param, scales = "free") + guides(col="none", fill="none")
 
 

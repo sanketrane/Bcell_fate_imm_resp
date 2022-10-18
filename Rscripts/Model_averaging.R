@@ -32,15 +32,15 @@ model_compare <- function(looiclist){
 LooDir <- file.path("loo_fit")
 
 ### reading the loo objects for each model
-MZB_const_filename = paste0('loosave_MZB_MZB_const_Bcell_imm_data.csv.rds')
-totFOB_const_filename = paste0('loosave_totFOB_MZB_const_Bcell_imm_data.csv.rds')
-carGC_const_filename = paste0('loosave_carGC_MZB_const_Bcell_imm_data.csv.rds')
-MZB_timeloss_filename = paste0('loosave_MZB_MZB_timelossGC_Bcell_imm_data.csv.rds')
-totFOB_timeloss_filename = paste0('loosave_totFOB_MZB_timelossGC_Bcell_imm_data.csv.rds')
-carGC_timeloss_filename = paste0('loosave_carGC_MZB_timelossGC_Bcell_imm_data.csv.rds')
-MZB_timeinflux_filename = paste0('loosave_MZB_MZB_timeinflux_Bcell_imm_data.csv.rds')
-totFOB_timeinflux_filename = paste0('loosave_totFOB_MZB_timeinflux_Bcell_imm_data.csv.rds')
-carGC_timeinflux_filename = paste0('loosave_carGC_MZB_timeinflux_Bcell_imm_data.csv.rds')
+MZB_const_filename = paste0('loosave_Branched_timeinflux_Bcell_imm_data.csv.rds')
+totFOB_const_filename = paste0('loosave_Linear_timeinflux_Bcell_imm_data.csv.rds')
+carGC_const_filename = paste0('loosave_Null_timeinflux_Bcell_imm_data.csv.rds')
+MZB_timeloss_filename = paste0('loosave_Branched_neutral_Bcell_imm_data.csv.rds')
+totFOB_timeloss_filename = paste0('loosave_Linear_neutral_Bcell_imm_data.csv.rds')
+carGC_timeloss_filename = paste0('loosave_Null_neutral_Bcell_imm_data.csv.rds')
+MZB_timeinflux_filename = paste0('loosave_Branched_timeloss_Bcell_imm_data.csv.rds')
+totFOB_timeinflux_filename = paste0('loosave_Linear_timeloss_Bcell_imm_data.csv.rds')
+carGC_timeinflux_filename = paste0('loosave_Null_timeloss_Bcell_imm_data.csv.rds')
 
 MZB_const_loo <- readRDS(file.path(LooDir, MZB_const_filename))
 totFOB_const_loo <- readRDS(file.path(LooDir, totFOB_const_filename))
@@ -52,17 +52,21 @@ MZB_timeinflux_loo <- readRDS(file.path(LooDir, MZB_timeinflux_filename))
 totFOB_timeinflux_loo <- readRDS(file.path(LooDir, totFOB_timeinflux_filename))
 carGC_timeinflux_loo <- readRDS(file.path(LooDir, carGC_timeinflux_filename))
 
-model_list <- list('NULL_const' = MZB_const_loo, 
-                   'BUA_const' = totFOB_const_loo, 
-                   "DPG_const" = carGC_const_loo, 
-                   "NULL_timeloss" = MZB_timeloss_loo,
-                   "BUA_timeloss" = totFOB_timeloss_loo,
-                   "DPG_timeloss" = carGC_timeloss_loo,
-                   "NULL_timeinflux" = MZB_timeinflux_loo,
-                   "BUA_timeinflux" = totFOB_timeinflux_loo,
-                   "DPG_timeinflux" = carGC_timeinflux_loo)
+model_list <- list('Branched_timeinflux' = MZB_const_loo, 
+                   'Linear_timeinflux' = totFOB_const_loo, 
+                   "Null_timeinflux" = carGC_const_loo, 
+                   "Branched_neutral" = MZB_timeloss_loo,
+                   "Linear_neutral" = totFOB_timeloss_loo,
+                   "Null_neutral" = carGC_timeloss_loo,
+                   "Branched_timeloss" = MZB_timeinflux_loo,
+                   "Linear_timeloss" = totFOB_timeinflux_loo,
+                   "Null_timeloss" = carGC_timeinflux_loo)
 compare_mods <- loo_compare(model_list)
 print(compare_mods, simplify = F)
 
 compare_mods
-loo_model_weights(model_list, method = 'pseudobma') * 100
+formattable::formattable(
+mw_vec <- loo_model_weights(model_list, method = 'pseudobma') * 100
+)
+data.frame(mw_vec)
+

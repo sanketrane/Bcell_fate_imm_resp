@@ -92,9 +92,9 @@ CAR_cell_counts_df <- B_cell_data %>%
                                   ifelse(days_post_imm <21, "3Wk", "4Wk"))))
 
 
-corFOMZ <- cor.test(CAR_cell_counts_df$CARpos_FoB, CAR_cell_counts_df$CARpos_MZB)
-corGCMZ <- cor.test(CAR_cell_counts_df$CARpos_GCB, CAR_cell_counts_df$CARpos_MZB)
-corFOGC <- cor.test(CAR_cell_counts_df$CARpos_FoB, CAR_cell_counts_df$CARpos_GCB)
+corFOMZ <- cor.test(B_cell_data$total_FoB, B_cell_data$CARpos_MZB)
+corGCMZ <- cor.test(B_cell_data$CARpos_GCB, B_cell_data$CARpos_MZB)
+corFOGC <- cor.test(B_cell_data$total_FoB, B_cell_data$CARpos_GCB)
 
 p11 <-ggplot(data = CAR_cell_counts_df)+
   geom_point(aes(x=log(CARpos_FoB), y=log(CARpos_MZB), col=days_bin), size=2)+
@@ -212,6 +212,7 @@ phi_vec_mm <- phi2_func(sol_time, basl=16.7, nu=0.004, b0=20)
 ggplot() +
   #geom_line(aes(x=sol_time, y=(phi_vec_m)), col="blue", size=2) +
   geom_line(aes(x=sol_time, y=(phi_vec_mm)), col="#CD7F32", size=0.8) +
+  geom_hline(yintercept = exp(17.1), col=2, size=0.8) +
   geom_point(data=filter(B_cell_data, days_post_imm >=4),
              aes(x=days_post_imm, y=(total_FoB)), size=2, col="#CD7F32") +
   scale_x_continuous(limits=c(3.9, 30))+
