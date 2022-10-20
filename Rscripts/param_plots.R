@@ -192,52 +192,35 @@ imm_N2ko_data <- read_csv(file.path(dataDir, "N2KO_imm_data.csv"))
 
 #### plots
 p1 <- ggplot() +
-  geom_line(data = Y1pred1, aes(x = timeseries, y = median), col =2) +
-  geom_line(data = Y1pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
-  geom_ribbon(data = Y1pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
+  geom_line(data = Y2pred1, aes(x = timeseries, y = median), col =2) +
+  #geom_line(data = Y1pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
+  geom_ribbon(data = Y2pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
   #geom_ribbon(data = Y1pred2, aes(x = timeseries, ymin = lb, ymax = ub), fill="orange", alpha = 0.25)+
-  geom_line(data = Y4pred1, aes(x = timeseries, y = median), col =4) +
-  geom_ribbon(data = Y4pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
-  geom_line(data = Y4pred2, aes(x = timeseries, y = median), linetype=2, col ="darkblue") +
+  geom_line(data = Y3pred1, aes(x = timeseries, y = median), col =4) +
+  geom_ribbon(data = Y3pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
+  #geom_line(data = Y4pred2, aes(x = timeseries, y = median), linetype=2, col ="darkblue") +
   #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
-  geom_point(data = imm_data, aes(x = days.post.imm, y = CAR_MZB_numbers), col=2) +
-  geom_point(data = imm_N2ko_data, aes(x = days.post.imm, y = CAR_MZB_numbers), col=4) +
+  geom_point(data = imm_data, aes(x = days_post_imm, y = CARpos_MZB), col=2) +
+  geom_point(data = imm_N2ko_data, aes(x = days_post_imm, y = CARpos_MZB), col=4) +
   labs(title=paste("CAR positive MZ B cells"),  y=NULL, x="Days post immunization") + 
   xlim(3, 30) +
   scale_y_continuous(limits = c(2e3, 3e5), trans="log10", breaks=c(1e4, 1e5, 1e6, 1e3, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
 
 p2 <- ggplot() +
-  geom_line(data = Y2pred1, aes(x = timeseries, y = median), col =2) +
-  geom_line(data = Y2pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
-  geom_ribbon(data = Y2pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.15)+
+  geom_line(data = Y1pred1, aes(x = timeseries, y = median), col =2) +
+  #geom_line(data = Y2pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
+  geom_ribbon(data = Y1pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.15)+
   #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
-  geom_point(data = imm_data, aes(x = days.post.imm, y = CAR_GCB_numbers), col=2) +
+  geom_point(data = imm_data, aes(x = days_post_imm, y = CARpos_GCB), col=2) +
   #geom_line(data = Y5pred, aes(x = timeseries, y = median), col =2) +
   #geom_ribbon(data = Y5pred, aes(x = timeseries, ymin = lb, ymax = ub), fill="#ba6dd1", alpha = 0.15)+
   #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
-  geom_point(data = imm_N2ko_data, aes(x = days.post.imm, y = CAR_GCB_numbers), col=4) +
+  geom_point(data = imm_N2ko_data, aes(x = days_post_imm, y = CARpos_GCB), col=4) +
   labs(title=paste("CAR positive GC B cells"),  y=NULL, x="Days post immunization") + 
   xlim(3, 30) +
   scale_y_continuous(limits = c(5e3, 1e7), trans="log10", breaks=c(1e4, 1e5, 1e6, 1e7, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
-
-p3 <- ggplot() +
-  geom_line(data = Y3pred1, aes(x = timeseries, y = median), col =2) +
-  geom_line(data = Y3pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
-  geom_ribbon(data = Y3pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.15)+
-  #geom_ribbon(data = GCcounts_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
-  geom_point(data = imm_data, aes(x = days.post.imm, y = GCB_cell_numbers), col=2) + 
-  #geom_line(data = Y6pred, aes(x = timeseries, y = median), col ="#e63590") +
-  #geom_ribbon(data = Y6pred, aes(x = timeseries, ymin = lb, ymax = ub), fill="#ba6dd1", alpha = 0.25)+
-  #geom_ribbon(data = GCcounts_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
-  geom_point(data = imm_N2ko_data, aes(x = days.post.imm, y = GCB_cell_numbers), col=4) + 
-  xlim(0, 30) +
-  labs(title=paste("Total numbers of GC B cells"),  y=NULL, x="Days post immunization") + 
-  scale_y_continuous(limits = c(5e3, 1e7), trans="log10", breaks=c(1e4, 1e5, 1e6, 1e7, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
-  myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal")
-
-
 
 
 ## saving  plots for quality control 
@@ -305,7 +288,7 @@ df_pars1 <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pr
 
 
 alphats <- function(timepr){
-  0.09146030/(1 + exp(0.005696415 * (timepr - 4.0)^2))
+  0.09146030/(1 + exp(0.01 * (timepr - 4.0)^2))
 }
 
 alphavec <- sapply(ts_pred, alphats)
@@ -411,7 +394,7 @@ ggplot() +
   labs(title=paste("Influx into CAR+ MZ (as % of CAR+ MZ)"),  y=NULL, x="Days post immunization") + 
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal") +
   #scale_x_log10(limits=c(3, 30)) +  scale_y_log10(limits=c(3, 125), breaks=c(3, 10, 30, 100)) +
-  facet_wrap(~ param, scales = "free") + guides(col="none", fill="none")
+  facet_wrap(~ param) + guides(col="none", fill="none")
 
 
 FOtoCARGC_pred1 <- as.data.frame(fit1, pars = "FOtoCARGC_pred") %>%
@@ -439,8 +422,8 @@ FOtoCARGC_pred2 <- as.data.frame(fit2, pars = "FOtoCARGC_pred") %>%
 ggplot() +
   geom_line(data = FOtoCARGC_pred1, aes(x = timeseries, y = median, col = Model), size=1.2) +
   geom_ribbon(data = FOtoCARGC_pred1, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
-  geom_line(data = FOtoCARGC_pred2, aes(x = timeseries, y = median, col = Model), size=1.2) +
-  geom_ribbon(data = FOtoCARGC_pred2, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
+  #geom_line(data = FOtoCARGC_pred2, aes(x = timeseries, y = median, col = Model), size=1.2) +
+  #geom_ribbon(data = FOtoCARGC_pred2, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
   labs(title=paste("Influx into GC B cells (as % of GC)"),  y=NULL, x="Days post immunization") + 
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal") + 
   ylim(0, 8) + guides(col="none", fill="none") +

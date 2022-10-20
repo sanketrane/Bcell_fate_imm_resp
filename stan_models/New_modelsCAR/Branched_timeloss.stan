@@ -35,7 +35,7 @@ functions{
      // the system of ODEs
      real dydt[3];
      // CAR positive GCB cells in WT
-     dydt[1] = alpha * Total_FoB(time)  - delta_tau * y[1];
+     dydt[1] = alpha * CAR_positive_FOB(time)  - delta_tau * y[1];
      // CAR positive MZB cells in WT
      dydt[2] = mu * Total_FoB(time) + beta * CAR_negative_MZB(time) - lambda_WT * y[2];
 

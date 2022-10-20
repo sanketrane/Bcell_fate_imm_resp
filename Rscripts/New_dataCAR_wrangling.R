@@ -47,7 +47,9 @@ log10minorbreaks = as.numeric(1:10 %o% 10^(-4:8))
 
 ############################################################
 ## Immune response dynamics of B cells -- reporter induction upon b cell activation
-B_cell_data <- read_excel("datafiles/New_dataCAR.xlsx", sheet =2) 
+B_cell_data <- read_excel("datafiles/New_dataCAR.xlsx", sheet =2) %>%
+  mutate(mouse.id = paste0('m_', seq(1, 72))) %>%
+  filter(mouse.id != "m_1")
 
 
 B_cell_countsWT_df <- B_cell_data %>% 
@@ -86,15 +88,15 @@ ggsave('plots/New_plotsNatComm/dataplot1.pdf', last_plot(), device = 'pdf', widt
 
 #### plotting correlations
 CAR_cell_counts_df <- B_cell_data %>% 
-  filter(genotype == "CAR", days_post_imm > 0) %>% 
+  filter(genotype == "CAR", days_post_imm >=0) %>% 
   mutate(days_bin = ifelse(days_post_imm < 7, "1Wk",
                            ifelse(days_post_imm <14, "2Wk",
                                   ifelse(days_post_imm <21, "3Wk", "4Wk"))))
 
 
-corFOMZ <- cor.test(B_cell_data$total_FoB, B_cell_data$CARpos_MZB)
+corFOMZ <- cor.test(B_cell_data$CARpos_FoB, B_cell_data$CARpos_MZB)
 corGCMZ <- cor.test(B_cell_data$CARpos_GCB, B_cell_data$CARpos_MZB)
-corFOGC <- cor.test(B_cell_data$total_FoB, B_cell_data$CARpos_GCB)
+corFOGC <- cor.test(B_cell_data$CARpos_FoB, B_cell_data$CARpos_GCB)
 
 p11 <-ggplot(data = CAR_cell_counts_df)+
   geom_point(aes(x=log(CARpos_FoB), y=log(CARpos_MZB), col=days_bin), size=2)+
@@ -116,7 +118,7 @@ p33 <- ggplot(data = CAR_cell_counts_df)+
   geom_point(aes(x=log(CARpos_FoB), y=log(CARpos_GCB), col=days_bin), size=2) +
   labs(x="Log(Counts of CAR positive FoB)", y="Log(Counts of CAR positive GCB)") +
   geom_text(x=12.3, y=14.8, label=paste0("r=", round(corFOGC$estimate, 2)), col='darkred',  size=5) +
-  scale_color_npg(name = "Days post\nimmunization") + myTheme + theme(legend.position = c(0.875, 0.2))
+  scale_color_npg(name = "Days post\nimmunization") + myTheme + theme(legend.position = c(0.85, 0.2))
 
 
 cowplot::plot_grid( p11, p22, p33, nrow  = 1)

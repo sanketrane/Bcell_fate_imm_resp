@@ -8,7 +8,7 @@ library(tidyverse)
 ####################################################################################
 
 ## model specific details that needs to be change for every run
-modelName <- "Null_timeinflux"
+modelName <- "Linear_timeloss"
 data_der <- "Bcell_imm_data.csv"    
 data_der2 <- "N2KO_imm_data.csv"    
 
@@ -79,7 +79,7 @@ ploocv <- data.frame("Model" = modelName,
                      "PLoo" = loo_loglik$estimates[2])
 
 write.table(ploocv, file = file.path(outputDir, "stat_table_MZB.csv"),
-            sep = ",", append = T, quote = FALSE,
+            sep = ",", append = F, quote = FALSE,
             col.names = F, row.names = FALSE)
 
 
@@ -87,7 +87,7 @@ write.table(ploocv, file = file.path(outputDir, "stat_table_MZB.csv"),
 ################################################################################################
 ## posterior predictive distributions
 # time sequence for predictions 
-ts_pred <- seq(0, 30, length.out = 500)
+ts_pred <- seq(4, 30, length.out = 500)
 numPred <- length(ts_pred)
 
 
@@ -302,7 +302,7 @@ dev.off()
 #}
 
 #alpha_pred <- alpha_shape(seq(4, 30, length.out=500), out_table$mean[2], out_table$mean[7])
-alpha_pred <- as.data.frame(fit, pars = "alpha_pred") %>%
+alpha_pred <- as.data.frame(fit, pars = "mu_pred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
   summarize(lb = quantile(value, probs = 0.16),
