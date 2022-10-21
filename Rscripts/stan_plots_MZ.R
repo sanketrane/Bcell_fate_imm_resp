@@ -8,7 +8,7 @@ library(tidyverse)
 ####################################################################################
 
 ## model specific details that needs to be change for every run
-modelName <- "Linear_timeloss"
+modelName <- "Branched_timeinflux"
 data_der <- "Bcell_imm_data.csv"    
 data_der2 <- "N2KO_imm_data.csv"    
 
@@ -79,7 +79,7 @@ ploocv <- data.frame("Model" = modelName,
                      "PLoo" = loo_loglik$estimates[2])
 
 write.table(ploocv, file = file.path(outputDir, "stat_table_MZB.csv"),
-            sep = ",", append = F, quote = FALSE,
+            sep = ",", append = T, quote = FALSE,
             col.names = F, row.names = FALSE)
 
 
@@ -302,7 +302,7 @@ dev.off()
 #}
 
 #alpha_pred <- alpha_shape(seq(4, 30, length.out=500), out_table$mean[2], out_table$mean[7])
-alpha_pred <- as.data.frame(fit, pars = "mu_pred") %>%
+alpha_pred <- as.data.frame(fit, pars = "alpha_pred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
   summarize(lb = quantile(value, probs = 0.16),
@@ -314,17 +314,38 @@ p4 <- ggplot() +
   #geom_line(aes(x = seq(4, 30, length.out=500), y = alpha_pred), col =4, size=1.52) +
   geom_line(data = alpha_pred, aes(x = timeseries, y = median), col ="#e63590") +
   geom_ribbon(data = alpha_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill="#ba6dd1", alpha = 0.25)+
-  labs(title=paste("Time dependent influx of FO B cells into GC"),  y=NULL, x="Days post immunization") + 
+  labs(title=paste("Time dependent influx of FO B cells into GCB"),  y=NULL, x="Days post immunization") + 
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal") +
-  scale_x_log10() #+ scale_y_log10(limits=c(1e-5, 1))
+  scale_x_log10() + scale_y_log10(limits=c(1e-3, 0.1))
 
 p4
 
+
+mu_pred <- as.data.frame(fit, pars = "mu_pred") %>%
+  gather(factor_key = TRUE) %>%
+  group_by(key) %>%
+  summarize(lb = quantile(value, probs = 0.16),
+            median = quantile(value, probs = 0.5),
+            ub = quantile(value, probs = 0.84))%>%
+  bind_cols("timeseries" = ts_pred)
+
+p5 <- ggplot() +
+  #geom_line(aes(x = seq(4, 30, length.out=500), y = alpha_pred), col =4, size=1.52) +
+  geom_line(data = mu_pred, aes(x = timeseries, y = median), col ="#e63590") +
+  geom_ribbon(data = mu_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill="#ba6dd1", alpha = 0.25)+
+  geom_line(data = alpha_pred, aes(x = timeseries, y = median), col ="#e63590") +
+  geom_ribbon(data = alpha_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill="#ba6dd1", alpha = 0.25)+
+  labs(title=paste("Time dependent influx of FO B cells into MZB"),  y=NULL, x="Days post immunization") + 
+  myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal") +
+  scale_x_log10() + scale_y_log10(limits=c(1e-5, 1e-1))
+
+p5
 ## saving  plots for parameter estimates  
 pdf(file = file.path(outputDir, paste(modelName,"ExtraPlots%03d.pdf", sep = "")),
     width = 5, height = 4, onefile = FALSE, useDingbats = FALSE)
-p4
+p4;p5
 dev.off()
+
 
 
 

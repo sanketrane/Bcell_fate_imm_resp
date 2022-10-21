@@ -35,7 +35,7 @@ functions{
      // the system of ODEs
      real dydt[3];
      // CAR positive GCB cells in WT
-     dydt[1] = alpha_tau * CAR_positive_FOB(time)  - delta * y[1];
+     dydt[1] = alpha_tau * Total_FoB(time)  - delta * y[1];
      // CAR positive MZB cells in WT
      dydt[2] = beta_tau * CAR_negative_MZB(time) - lambda_WT * y[2];
      // CAR positive MZB cells in N2KO
@@ -184,8 +184,8 @@ generated quantities{
      // Influx into CAR MZ
      MZtoCARMZ_pred[i] = beta * CAR_negative_MZB(ts_pred[i])/y2_mean_pred[i];
      // Influx into CAR GC
-     alpha_pred[i] = alpha/(1 + exp(-nu *(ts_pred[i] - 4.0)^2));
-     FOtoCARGC_pred[i] = ((alpha/(1 + exp(nu * (ts_pred[i] - 4.0)^2))) * CAR_positive_FOB(ts_pred[i]))/y1_mean_pred[i];
+     alpha_pred[i] = alpha/(1 + exp(nu *(ts_pred[i] - 4.0)^2));
+     FOtoCARGC_pred[i] = ((alpha/(1 + exp(nu * (ts_pred[i] - 4.0)^2))) * Total_FoB(ts_pred[i]))/y1_mean_pred[i];
    }
 
    // calculating the log predictive accuracy for each point

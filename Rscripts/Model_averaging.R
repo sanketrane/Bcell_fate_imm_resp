@@ -65,8 +65,6 @@ compare_mods <- loo_compare(model_list)
 print(compare_mods, simplify = F)
 
 compare_mods
-formattable::formattable(
-mw_vec <- loo_model_weights(model_list, method = 'pseudobma') * 100
-)
-data.frame(mw_vec)
+loo_model_weights(model_list, method = 'pseudobma') * 100
+
 

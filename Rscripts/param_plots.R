@@ -110,23 +110,6 @@ Y4pred1 <- as.data.frame(fit1, pars = "y4_mean_pred") %>%
   bind_cols("timeseries" = ts_pred)
 
 
-Y5pred1 <- as.data.frame(fit1, pars = "y5_mean_pred") %>%
-  gather(factor_key = TRUE) %>%
-  group_by(key) %>%
-  summarize(lb = quantile(value, probs = 0.045),
-            median = quantile(value, probs = 0.5),
-            ub = quantile(value, probs = 0.955))%>%
-  bind_cols("timeseries" = ts_pred)
-
-
-Y6pred1 <- as.data.frame(fit1, pars = "y6_mean_pred") %>%
-  gather(factor_key = TRUE) %>%
-  group_by(key) %>%
-  summarize(lb = quantile(value, probs = 0.045),
-            median = quantile(value, probs = 0.5),
-            ub = quantile(value, probs = 0.955)) %>%
-  bind_cols("timeseries" = ts_pred)
-
 
 
 Y1pred2 <- as.data.frame(fit2, pars = "y1_mean_pred") %>%
@@ -164,26 +147,6 @@ Y4pred2 <- as.data.frame(fit2, pars = "y4_mean_pred") %>%
   bind_cols("timeseries" = ts_pred)
 
 
-Y5pred2 <- as.data.frame(fit2, pars = "y5_mean_pred") %>%
-  gather(factor_key = TRUE) %>%
-  group_by(key) %>%
-  summarize(lb = quantile(value, probs = 0.045),
-            median = quantile(value, probs = 0.5),
-            ub = quantile(value, probs = 0.955))%>%
-  bind_cols("timeseries" = ts_pred)
-
-
-Y6pred2 <- as.data.frame(fit2, pars = "y6_mean_pred") %>%
-  gather(factor_key = TRUE) %>%
-  group_by(key) %>%
-  summarize(lb = quantile(value, probs = 0.045),
-            median = quantile(value, probs = 0.5),
-            ub = quantile(value, probs = 0.955)) %>%
-  bind_cols("timeseries" = ts_pred)
-
-
-
-
 
 ## loading required datasets for plotting
 imm_data <- read_csv(file.path(dataDir, "Bcell_imm_data.csv"))
@@ -193,12 +156,12 @@ imm_N2ko_data <- read_csv(file.path(dataDir, "N2KO_imm_data.csv"))
 #### plots
 p1 <- ggplot() +
   geom_line(data = Y2pred1, aes(x = timeseries, y = median), col =2) +
-  #geom_line(data = Y1pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
+  geom_line(data = Y2pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
   geom_ribbon(data = Y2pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
-  #geom_ribbon(data = Y1pred2, aes(x = timeseries, ymin = lb, ymax = ub), fill="orange", alpha = 0.25)+
-  geom_line(data = Y3pred1, aes(x = timeseries, y = median), col =4) +
-  geom_ribbon(data = Y3pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
-  #geom_line(data = Y4pred2, aes(x = timeseries, y = median), linetype=2, col ="darkblue") +
+  #geom_ribbon(data = Y2pred2, aes(x = timeseries, ymin = lb, ymax = ub), fill="orange", alpha = 0.25)+
+  geom_line(data = Y4pred1, aes(x = timeseries, y = median), col =4) +
+  geom_ribbon(data = Y4pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
+  geom_line(data = Y4pred2, aes(x = timeseries, y = median), linetype=2, col ="darkblue") +
   #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
   geom_point(data = imm_data, aes(x = days_post_imm, y = CARpos_MZB), col=2) +
   geom_point(data = imm_N2ko_data, aes(x = days_post_imm, y = CARpos_MZB), col=4) +
@@ -209,7 +172,7 @@ p1 <- ggplot() +
 
 p2 <- ggplot() +
   geom_line(data = Y1pred1, aes(x = timeseries, y = median), col =2) +
-  #geom_line(data = Y2pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
+  geom_line(data = Y1pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
   geom_ribbon(data = Y1pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.15)+
   #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
   geom_point(data = imm_data, aes(x = days_post_imm, y = CARpos_GCB), col=2) +
@@ -226,7 +189,7 @@ p2 <- ggplot() +
 ## saving  plots for quality control 
 pdf(file = file.path(outputDir, paste("Combinedfit.pdf", sep = "")),
     width = 14, height = 4, onefile = FALSE, useDingbats = FALSE)
-cowplot::plot_grid(p1, p2, ncol  = 3)
+cowplot::plot_grid(p1, p2, ncol  = 2)
 dev.off()
 
 
@@ -286,25 +249,16 @@ df_pars1 <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pr
          pars_plot = pars_plot,
          Model = "Branched")
 
-
-alphats <- function(timepr){
-  0.09146030/(1 + exp(0.01 * (timepr - 4.0)^2))
-}
-
-alphavec <- sapply(ts_pred, alphats)
-
-qplot(x=ts_pred, y=alphavec)
-
 parnames_lambda <- c('Control/CAR', 'N2KO//CAR', 'Control/CAR', 'N2KO//CAR')
 df_pars_lambda <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pred1, delta_pred1))) %>%
   mutate(parname = parnames_lambda,
-         Param = c("Clonal half-life of CAR positive MZ B cells", "Clonal half-life of CAR positive MZ B cells",
-                   "Clonal half-life of GC B cells", "Clonal half-life of GC B cells"),
+         Param = c("Clonal half-life of CAR positive MZB (days)", "Clonal half-life of CAR positive MZB (days)",
+                   "Clonal half-life of GCB (days)", "Clonal half-life of GCB (days)"),
          cell_subset = c("MZ", "MZ", "GC", "GC"))
 names(df_pars_lambda) <- c('Estimates', 'par_lb', 'par_ub', 'parname', 'Param', "Subset")
-blank_data <- data.frame(Param = c("Clonal half-life of CAR positive MZ B cells", "Clonal half-life of CAR positive MZ B cells",
-                                   "Clonal half-life of GC B cells", "Clonal half-life of GC B cells"),
-                         Estimates = c(5, 5, 18, 18),
+blank_data <- data.frame( Param = c("Clonal half-life of CAR positive MZB (days)", "Clonal half-life of CAR positive MZB (days)",
+                                    "Clonal half-life of GCB (days)", "Clonal half-life of GCB (days)"),
+                         Estimates = c(12, 12, 12, 12),
                          parname = parnames_lambda,
                          Subset =  c("MZ", "MZ", "GC", "GC"))
 
@@ -315,10 +269,10 @@ ggplot(df_pars_lambda, aes(y=Estimates, x=factor(Subset), col=parname))+
   geom_blank(data = blank_data)+
   geom_point(position=position_dodge(width=0.4), stat = "identity", size=4) + 
   facet_wrap(~ factor(Param), scales = "free") + 
-  expand_limits(y = 0) + scale_y_continuous(expand = c(0, 0))+
+  expand_limits(y = 0) + scale_y_continuous(expand = c(0.1, 0.1))+
   scale_color_manual(values=c(2, 4), name="Mouse strain")+
   myTheme + theme(axis.text.x=element_blank(),
-                  axis.title.x=element_blank())+ theme(legend.background = element_blank(), legend.position = c(0.88, 0.88))
+                  axis.title.x=element_blank())+ theme(legend.background = element_blank(), legend.position = c(0.88, 0.85))
 
 
 matrix_of_draws2 <- as.data.frame(fit2)   #matrix of parameter draws
@@ -411,9 +365,9 @@ FOtoCARGC_pred1 <- as.data.frame(fit1, pars = "FOtoCARGC_pred") %>%
 FOtoCARGC_pred2 <- as.data.frame(fit2, pars = "FOtoCARGC_pred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
-  summarize(lb = quantile(value, probs = 0.16),
+  summarize(lb = quantile(value, probs = 0.45),
             median = quantile(value, probs = 0.5),
-            ub = quantile(value, probs = 0.84))%>%
+            ub = quantile(value, probs = 0.975))%>%
   bind_cols("timeseries" = ts_pred,
             "param" = "FO_to_GC",
             "Model" = "Linear")
