@@ -8,7 +8,7 @@ library(tidyverse)
 ####################################################################################
 
 ## model specific details that needs to be change for every run
-modelName <- "Branched_timeinflux"
+modelName <- "Null_timeinflux2"
 data_der <- "Bcell_imm_data.csv"    
 data_der2 <- "N2KO_imm_data.csv"    
 
@@ -78,7 +78,7 @@ ploocv <- data.frame("Model" = modelName,
                      "SE" = loo_loglik$estimates[6], 
                      "PLoo" = loo_loglik$estimates[2])
 
-write.table(ploocv, file = file.path(outputDir, "stat_table_MZB.csv"),
+write.table(ploocv, file = file.path(outputDir, "stat_table_MZB1.csv"),
             sep = ",", append = T, quote = FALSE,
             col.names = F, row.names = FALSE)
 
@@ -255,7 +255,7 @@ cowplot::plot_grid(p1, p2, p1.1, p2.1, p3.1, p4.1, nrow  = 3)
 
 
 ## saving  plots for quality control 
-pdf(file = file.path(outputDir, paste(modelName,"StanPlots%03d.pdf", sep = "")),
+pdf(file = file.path(outputDir, 'timeinfluxfit', paste(modelName,"StanPlots%03d.pdf", sep = "")),
     width = 9, height = 4, onefile = FALSE, useDingbats = FALSE)
 cowplot::plot_grid(p1, p2, ncol  = 2)
 dev.off()
@@ -266,7 +266,7 @@ ptable <- monitor(as.array(fit, pars = parametersToPlot), warmup = 0, print = FA
 out_table <- ptable[1:num_pars, c(1, 3, 4, 8)]
 out_table
 
-write.csv(out_table, file = file.path(outputDir, paste0('params_', modelName, ".csv")))
+write.csv(out_table, file = file.path(outputDir, 'timeinfluxfit', paste0('params_', modelName, ".csv")))
 
 #time_shape <- function(Time, delta, nu){
 #  delta/(1 + exp(-nu *(Time-4)^2))

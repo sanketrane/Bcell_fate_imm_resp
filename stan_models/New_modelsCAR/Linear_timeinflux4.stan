@@ -28,18 +28,21 @@ functions{
      real lambda_WT = parms[5];
      real lambda_N2KO = parms[6];
      real nu = parms[7];
+     real nu1 = parms[8];
 
      real t0 = 4.0;
      real alpha_tau = alpha/(1 + exp(nu * (time-t0)^2));
+     real mu_tau = mu/(1 + exp(nu1 * (time-t0)^2));
+     real beta_tau = beta/(1 + exp(nu * (time-t0)^2));
 
      // the system of ODEs
      real dydt[3];
      // CAR positive GCB cells in WT
      dydt[1] = alpha_tau * Total_FoB(time)  - delta * y[1];
      // CAR positive MZB cells in WT
-     dydt[2] = mu * y[1] + beta * CAR_negative_MZB(time) - lambda_WT * y[2];
+     dydt[2] = mu_tau * y[1] + beta_tau * CAR_negative_MZB(time) - lambda_WT * y[2];
      // CAR positive MZB cells in N2KO
-     dydt[3] = beta * CAR_negative_MZB(time) - lambda_N2KO * y[3];
+     dydt[3] = beta_tau * CAR_negative_MZB(time) - lambda_N2KO * y[3];
      return dydt;
    }
 
@@ -76,6 +79,7 @@ parameters{
   real<lower = 0> lambda_WT;
   real<lower = 0> lambda_N2KO;
   real<lower = 0> nu;
+  real<lower = 0> nu1;
   real<lower = 0> M0N2;
 
   // stdev within individual datasets to be estimated
@@ -93,7 +97,7 @@ transformed parameters{
   real CAR_GCN2counts_mean[numObs2];
   real CAR_MZN2counts_mean[numObs2];
 
-  real parms[7];                  // declaring the array for parameters
+  real parms[8];                  // declaring the array for parameters
   real init_cond[3];              // declaring the array for state variables
 
   real CAR_GC0 = exp(11.5);              // transformed parameters for better/faster sampling
@@ -112,6 +116,8 @@ transformed parameters{
   parms[5] = lambda_WT;
   parms[6] = lambda_N2KO;
   parms[7] = nu;
+  parms[8] = nu1;
+
 
   y_hat[1] = init_cond;
   // solution of the system of ODEs for the predictor values
@@ -134,6 +140,7 @@ model{
   beta ~ normal(0.01, 0.5);
   mu ~ normal(0.01, 0.5);
   nu ~ normal(0.01, 0.5);
+  nu1 ~ normal(0.01, 0.5);
   delta ~ normal(0.01, 0.5);
   lambda_WT ~ normal(0.01, 0.5);
   lambda_N2KO ~ normal(0.01, 0.5);
@@ -156,7 +163,7 @@ generated quantities{
    // variables for model predictions
    real y1_mean_pred[numPred]; real y2_mean_pred[numPred]; real y3_mean_pred[numPred]; real y4_mean_pred[numPred];
    real FOtoCARMZ_pred[numPred]; real MZtoCARMZ_pred[numPred]; real FOtoCARGC_pred[numPred];
-   real alpha_pred[numPred];
+   real alpha_pred[numPred]; real mu_pred[numPred]; real beta_pred[numPred];
    // variables for model predictions with stdev
    real CAR_MZcounts_pred[numPred]; real CAR_GCcounts_pred[numPred];
    real CAR_MZN2counts_pred[numPred]; real CAR_GCN2counts_pred[numPred];
@@ -186,8 +193,10 @@ generated quantities{
      CAR_MZN2counts_pred[i] = exp(normal_rng(log(y4_mean_pred[i]), sigma3));
 
      // Influx into CAR MZ
-     FOtoCARMZ_pred[i] = mu * Total_FoB(ts_pred[i])/y2_mean_pred[i];
-     MZtoCARMZ_pred[i] = beta * CAR_negative_MZB(ts_pred[i])/y2_mean_pred[i];
+     mu_pred[i] = mu/(1 + exp(nu1 *(ts_pred[i] - 4.0)^2));
+     beta_pred[i] = mu/(1 + exp(nu *(ts_pred[i] - 4.0)^2));
+     FOtoCARMZ_pred[i] = mu_pred[i]  * y1_mean_pred[i]/y2_mean_pred[i];
+     MZtoCARMZ_pred[i] = beta_pred[i] * CAR_negative_MZB(ts_pred[i])/y2_mean_pred[i];
      // Influx into CAR GC
      alpha_pred[i] = alpha/(1 + exp(nu *(ts_pred[i] - 4.0)^2));
      FOtoCARGC_pred[i] = ((alpha/(1 + exp(nu * (ts_pred[i] - 4.0)^2))) * Total_FoB(ts_pred[i]))/y1_mean_pred[i];

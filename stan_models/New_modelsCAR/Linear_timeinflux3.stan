@@ -31,15 +31,16 @@ functions{
 
      real t0 = 4.0;
      real alpha_tau = alpha/(1 + exp(nu * (time-t0)^2));
+     real beta_tau = beta/(1 + exp(nu * (time-t0)^2));
 
      // the system of ODEs
      real dydt[3];
      // CAR positive GCB cells in WT
      dydt[1] = alpha_tau * Total_FoB(time)  - delta * y[1];
      // CAR positive MZB cells in WT
-     dydt[2] = mu * y[1] + beta * CAR_negative_MZB(time) - lambda_WT * y[2];
+     dydt[2] = mu * y[1] + beta_tau * CAR_negative_MZB(time) - lambda_WT * y[2];
      // CAR positive MZB cells in N2KO
-     dydt[3] = beta * CAR_negative_MZB(time) - lambda_N2KO * y[3];
+     dydt[3] = beta_tau * CAR_negative_MZB(time) - lambda_N2KO * y[3];
      return dydt;
    }
 
@@ -156,7 +157,7 @@ generated quantities{
    // variables for model predictions
    real y1_mean_pred[numPred]; real y2_mean_pred[numPred]; real y3_mean_pred[numPred]; real y4_mean_pred[numPred];
    real FOtoCARMZ_pred[numPred]; real MZtoCARMZ_pred[numPred]; real FOtoCARGC_pred[numPred];
-   real alpha_pred[numPred];
+   real alpha_pred[numPred];  real beta_pred[numPred];
    // variables for model predictions with stdev
    real CAR_MZcounts_pred[numPred]; real CAR_GCcounts_pred[numPred];
    real CAR_MZN2counts_pred[numPred]; real CAR_GCN2counts_pred[numPred];
@@ -186,8 +187,9 @@ generated quantities{
      CAR_MZN2counts_pred[i] = exp(normal_rng(log(y4_mean_pred[i]), sigma3));
 
      // Influx into CAR MZ
-     FOtoCARMZ_pred[i] = mu * Total_FoB(ts_pred[i])/y2_mean_pred[i];
-     MZtoCARMZ_pred[i] = beta * CAR_negative_MZB(ts_pred[i])/y2_mean_pred[i];
+     beta_pred[i] = mu/(1 + exp(nu *(ts_pred[i] - 4.0)^2));
+     FOtoCARMZ_pred[i] = mu  * y1_mean_pred[i]/y2_mean_pred[i];
+     MZtoCARMZ_pred[i] = beta_pred[i] * CAR_negative_MZB(ts_pred[i])/y2_mean_pred[i];
      // Influx into CAR GC
      alpha_pred[i] = alpha/(1 + exp(nu *(ts_pred[i] - 4.0)^2));
      FOtoCARGC_pred[i] = ((alpha/(1 + exp(nu * (ts_pred[i] - 4.0)^2))) * Total_FoB(ts_pred[i]))/y1_mean_pred[i];
