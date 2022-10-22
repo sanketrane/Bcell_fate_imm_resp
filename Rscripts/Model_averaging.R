@@ -32,35 +32,50 @@ model_compare <- function(looiclist){
 LooDir <- file.path("loo_fit")
 
 ### reading the loo objects for each model
-MZB_const_filename = paste0('loosave_Branched_timeinflux_Bcell_imm_data.csv.rds')
-totFOB_const_filename = paste0('loosave_Linear_timeinflux_Bcell_imm_data.csv.rds')
-carGC_const_filename = paste0('loosave_Null_timeinflux_Bcell_imm_data.csv.rds')
-MZB_timeloss_filename = paste0('loosave_Branched_neutral_Bcell_imm_data.csv.rds')
-totFOB_timeloss_filename = paste0('loosave_Linear_neutral_Bcell_imm_data.csv.rds')
-carGC_timeloss_filename = paste0('loosave_Null_neutral_Bcell_imm_data.csv.rds')
-MZB_timeinflux_filename = paste0('loosave_Branched_timeloss_Bcell_imm_data.csv.rds')
-totFOB_timeinflux_filename = paste0('loosave_Linear_timeloss_Bcell_imm_data.csv.rds')
-carGC_timeinflux_filename = paste0('loosave_Null_timeloss_Bcell_imm_data.csv.rds')
+Branched_timeinflux_filename = paste0('loosave_Branched_timeinflux_Bcell_imm_data.csv.rds')
+Branched_timeinflux1_filename = paste0('loosave_Branched_timeinflux1_Bcell_imm_data.csv.rds')
+Branched_timeinflux2_filename = paste0('loosave_Branched_timeinflux2_Bcell_imm_data.csv.rds')
+Branched_timeinflux3_filename = paste0('loosave_Branched_timeinflux3_Bcell_imm_data.csv.rds')
+#Branched_timeinflux4_filename = paste0('loosave_Branched_timeinflux4_Bcell_imm_data.csv.rds')
+#Branched_timeinflux5_filename = paste0('loosave_Branched_timeinflux5_Bcell_imm_data.csv.rds')
+Linear_timeinflux_filename = paste0('loosave_Linear_timeinflux_Bcell_imm_data.csv.rds')
+Linear_timeinflux1_filename = paste0('loosave_Linear_timeinflux1_Bcell_imm_data.csv.rds')
+Linear_timeinflux2_filename = paste0('loosave_Linear_timeinflux2_Bcell_imm_data.csv.rds')
+Linear_timeinflux3_filename = paste0('loosave_Linear_timeinflux3_Bcell_imm_data.csv.rds')
+#Linear_timeinflux4_filename = paste0('loosave_Linear_timeinflux4_Bcell_imm_data.csv.rds')
+#Linear_timeinflux5_filename = paste0('loosave_Linear_timeinflux5_Bcell_imm_data.csv.rds')
+Null_timeinflux_filename = paste0('loosave_Null_timeinflux_Bcell_imm_data.csv.rds')
+Null_timeinflux1_filename = paste0('loosave_Null_timeinflux1_Bcell_imm_data.csv.rds')
+#Null_timeinflux2_filename = paste0('loosave_Null_timeinflux2_Bcell_imm_data.csv.rds')
+Branched_neutral_filename = paste0('loosave_Branched_neutral_Bcell_imm_data.csv.rds')
+Linear_neutral_filename = paste0('loosave_Linear_neutral_Bcell_imm_data.csv.rds')
+Null_neutral_filename = paste0('loosave_Null_neutral_Bcell_imm_data.csv.rds')
+Branched_timeloss_filename = paste0('loosave_Branched_timeloss_Bcell_imm_data.csv.rds')
+Linear_timeloss_filename = paste0('loosave_Linear_timeloss_Bcell_imm_data.csv.rds')
+Null_timeloss_filename = paste0('loosave_Null_timeloss_Bcell_imm_data.csv.rds')
 
-MZB_const_loo <- readRDS(file.path(LooDir, MZB_const_filename))
-totFOB_const_loo <- readRDS(file.path(LooDir, totFOB_const_filename))
-carGC_const_loo <- readRDS(file.path(LooDir, carGC_const_filename))
-MZB_timeloss_loo <- readRDS(file.path(LooDir, MZB_timeloss_filename))
-totFOB_timeloss_loo <- readRDS(file.path(LooDir, totFOB_timeloss_filename))
-carGC_timeloss_loo <- readRDS(file.path(LooDir, carGC_timeloss_filename))
-MZB_timeinflux_loo <- readRDS(file.path(LooDir, MZB_timeinflux_filename))
-totFOB_timeinflux_loo <- readRDS(file.path(LooDir, totFOB_timeinflux_filename))
-carGC_timeinflux_loo <- readRDS(file.path(LooDir, carGC_timeinflux_filename))
 
-model_list <- list('Branched_timeinflux' = MZB_const_loo, 
-                   'Linear_timeinflux' = totFOB_const_loo, 
-                   "Null_timeinflux" = carGC_const_loo, 
-                   "Branched_neutral" = MZB_timeloss_loo,
-                   "Linear_neutral" = totFOB_timeloss_loo,
-                   "Null_neutral" = carGC_timeloss_loo,
-                   "Branched_timeloss" = MZB_timeinflux_loo,
-                   "Linear_timeloss" = totFOB_timeinflux_loo,
-                   "Null_timeloss" = carGC_timeinflux_loo)
+model_list <- list('Branched_timeinflux' = readRDS(file.path(LooDir, Branched_timeinflux_filename)), 
+                  'Branched_timeinflux1' = readRDS(file.path(LooDir, Branched_timeinflux1_filename)), 
+                  'Branched_timeinflux2' = readRDS(file.path(LooDir, Branched_timeinflux2_filename)), 
+                  'Branched_timeinflux3' = readRDS(file.path(LooDir, Branched_timeinflux3_filename)), 
+                  #'Branched_timeinflux4' = readRDS(file.path(LooDir, Branched_timeinflux4_filename)), 
+                  #'Branched_timeinflux5' = readRDS(file.path(LooDir, Branched_timeinflux5_filename)), 
+                   'Linear_timeinflux' = readRDS(file.path(LooDir, Linear_timeinflux_filename)), 
+                  'Linear_timeinflux1' = readRDS(file.path(LooDir, Linear_timeinflux1_filename)), 
+                  'Linear_timeinflux2' = readRDS(file.path(LooDir, Linear_timeinflux2_filename)), 
+                  'Linear_timeinflux3' = readRDS(file.path(LooDir, Linear_timeinflux3_filename)), 
+                  #'Linear_timeinflux4' = readRDS(file.path(LooDir, Linear_timeinflux4_filename)), 
+                  #'Linear_timeinflux5' = readRDS(file.path(LooDir, Linear_timeinflux5_filename)), 
+                   "Null_timeinflux" = readRDS(file.path(LooDir, Null_timeinflux_filename)), 
+                   "Null_timeinflux1" = readRDS(file.path(LooDir, Null_timeinflux1_filename)), 
+                   #"Null_timeinflux2" = readRDS(file.path(LooDir, Null_timeinflux2_filename)), 
+                   "Branched_neutral" = readRDS(file.path(LooDir, Branched_neutral_filename)), 
+                   "Linear_neutral" = readRDS(file.path(LooDir, Linear_neutral_filename)), 
+                   "Null_neutral" = readRDS(file.path(LooDir, Null_neutral_filename)), 
+                   "Branched_timeloss" = readRDS(file.path(LooDir, Branched_timeloss_filename)), 
+                   "Linear_timeloss" = readRDS(file.path(LooDir, Linear_timeloss_filename)), 
+                   "Null_timeloss" = readRDS(file.path(LooDir, Null_timeloss_filename)))
 compare_mods <- loo_compare(model_list)
 print(compare_mods, simplify = F)
 

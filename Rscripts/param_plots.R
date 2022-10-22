@@ -48,7 +48,7 @@ LooDir <- file.path('loo_fit')
 
 ## model specific details that needs to be change for every run
 modelName1 <- "Branched_timeinflux"
-modelName2 <- "Linear_timeinflux"
+modelName2 <- "Branched_timeinflux1"
 
 # compiling multiple stan objects together that ran on different nodes
 stanfit1 <- read_stan_csv(file.path(saveDir, paste0(modelName1, "_1", ".csv")))
@@ -250,7 +250,7 @@ df_pars1 <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pr
          Model = "Branched")
 
 parnames_lambda <- c('Control/CAR', 'N2KO//CAR', 'Control/CAR', 'N2KO//CAR')
-df_pars_lambda <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pred1, delta_pred1))) %>%
+df_pars_lambda <- data.frame(t(data.frame(lambda_WT_pred2, lambda_N2KO_pred2, delta_pred2, delta_pred2))) %>%
   mutate(parname = parnames_lambda,
          Param = c("Clonal half-life of CAR positive MZB (days)", "Clonal half-life of CAR positive MZB (days)",
                    "Clonal half-life of GCB (days)", "Clonal half-life of GCB (days)"),
@@ -258,7 +258,7 @@ df_pars_lambda <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, de
 names(df_pars_lambda) <- c('Estimates', 'par_lb', 'par_ub', 'parname', 'Param', "Subset")
 blank_data <- data.frame( Param = c("Clonal half-life of CAR positive MZB (days)", "Clonal half-life of CAR positive MZB (days)",
                                     "Clonal half-life of GCB (days)", "Clonal half-life of GCB (days)"),
-                         Estimates = c(12, 12, 12, 12),
+                         Estimates = c(6,6,6,6),
                          parname = parnames_lambda,
                          Subset =  c("MZ", "MZ", "GC", "GC"))
 
@@ -293,7 +293,7 @@ df_pars2 <- data.frame(t(data.frame(lambda_WT_pred2, lambda_N2KO_pred2, delta_pr
 
 parnames <- c('Clonal half-life of CAR+ MZ in WT mice', 'Clonal half-life of CAR+ MZ in N2KO mice', 
               'Clonal half-life of CAR+ GC',  "Propensity to gain CAR expression (%) for CAR- MZ B cells")
-formattable::formattable(all_pars_df)
+#formattable::formattable(all_pars_df)
 all_pars_df <- rbind(df_pars1, df_pars2)
 names(all_pars_df) <- c('Estimates', 'par_lb', 'par_ub', 'param', "pars_plot",  "Model")
 
@@ -316,7 +316,7 @@ ggplot(all_pars_df, aes(y=Estimates, x=pars_plot, col=Model))+
                 axis.title.x=element_blank())
 
 
-FOtoCARMZ_pred1 <- as.data.frame(fit1, pars = "FOtoCARMZ_pred") %>%
+FOtoCARMZ_pred1 <- as.data.frame(fit2, pars = "FOtoCARMZ_pred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
   summarize(lb = quantile(value, probs = 0.16),
@@ -326,7 +326,7 @@ FOtoCARMZ_pred1 <- as.data.frame(fit1, pars = "FOtoCARMZ_pred") %>%
             "param" = "FOB to CAR+ MZB",
             "Model" = "CARMZ")
 
-MZtoCARMZ_pred1 <- as.data.frame(fit1, pars = "MZtoCARMZ_pred") %>%
+MZtoCARMZ_pred1 <- as.data.frame(fit2, pars = "MZtoCARMZ_pred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
   summarize(lb = quantile(value, probs = 0.16),
@@ -362,7 +362,7 @@ FOtoCARGC_pred1 <- as.data.frame(fit1, pars = "FOtoCARGC_pred") %>%
             "Model" = "Branched")
 
 
-FOtoCARGC_pred2 <- as.data.frame(fit2, pars = "FOtoCARGC_pred") %>%
+FOtoCARGC_pred2 <- as.data.frame(fit1, pars = "FOtoCARGC_pred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
   summarize(lb = quantile(value, probs = 0.45),
@@ -376,8 +376,8 @@ FOtoCARGC_pred2 <- as.data.frame(fit2, pars = "FOtoCARGC_pred") %>%
 ggplot() +
   geom_line(data = FOtoCARGC_pred1, aes(x = timeseries, y = median, col = Model), size=1.2) +
   geom_ribbon(data = FOtoCARGC_pred1, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
-  #geom_line(data = FOtoCARGC_pred2, aes(x = timeseries, y = median, col = Model), size=1.2) +
-  #geom_ribbon(data = FOtoCARGC_pred2, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
+  geom_line(data = FOtoCARGC_pred2, aes(x = timeseries, y = median, col = Model), size=1.2) +
+  geom_ribbon(data = FOtoCARGC_pred2, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
   labs(title=paste("Influx into GC B cells (as % of GC)"),  y=NULL, x="Days post immunization") + 
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal") + 
   ylim(0, 8) + guides(col="none", fill="none") +

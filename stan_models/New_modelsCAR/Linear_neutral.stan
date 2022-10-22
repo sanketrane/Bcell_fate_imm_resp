@@ -127,10 +127,10 @@ model{
   alpha ~ normal(0.01, 0.5);
   beta ~ normal(0.01, 0.5);
   mu ~ normal(0.01, 0.5);
-  delta ~ normal(0.01, 0.5);
-  lambda_WT ~ normal(0.01, 0.5);
-  lambda_N2KO ~ normal(0.01, 0.5);
-  M0N2 ~ normal(8, 1);
+  delta ~ normal(0.8, 0.3);
+  lambda_WT ~ normal(0.1, 0.3);
+  lambda_N2KO ~ normal(0.8, 0.3);
+  M0N2 ~ normal(9, 1);
 
   sigma1 ~ normal(0, 2.5);
   sigma2 ~ normal(0, 2.5);

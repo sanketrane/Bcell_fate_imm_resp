@@ -77,7 +77,7 @@ parameters{
   real<lower = 0> mu;
   real<lower = 0> delta;
   real<lower = 0> lambda_WT;
-  real<lower = 0> lambda_N2KO;
+  real<lower = lambda_WT> lambda_N2KO;
   real<lower = 0> nu;
   real<lower = 0> nu1;
   real<lower = 0> M0N2;
@@ -141,10 +141,10 @@ model{
   mu ~ normal(0.01, 0.5);
   nu ~ normal(0.01, 0.5);
   nu1 ~ normal(0.01, 0.5);
-  delta ~ normal(0.01, 0.5);
-  lambda_WT ~ normal(0.01, 0.5);
-  lambda_N2KO ~ normal(0.01, 0.5);
-  M0N2 ~ normal(8, 1);
+  delta ~ normal(0.8, 0.3);
+  lambda_WT ~ normal(0.1, 0.3);
+  lambda_N2KO ~ normal(0.8, 0.3);
+  M0N2 ~ normal(9, 1);
 
   sigma1 ~ normal(0, 2.5);
   sigma2 ~ normal(0, 2.5);

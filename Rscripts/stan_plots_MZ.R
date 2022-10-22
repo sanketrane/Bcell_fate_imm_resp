@@ -8,7 +8,7 @@ library(tidyverse)
 ####################################################################################
 
 ## model specific details that needs to be change for every run
-modelName <- "Null_timeinflux2"
+modelName <- "Branched_timeinflux"
 data_der <- "Bcell_imm_data.csv"    
 data_der2 <- "N2KO_imm_data.csv"    
 
