@@ -230,12 +230,12 @@ ggsave('plots/New_plotsNatComm/CARnegMZB.pdf', last_plot(), device = 'pdf', widt
 # generating data for fitting
 imm_data <- B_cell_data %>% filter(genotype == "CAR") %>%
   select(days_post_imm, contains("CARpos"))  %>%
-  filter(days_post_imm > 0)
+  filter(days_post_imm >= 0)
 
 write.csv(imm_data, file.path("datafiles", "Bcell_imm_data.csv"), row.names = F)
 
 imm_data %>% 
-  filter(days_post_imm == 4) %>%
+  filter(days_post_imm == 0) %>%
   summarise("CAR_countsMZ" = log(mean(CARpos_MZB)),
             "CAR_countsGC" = log(mean(CARpos_GCB)))
 
@@ -291,14 +291,16 @@ rstan::stan_rdump(c("numObs1",  "n_shards", "solve_time", "time_index1", "numObs
 ## testing models from stan
 library(rstan)
 
-stanmodel_file <- file.path("stan_models/New_modelsCAR", "Branched_neutral.stan")
+stanmodel_file <- file.path("stan_models/New_modelsCAR", "Branched_timeinflux.stan")
 expose_stan_functions(stanmodel_file)
 
 
 ts_seq <- c(7, 14, 30)
-init_cond <- c(exp(11.5), exp(10.8), exp(11.5), exp(9))
-params <- c(0.05, 0.02, 0.01, 0.04, 0.2, 0.1)
+init_cond <- c(exp(11.5), exp(10.8), exp(11.5))
+params <- c(0.05, 0.02, 0.01, 0.04, 0.2, 0.1, 0.01)
 ode_sol <- solve_ODE_sys(ts_seq, init_cond, params)
+
+solve_ODE_init(exp(9.9), params)
 
 ts_pred <- seq(4.1, 30, length.out=100)
 ode_df <- solve_ODE_sys(ts_pred, init_cond, params)
@@ -306,8 +308,7 @@ stan_pred_df <- data.frame("time_pred" = ts_pred,
                            "y_pred" = matrix(unlist(ode_df), nrow = length(ode_df), byrow = TRUE))%>%
   mutate(CAR_GC = y_pred.1,
          CAR_MZ = y_pred.2,
-         CAR_GCN2 = y_pred.3,
-         CAR_MZN2 = y_pred.4) %>%
+         CAR_GCN2 = y_pred.3) %>%
   select(time_pred, contains("CAR")) %>%
   gather(-time_pred, key="subplop", value="counts")
 

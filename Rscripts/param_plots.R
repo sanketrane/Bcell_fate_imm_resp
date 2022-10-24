@@ -47,8 +47,8 @@ saveDir <- file.path(projectDir, 'save_csv')
 LooDir <- file.path('loo_fit') 
 
 ## model specific details that needs to be change for every run
-modelName1 <- "Branched_timeinflux"
-modelName2 <- "Branched_timeinflux1"
+modelName1 <- "Branched_timeinflux3"
+modelName2 <- "Branched_timeinflux"
 
 # compiling multiple stan objects together that ran on different nodes
 stanfit1 <- read_stan_csv(file.path(saveDir, paste0(modelName1, "_1", ".csv")))
@@ -69,7 +69,7 @@ stanfit4 <- read_stan_csv(file.path(saveDir, paste0(modelName2, "_4",".csv")))
 stanfit5 <- read_stan_csv(file.path(saveDir, paste0(modelName2, "_5", ".csv")))
 stanfit6 <- read_stan_csv(file.path(saveDir, paste0(modelName2, "_6",".csv")))
 
-fit2 <- sflist2stanfit(list(stanfit1, stanfit2, stanfit3, stanfit4, stanfit5, stanfit6))
+fit2 <- sflist2stanfit(list(stanfit1,  stanfit2, stanfit3, stanfit4, stanfit5, stanfit6))
 
 ## Time seq for predictions
 ts_pred <- seq(4, 30, length.out = 500)
@@ -158,11 +158,9 @@ p1 <- ggplot() +
   geom_line(data = Y2pred1, aes(x = timeseries, y = median), col =2) +
   geom_line(data = Y2pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
   geom_ribbon(data = Y2pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
-  #geom_ribbon(data = Y2pred2, aes(x = timeseries, ymin = lb, ymax = ub), fill="orange", alpha = 0.25)+
   geom_line(data = Y4pred1, aes(x = timeseries, y = median), col =4) +
   geom_ribbon(data = Y4pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
   geom_line(data = Y4pred2, aes(x = timeseries, y = median), linetype=2, col ="darkblue") +
-  #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
   geom_point(data = imm_data, aes(x = days_post_imm, y = CARpos_MZB), col=2) +
   geom_point(data = imm_N2ko_data, aes(x = days_post_imm, y = CARpos_MZB), col=4) +
   labs(title=paste("CAR positive MZ B cells"),  y=NULL, x="Days post immunization") + 
@@ -174,11 +172,7 @@ p2 <- ggplot() +
   geom_line(data = Y1pred1, aes(x = timeseries, y = median), col =2) +
   geom_line(data = Y1pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
   geom_ribbon(data = Y1pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.15)+
-  #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
   geom_point(data = imm_data, aes(x = days_post_imm, y = CARpos_GCB), col=2) +
-  #geom_line(data = Y5pred, aes(x = timeseries, y = median), col =2) +
-  #geom_ribbon(data = Y5pred, aes(x = timeseries, ymin = lb, ymax = ub), fill="#ba6dd1", alpha = 0.15)+
-  #geom_ribbon(data = MZfractions_pred, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
   geom_point(data = imm_N2ko_data, aes(x = days_post_imm, y = CARpos_GCB), col=4) +
   labs(title=paste("CAR positive GC B cells"),  y=NULL, x="Days post immunization") + 
   xlim(3, 30) +
@@ -188,7 +182,7 @@ p2 <- ggplot() +
 
 ## saving  plots for quality control 
 pdf(file = file.path(outputDir, paste("Combinedfit.pdf", sep = "")),
-    width = 14, height = 4, onefile = FALSE, useDingbats = FALSE)
+    width = 10, height = 4.5, onefile = FALSE, useDingbats = FALSE)
 cowplot::plot_grid(p1, p2, ncol  = 2)
 dev.off()
 
@@ -250,7 +244,7 @@ df_pars1 <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pr
          Model = "Branched")
 
 parnames_lambda <- c('Control/CAR', 'N2KO//CAR', 'Control/CAR', 'N2KO//CAR')
-df_pars_lambda <- data.frame(t(data.frame(lambda_WT_pred2, lambda_N2KO_pred2, delta_pred2, delta_pred2))) %>%
+df_pars_lambda <- data.frame(t(data.frame(lambda_WT_pred1, lambda_N2KO_pred1, delta_pred1, delta_pred1))) %>%
   mutate(parname = parnames_lambda,
          Param = c("Clonal half-life of CAR positive MZB (days)", "Clonal half-life of CAR positive MZB (days)",
                    "Clonal half-life of GCB (days)", "Clonal half-life of GCB (days)"),
@@ -258,7 +252,7 @@ df_pars_lambda <- data.frame(t(data.frame(lambda_WT_pred2, lambda_N2KO_pred2, de
 names(df_pars_lambda) <- c('Estimates', 'par_lb', 'par_ub', 'parname', 'Param', "Subset")
 blank_data <- data.frame( Param = c("Clonal half-life of CAR positive MZB (days)", "Clonal half-life of CAR positive MZB (days)",
                                     "Clonal half-life of GCB (days)", "Clonal half-life of GCB (days)"),
-                         Estimates = c(6,6,6,6),
+                         Estimates = c(5,5,5,5),
                          parname = parnames_lambda,
                          Subset =  c("MZ", "MZ", "GC", "GC"))
 
@@ -291,8 +285,6 @@ df_pars2 <- data.frame(t(data.frame(lambda_WT_pred2, lambda_N2KO_pred2, delta_pr
          pars_plot = pars_plot,
          Model = "Linear")
 
-parnames <- c('Clonal half-life of CAR+ MZ in WT mice', 'Clonal half-life of CAR+ MZ in N2KO mice', 
-              'Clonal half-life of CAR+ GC',  "Propensity to gain CAR expression (%) for CAR- MZ B cells")
 #formattable::formattable(all_pars_df)
 all_pars_df <- rbind(df_pars1, df_pars2)
 names(all_pars_df) <- c('Estimates', 'par_lb', 'par_ub', 'param', "pars_plot",  "Model")

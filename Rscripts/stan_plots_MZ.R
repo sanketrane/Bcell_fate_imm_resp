@@ -8,7 +8,7 @@ library(tidyverse)
 ####################################################################################
 
 ## model specific details that needs to be change for every run
-modelName <- "Branched_timeinflux"
+modelName <- "Null_timeinflux1"
 data_der <- "Bcell_imm_data.csv"    
 data_der2 <- "N2KO_imm_data.csv"    
 
@@ -78,7 +78,7 @@ ploocv <- data.frame("Model" = modelName,
                      "SE" = loo_loglik$estimates[6], 
                      "PLoo" = loo_loglik$estimates[2])
 
-write.table(ploocv, file = file.path(outputDir, "stat_table_MZB1.csv"),
+write.table(ploocv, file = file.path(outputDir, 'timeinfluxfit', "stat_table_MZB1.csv"),
             sep = ",", append = T, quote = FALSE,
             col.names = F, row.names = FALSE)
 
