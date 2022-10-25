@@ -94,9 +94,9 @@ CAR_cell_counts_df <- B_cell_data %>%
                                   ifelse(days_post_imm <21, "3Wk", "4Wk"))))
 
 
-corFOMZ <- cor.test(B_cell_data$CARpos_FoB, B_cell_data$CARpos_MZB)
-corGCMZ <- cor.test(B_cell_data$CARpos_GCB, B_cell_data$CARpos_MZB)
-corFOGC <- cor.test(B_cell_data$CARpos_FoB, B_cell_data$CARpos_GCB)
+corFOMZ <- cor.test(log(B_cell_data$CARpos_FoB), log(B_cell_data$CARpos_MZB))
+corGCMZ <- cor.test(log(B_cell_data$CARpos_GCB), log(B_cell_data$CARpos_MZB))
+corFOGC <- cor.test(log(B_cell_data$CARpos_FoB), log(B_cell_data$CARpos_GCB))
 
 p11 <-ggplot(data = CAR_cell_counts_df)+
   geom_point(aes(x=log(CARpos_FoB), y=log(CARpos_MZB), col=days_bin), size=2)+
