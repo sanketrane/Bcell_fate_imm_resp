@@ -48,7 +48,7 @@ LooDir <- file.path('loo_fit')
 
 ## model specific details that needs to be change for every run
 modelName1 <- "Branched_timeinflux3"
-modelName2 <- "Branched_timeinflux"
+modelName2 <- "Null_timeinflux1"
 
 # compiling multiple stan objects together that ran on different nodes
 stanfit1 <- read_stan_csv(file.path(saveDir, paste0(modelName1, "_1", ".csv")))
@@ -69,7 +69,7 @@ stanfit4 <- read_stan_csv(file.path(saveDir, paste0(modelName2, "_4",".csv")))
 stanfit5 <- read_stan_csv(file.path(saveDir, paste0(modelName2, "_5", ".csv")))
 stanfit6 <- read_stan_csv(file.path(saveDir, paste0(modelName2, "_6",".csv")))
 
-fit2 <- sflist2stanfit(list(stanfit1,  stanfit2, stanfit3, stanfit4, stanfit5, stanfit6))
+fit2 <- sflist2stanfit(list(stanfit1, stanfit2, stanfit3, stanfit4, stanfit5))
 
 ## Time seq for predictions
 ts_pred <- seq(4, 30, length.out = 500)
@@ -156,11 +156,11 @@ imm_N2ko_data <- read_csv(file.path(dataDir, "N2KO_imm_data.csv"))
 #### plots
 p1 <- ggplot() +
   geom_line(data = Y2pred1, aes(x = timeseries, y = median), col =2) +
-  geom_line(data = Y2pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
+  #geom_line(data = Y2pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
   geom_ribbon(data = Y2pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.25)+
   geom_line(data = Y4pred1, aes(x = timeseries, y = median), col =4) +
   geom_ribbon(data = Y4pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=4, alpha = 0.25)+
-  geom_line(data = Y4pred2, aes(x = timeseries, y = median), linetype=2, col ="darkblue") +
+  #geom_line(data = Y4pred2, aes(x = timeseries, y = median), linetype=2, col ="darkblue") +
   geom_point(data = imm_data, aes(x = days_post_imm, y = CARpos_MZB), col=2) +
   geom_point(data = imm_N2ko_data, aes(x = days_post_imm, y = CARpos_MZB), col=4) +
   labs(title=paste("CAR positive MZ B cells"),  y=NULL, x="Days post immunization") + 
@@ -170,7 +170,7 @@ p1 <- ggplot() +
 
 p2 <- ggplot() +
   geom_line(data = Y1pred1, aes(x = timeseries, y = median), col =2) +
-  geom_line(data = Y1pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
+  #geom_line(data = Y1pred2, aes(x = timeseries, y = median), linetype=2, col ="#923347") +
   geom_ribbon(data = Y1pred1, aes(x = timeseries, ymin = lb, ymax = ub), fill=2, alpha = 0.15)+
   geom_point(data = imm_data, aes(x = days_post_imm, y = CARpos_GCB), col=2) +
   geom_point(data = imm_N2ko_data, aes(x = days_post_imm, y = CARpos_GCB), col=4) +
@@ -189,52 +189,24 @@ dev.off()
 
 
 #### parameter plots
-car_fob_time <- function(t){
-  F0 = exp(11.763019); B0 = exp(4.717021); n = 5.092933;
-  X = 7.121932 ;  q = 6.475884;
-  F0 + (B0 * t^n) * (1 - ((t^q)/((X^q) + (t^q))))
-}
-
-car_neg_mzb <- function(t){
-  M0 = exp(14);  nu = 0.01;  b0 = 18;
-  M0 * (1 + exp(-nu * (t - b0)^2));
-}
-
-CAR_FOB <- sapply(ts_pred, car_fob_time)
-CAR_neg_MZB <- sapply(ts_pred, car_neg_mzb)
-
 matrix_of_draws1 <- as.data.frame(fit1)   #matrix of parameter draws
+alpha_pred1 <- quantile(0.5 * matrix_of_draws1$alpha, probs = c(0.5, 0.025, 0.975))
+beta_pred1 <- quantile(0.5 * matrix_of_draws1$beta, probs = c(0.5, 0.025, 0.975))
+lambda_WT_pred1 <- quantile(matrix_of_draws1$lambda_WT, probs = c(0.5, 0.025, 0.975))
+lambda_N2KO_pred1 <- quantile(matrix_of_draws1$lambda_N2KO, probs = c(0.5, 0.025, 0.975))
+delta_pred1 <- quantile(matrix_of_draws1$delta, probs = c(0.5, 0.025, 0.975))
+mu_pred1 <- quantile(0.5 * matrix_of_draws1$mu, probs = c(0.5, 0.025, 0.975))
+nu_pred1 <- quantile(sqrt(log(3)/matrix_of_draws1$nu), probs = c(0.5, 0.025, 0.975))
 
-alpha_pred1 <- quantile(matrix_of_draws1$alpha, probs = c(0.5, 0.025, 0.975))
-mu_pred1 <- quantile(matrix_of_draws1$mu, probs = c(0.5, 0.025, 0.975))
-alpha2d4_pred1 <- quantile(matrix_of_draws1$alpha2/(1 + exp(matrix_of_draws1$nu * (4 - 4.0)^2)), probs = c(0.5, 0.025, 0.975))
-alpha2d7_pred1 <- quantile(matrix_of_draws1$alpha2/(1 + exp(matrix_of_draws1$nu * (7 - 4.0)^2)), probs = c(0.5, 0.025, 0.975))
-alpha2d10_pred1 <- quantile(matrix_of_draws1$alpha2/(1 + exp(matrix_of_draws1$nu * (9 - 4.0)^2)), probs = c(0.5, 0.025, 0.975))
-pars_plot <- c("alpha1", "alpha3", "alpha2d04")
-parnames <- c('FO_to_MZ_rate', 'MZ_to_MZ_rate', 'FO_to_GC_rate_d04')
-df_pars_alpha <- data.frame(t(data.frame(alpha1_pred1, alpha3_pred1, alpha2d4_pred1))) %>%
-  mutate(parname = parnames, 
-         pars_plot = pars_plot,
-         Model = "Branched")
+params_table <- t(round(data.frame(1/alpha_pred1,
+                           1/beta_pred1,
+                           lambda_WT_pred1,
+                           lambda_N2KO_pred1,
+                           delta_pred1,
+                           1/mu_pred1,
+                           nu_pred1), 4))
 
-names(df_pars_alpha) <- c('Estimates', 'par_lb', 'par_ub', 'param', "par_plot", "Model")
-
-ggplot(df_pars_alpha, aes(y=Estimates, x=factor(param), fill=param))+
-  labs(y=NULL) +
-  geom_errorbar(aes(y=Estimates, ymin=par_lb, ymax=par_ub, x=param),
-                width=0.2, linetype=1,  position=position_dodge(0.4)) +
-  geom_point(position=position_dodge(width=0.4), stat = "identity") + scale_y_log10()
- 
-
-alpha_pred1 <- quantile(matrix_of_draws1$alpha, probs = c(0.5, 0.025, 0.975))
-beta_pred1 <- quantile(matrix_of_draws1$beta, probs = c(0.5, 0.025, 0.975))
-lambda_WT_pred1 <- quantile(log(2)/matrix_of_draws1$lambda_WT, probs = c(0.5, 0.025, 0.975))
-lambda_N2KO_pred1 <- quantile(log(2)/matrix_of_draws1$lambda_N2KO, probs = c(0.5, 0.025, 0.975))
-delta_pred1 <- quantile(log(2)/matrix_of_draws1$delta, probs = c(0.5, 0.025, 0.975))
-mu_pred1 <- quantile(matrix_of_draws1$mu, probs = c(0.5, 0.025, 0.975))
-nu_pred1 <- quantile(matrix_of_draws1$nu, probs = c(0.5, 0.025, 0.975))
-
-
+write.csv(params_table, 'params_table.csv', row.names = T)
 
 pars_plot <- c("lambda_WT", "lambda_N2KO",  "delta", "beta")
 parnames <- c('Clonal half-life of CAR+ MZ in WT mice', 'Clonal half-life of CAR+ MZ in N2KO mice', 'GC clonal half-life', "Propensity to gain CAR expression (%) for CAR- MZ B cells")
@@ -263,7 +235,7 @@ ggplot(df_pars_lambda, aes(y=Estimates, x=factor(Subset), col=parname))+
   geom_blank(data = blank_data)+
   geom_point(position=position_dodge(width=0.4), stat = "identity", size=4) + 
   facet_wrap(~ factor(Param), scales = "free") + 
-  expand_limits(y = 0) + scale_y_continuous(expand = c(0.1, 0.1))+
+  expand_limits(y = 0) + scale_y_continuous(expand = c(0.15, 0.1))+
   scale_color_manual(values=c(2, 4), name="Mouse strain")+
   myTheme + theme(axis.text.x=element_blank(),
                   axis.title.x=element_blank())+ theme(legend.background = element_blank(), legend.position = c(0.88, 0.85))
@@ -271,13 +243,13 @@ ggplot(df_pars_lambda, aes(y=Estimates, x=factor(Subset), col=parname))+
 
 matrix_of_draws2 <- as.data.frame(fit2)   #matrix of parameter draws
 
-alpha_pred2 <- quantile(matrix_of_draws2$alpha, probs = c(0.5, 0.025, 0.975))
-beta_pred2 <- quantile(matrix_of_draws2$beta, probs = c(0.5, 0.025, 0.975))
+alpha_pred2 <- quantile(0.5 * matrix_of_draws2$alpha, probs = c(0.5, 0.025, 0.975))
+beta_pred2 <- quantile(0.5 * matrix_of_draws2$beta, probs = c(0.5, 0.025, 0.975))
 lambda_WT_pred2 <- quantile(log(2)/matrix_of_draws2$lambda_WT, probs = c(0.5, 0.025, 0.975))
 lambda_N2KO_pred2 <- quantile(log(2)/matrix_of_draws2$lambda_N2KO, probs = c(0.5, 0.025, 0.975))
 delta_pred2 <- quantile(log(2)/matrix_of_draws2$delta, probs = c(0.5, 0.025, 0.975))
 mu_pred2 <- quantile(matrix_of_draws2$mu, probs = c(0.5, 0.025, 0.975))
-nu_pred2 <- quantile(log(2)/matrix_of_draws2$nu, probs = c(0.5, 0.025, 0.975))
+nu_pred2 <- quantile(sqrt(log(3)/matrix_of_draws2$nu), probs = c(0.5, 0.025, 0.975))
 
 
 df_pars2 <- data.frame(t(data.frame(lambda_WT_pred2, lambda_N2KO_pred2, delta_pred2,  beta_pred2))) %>%
@@ -308,7 +280,7 @@ ggplot(all_pars_df, aes(y=Estimates, x=pars_plot, col=Model))+
                 axis.title.x=element_blank())
 
 
-FOtoCARMZ_pred1 <- as.data.frame(fit2, pars = "FOtoCARMZ_pred") %>%
+FOtoCARMZ_pred1 <- as.data.frame(fit1, pars = "FOtoCARMZ_pred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
   summarize(lb = quantile(value, probs = 0.16),
@@ -318,7 +290,7 @@ FOtoCARMZ_pred1 <- as.data.frame(fit2, pars = "FOtoCARMZ_pred") %>%
             "param" = "FOB to CAR+ MZB",
             "Model" = "CARMZ")
 
-MZtoCARMZ_pred1 <- as.data.frame(fit2, pars = "MZtoCARMZ_pred") %>%
+MZtoCARMZ_pred1 <- as.data.frame(fit1, pars = "MZtoCARMZ_pred") %>%
   gather(factor_key = TRUE) %>%
   group_by(key) %>%
   summarize(lb = quantile(value, probs = 0.16),
@@ -351,7 +323,7 @@ FOtoCARGC_pred1 <- as.data.frame(fit1, pars = "FOtoCARGC_pred") %>%
             ub = quantile(value, probs = 0.975))%>%
   bind_cols("timeseries" = ts_pred,
             "param" = "FO_to_GC",
-            "Model" = "Branched")
+            "Model" = "FOB to CAR+ GCB")
 
 
 FOtoCARGC_pred2 <- as.data.frame(fit1, pars = "FOtoCARGC_pred") %>%
@@ -368,8 +340,8 @@ FOtoCARGC_pred2 <- as.data.frame(fit1, pars = "FOtoCARGC_pred") %>%
 ggplot() +
   geom_line(data = FOtoCARGC_pred1, aes(x = timeseries, y = median, col = Model), size=1.2) +
   geom_ribbon(data = FOtoCARGC_pred1, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
-  geom_line(data = FOtoCARGC_pred2, aes(x = timeseries, y = median, col = Model), size=1.2) +
-  geom_ribbon(data = FOtoCARGC_pred2, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
+  #geom_line(data = FOtoCARGC_pred2, aes(x = timeseries, y = median, col = Model), size=1.2) +
+  #geom_ribbon(data = FOtoCARGC_pred2, aes(x = timeseries, ymin = lb, ymax = ub, fill=Model), alpha = 0.25) +
   labs(title=paste("Influx into GC B cells (as % of GC)"),  y=NULL, x="Days post immunization") + 
   myTheme + theme(legend.position = c(0.5, 0.85), legend.direction = "horizontal") + 
   ylim(0, 8) + guides(col="none", fill="none") +
@@ -378,5 +350,16 @@ ggplot() +
 
 cowplot::plot_grid(p1, p1.2, align = "v", nrow = 2)
 cowplot::plot_grid(p2, p2.2, align = "v", nrow = 2)
+
+
+muvec <- function(t, nu){
+  2/(1 + exp(nu * t^2));
+}
+ts_pred <- seq(0, 30)
+nuva = 0.0054
+mus <- sapply(ts_pred, muvec, nu=nuva)
+qplot(ts_pred, mus)
+sqrt(log(3)/nuva)
+muvec(14.26, nuva)
 
 

@@ -122,7 +122,7 @@ p33 <- ggplot(data = CAR_cell_counts_df)+
 
 
 cowplot::plot_grid( p11, p22, p33, nrow  = 1)
-ggsave('plots/New_plotsNatComm/dataplot2.pdf', last_plot(), device = 'pdf', width = 12, height = 4)
+ggsave('plots/natcomm/dataplot2.pdf', last_plot(), device = 'pdf', width = 12, height = 4)
 
 
 
