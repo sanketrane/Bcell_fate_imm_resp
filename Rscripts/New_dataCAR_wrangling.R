@@ -94,9 +94,9 @@ CAR_cell_counts_df <- B_cell_data %>%
                                   ifelse(days_post_imm <21, "3Wk", "4Wk"))))
 
 
-corFOMZ <- cor.test(log(B_cell_data$CARpos_FoB), log(B_cell_data$CARpos_MZB))
-corGCMZ <- cor.test(log(B_cell_data$CARpos_GCB), log(B_cell_data$CARpos_MZB))
-corFOGC <- cor.test(log(B_cell_data$CARpos_FoB), log(B_cell_data$CARpos_GCB))
+corFOMZ <- cor.test(B_cell_data$CARpos_FoB, B_cell_data$CARpos_MZB)
+corGCMZ <- cor.test(B_cell_data$CARpos_GCB, B_cell_data$CARpos_MZB)
+corFOGC <- cor.test(B_cell_data$CARpos_FoB, B_cell_data$CARpos_GCB)
 
 p11 <-ggplot(data = CAR_cell_counts_df)+
   geom_point(aes(x=log(CARpos_FoB), y=log(CARpos_MZB), col=days_bin), size=2)+
@@ -122,7 +122,7 @@ p33 <- ggplot(data = CAR_cell_counts_df)+
 
 
 cowplot::plot_grid( p11, p22, p33, nrow  = 1)
-ggsave('plots/natcomm/dataplot2.pdf', last_plot(), device = 'pdf', width = 12, height = 4)
+ggsave('plots/New_plotsNatComm/dataplot2.pdf', last_plot(), device = 'pdf', width = 12, height = 4)
 
 
 
@@ -183,8 +183,8 @@ sol_time <- seq(4, 30, length.out=100)
 phi_vec_m <- phi2_func(sol_time, basl=par_est[1], nu=par_est[2], b0=par_est[3])
 phi_vec_mm <- phi2_func(sol_time, basl=14.06, nu=0.0033, b0=20.58)
 
-ggplot() +
-  geom_line(aes(x=sol_time, y=(phi_vec_m)), col="blue", size=2) +
+p1 <- ggplot() +
+  #geom_line(aes(x=sol_time, y=(phi_vec_m)), col="blue", size=2) +
   geom_line(aes(x=sol_time, y=(phi_vec_mm)), col="#CD7F32", size=0.8) +
   geom_point(data=filter(B_cell_data, days_post_imm >=4),
              aes(x=days_post_imm, y=(CARneg_MZB)), size=2, col="#CD7F32") +
@@ -195,34 +195,35 @@ ggplot() +
 
 ### tot FOb
 
-phi2_func <- function(Time, basl, nu, b0){
+phi3_func <- function(Time, basl, nu, b0){
   t = Time - 0
   basl_exp = exp(basl)
   return( basl_exp * (1 + exp(-nu * (Time - b0)^2)))
 }
 
-totFOB_nlm <- nls(log(total_FoB) ~ log(phi2_func(days_post_imm,  basl, nu, b0)),
+totFOB_nlm <- nls(log(total_FoB) ~ log(phi3_func(days_post_imm,  basl, nu, b0)),
                    data = B_cell_data,
                    start = list(basl = 11, nu = 0.01, b0=8))
 
 par_est <- coef(totFOB_nlm)
 sol_time <- seq(4, 30, length.out=100)
-phi_vec_m <- phi2_func(sol_time, basl=par_est[1], nu=par_est[2], b0=par_est[3])
-phi_vec_mm <- phi2_func(sol_time, basl=16.7, nu=0.004, b0=20)
+phi_vec_f <- phi3_func(sol_time, basl=par_est[1], nu=par_est[2], b0=par_est[3])
+phi_vec_ff <- phi3_func(sol_time, basl=16.7, nu=0.004, b0=20)
 
 
-ggplot() +
+p2 <- ggplot() +
   #geom_line(aes(x=sol_time, y=(phi_vec_m)), col="blue", size=2) +
-  geom_line(aes(x=sol_time, y=(phi_vec_mm)), col="#CD7F32", size=0.8) +
-  geom_hline(yintercept = exp(17.1), col=2, size=0.8) +
+  geom_line(aes(x=sol_time, y=(phi_vec_ff)), col=4, size=0.8) +
+  #geom_hline(yintercept = exp(17.1), col=2, size=0.8) +
   geom_point(data=filter(B_cell_data, days_post_imm >=4),
-             aes(x=days_post_imm, y=(total_FoB)), size=2, col="#CD7F32") +
+             aes(x=days_post_imm, y=(total_FoB)), size=2, col=4) +
   scale_x_continuous(limits=c(3.9, 30))+
   scale_y_log10(limits = c(1e6, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
-  labs(x='Days post immunization', y="Cell counts", title='total FoB Cells') + myTheme
+  labs(x='Days post immunization', y="Cell counts", title='Total FoB Cells') + myTheme
 
+cowplot::plot_grid(p1, p2)
 
-ggsave('plots/New_plotsNatComm/CARnegMZB.pdf', last_plot(), device = 'pdf', width = 6, height = 4.5)
+ggsave('plots/New_plotsNatComm/CARnegMZB.pdf', last_plot(), device = 'pdf', width = 10, height = 4)
 
 ###############################
 ##############################
@@ -230,12 +231,12 @@ ggsave('plots/New_plotsNatComm/CARnegMZB.pdf', last_plot(), device = 'pdf', widt
 # generating data for fitting
 imm_data <- B_cell_data %>% filter(genotype == "CAR") %>%
   select(days_post_imm, contains("CARpos"))  %>%
-  filter(days_post_imm >= 0)
+  filter(days_post_imm > 0)
 
 write.csv(imm_data, file.path("datafiles", "Bcell_imm_data.csv"), row.names = F)
 
 imm_data %>% 
-  filter(days_post_imm == 0) %>%
+  filter(days_post_imm == 4) %>%
   summarise("CAR_countsMZ" = log(mean(CARpos_MZB)),
             "CAR_countsGC" = log(mean(CARpos_GCB)))
 
@@ -291,16 +292,14 @@ rstan::stan_rdump(c("numObs1",  "n_shards", "solve_time", "time_index1", "numObs
 ## testing models from stan
 library(rstan)
 
-stanmodel_file <- file.path("stan_models/New_modelsCAR", "Branched_timeinflux.stan")
+stanmodel_file <- file.path("stan_models/New_modelsCAR", "Branched_neutral.stan")
 expose_stan_functions(stanmodel_file)
 
 
 ts_seq <- c(7, 14, 30)
-init_cond <- c(exp(11.5), exp(10.8), exp(11.5))
-params <- c(0.05, 0.02, 0.01, 0.04, 0.2, 0.1, 0.01)
+init_cond <- c(exp(11.5), exp(10.8), exp(11.5), exp(9))
+params <- c(0.05, 0.02, 0.01, 0.04, 0.2, 0.1)
 ode_sol <- solve_ODE_sys(ts_seq, init_cond, params)
-
-solve_ODE_init(exp(9.9), params)
 
 ts_pred <- seq(4.1, 30, length.out=100)
 ode_df <- solve_ODE_sys(ts_pred, init_cond, params)
@@ -308,7 +307,8 @@ stan_pred_df <- data.frame("time_pred" = ts_pred,
                            "y_pred" = matrix(unlist(ode_df), nrow = length(ode_df), byrow = TRUE))%>%
   mutate(CAR_GC = y_pred.1,
          CAR_MZ = y_pred.2,
-         CAR_GCN2 = y_pred.3) %>%
+         CAR_GCN2 = y_pred.3,
+         CAR_MZN2 = y_pred.4) %>%
   select(time_pred, contains("CAR")) %>%
   gather(-time_pred, key="subplop", value="counts")
 
