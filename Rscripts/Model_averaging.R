@@ -57,11 +57,11 @@ Null_timeloss_filename = paste0('loosave_Null_timeloss_Bcell_imm_data.csv.rds')
 
 model_list <- list(#'Branched_timeinflux' = readRDS(file.path(LooDir, Branched_timeinflux_filename)), 
                   #'Branched_timeinflux1' = readRDS(file.path(LooDir, Branched_timeinflux1_filename)), 
-                  'Branched_timeinflux2' = readRDS(file.path(LooDir, Branched_timeinflux2_filename)), 
+                  #'Branched_timeinflux2' = readRDS(file.path(LooDir, Branched_timeinflux2_filename)), 
                   'Branched_timeinflux3' = readRDS(file.path(LooDir, Branched_timeinflux3_filename)), 
                   #'Linear_timeinflux' = readRDS(file.path(LooDir, Linear_timeinflux_filename)), 
                   #'Linear_timeinflux1' = readRDS(file.path(LooDir, Linear_timeinflux1_filename)), 
-                  'Linear_timeinflux2' = readRDS(file.path(LooDir, Linear_timeinflux2_filename)), 
+                  #'Linear_timeinflux2' = readRDS(file.path(LooDir, Linear_timeinflux2_filename)), 
                   'Linear_timeinflux3' = readRDS(file.path(LooDir, Linear_timeinflux3_filename)), 
                    #"Null_timeinflux" = readRDS(file.path(LooDir, Null_timeinflux_filename)), 
                    "Null_timeinflux1" = readRDS(file.path(LooDir, Null_timeinflux1_filename)), 
