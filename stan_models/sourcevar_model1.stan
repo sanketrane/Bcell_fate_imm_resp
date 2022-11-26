@@ -21,7 +21,7 @@ functions{
      // solves the ode for each timepoint from t0
      int numdim = size(solve_time);
      real y_sol[numdim, 1];
-     y_sol = integrate_ode_rk45(ODE_sys, init_cond, 1.0, solve_time, parms, {0.0}, {0});
+     y_sol = integrate_ode_rk45(ODE_sys, init_cond, 0.0, solve_time, parms, {0.0}, {0});
      return y_sol;
    }
 }

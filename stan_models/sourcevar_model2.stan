@@ -1,17 +1,11 @@
 functions{
    // function that describes the changes in CAR+ counts in FO B cells
-  real[] theta_spline(real[] solve_time,  real[] parms){
+  real theta_spline(real solve_time,  real[] parms){
     //real M0 = exp(14); real nu = 0.01; real b0 = 18;
-    int numdim = size(solve_time);
     real M0 = parms[3];
     real nu  = parms[4];
     real b0  = parms[5];
-    real value[numdim];
-
-    for (i in 1:numdim){
-      value[i] = exp(M0) * (1 + exp(-nu * (solve_time[i] - b0)^2));
-    }
-    return value;
+    return exp(M0) * (1 + exp(-nu * (solve_time - b0)^2));
    }
 
    // function that contains the ODE equations to be used in ODE solver
@@ -29,7 +23,7 @@ functions{
      // solves the ode for each timepoint from t0
      int numdim = size(solve_time);
      real y_sol[numdim, 1];
-     y_sol = integrate_ode_rk45(ODE_sys, init_cond, 1.0, solve_time, parms, {0.0}, {0});
+     y_sol = integrate_ode_rk45(ODE_sys, init_cond, 0.0, solve_time, parms, {0.0}, {0});
      return y_sol;
    }
 }
@@ -76,7 +70,7 @@ transformed parameters{
   y_hat1[2:] = solve_ODE_sys(solve_time[2:], init_cond, parms);
 
   for (i in 1:numObs){
-    theta_mean[i] = theta_spline(solve_time, parms);
+    theta_mean[i] = theta_spline(solve_time[i], parms);
     total_counts_mean[i] = y_hat1[i, 1];
   }
 }
@@ -111,11 +105,11 @@ generated quantities{
   //ODE solution
   y_hat_pred1[1] = init_cond;
   y_hat_pred1[2:] = solve_ODE_sys(ts_pred[2:], init_cond, parms);
-  y2_mean_pred = theta_spline(ts_pred, parms)
   for (i in 1:numPred){
-    //CAR MZ
     y1_mean_pred[i] = y_hat_pred1[i, 1];
     totalcounts_pred[i] = exp(normal_rng(log(y1_mean_pred[i]), sigma2));
+
+    y2_mean_pred[i] = theta_spline(ts_pred[i], parms);
     theta_pred[i] = exp(normal_rng(log(y2_mean_pred[i]), sigma1));
   }
 
