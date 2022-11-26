@@ -5,3 +5,7 @@
 *.csv
 *.rds
 datafiles/old_data/
+Information/
+output_fit/
+save_csv/
+plots/
