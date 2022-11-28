@@ -25,7 +25,7 @@ sh sh_files/single_run.sh -m <insert ModelName here>
 ) all model sepcfic details that were explored here.
 
 
-#### Example code from model run:
+#### Example code to run a model:
 
 ```
 make MZ_munich/stan_models/New_modelsCAR/Branched_neutral  ## call this from the cmdstan directory
