@@ -21,6 +21,8 @@ Then run the single_run.sh file using
 ```
 sh sh_files/single_run.sh -m <insert ModelName here>
 ```
+This runs a single MCMC chain on one core. Average runtime for one chain is 1-10 minutes. The sh file _quadruple_run.sh_ can be called to run 4 chains on 4 cores. Depending on the availability of _ncores_ the code can be expanded to run _ncores_ number of chains. We recommned collecting >5000 samples.
+
 -m tag allows to call for a specific model. Refer to [model directory](https://github.com/sanketrane/Bcell_fate_imm_resp/tree/main/stan_models/New_modelsCAR) and the methods section of the [Preprint](https://www.biorxiv.org/content/10.1101/2022.06.13.495961v4
 ) all model sepcfic details that were explored here.
 
