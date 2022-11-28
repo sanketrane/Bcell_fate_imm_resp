@@ -3,9 +3,9 @@
 Preprint available at: https://www.biorxiv.org/content/10.1101/2022.06.13.495961v4
 
 This repository contains 
-1. Mathematical models of immune-reposne dynamics of B cells encoded in _Stan_ languagae;
-2. Original data from immunization experiments represented in _Excel_ format;
-3. Scripts written in _R_ language to generating data suitable to incorporate in Bayesian fitting in _Stan_ and to process the output from fitted models.
+1. Mathematical models of immune-response dynamics of B cells encoded in the _Stan_ languagae;
+2. Original data from immunization experiments represented in the _Excel_ format;
+3. Scripts written in the _R_ language to generate data suitable to incorporate in Bayesian fitting in _Stan_ and to process the output from fitted models.
 
 
 Models are written in _Stan_ version 2.18 and compiled and fitted using _CmdStan_ version 2.31.
