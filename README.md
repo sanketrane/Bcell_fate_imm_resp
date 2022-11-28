@@ -31,10 +31,10 @@ This runs a single MCMC chain on one core. Average runtime for one chain is 1-10
 #### Example code to run a model:
 
 ```
-make MZ_munich/stan_models/New_modelsCAR/Branched_neutral  ## call this from the cmdstan directory
+make MZ_munich/stan_models/New_modelsCAR/Branched_timeinflux  ## call this from the cmdstan directory
 
-cd Bcell_fate_imm_resp                                     ## Name of the project directory
+cd Bcell_fate_imm_resp                                        ## go to the project directory
 
-sh sh_files/single_run.sh -m Branched_neutral              ## calling the model Branched_neutral
+sh sh_files/single_run.sh -m Branched_timeinflux              ## calling the model Branched_neutral
 
 ```
