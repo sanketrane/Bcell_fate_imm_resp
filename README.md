@@ -3,7 +3,7 @@
 Preprint available at: https://www.biorxiv.org/content/10.1101/2022.06.13.495961v4
 
 This repository contains 
-1. Mathematical models of immune-response dynamics of B cells encoded in _Stan_ language;
+1. Mathematical models of immune-response dynamics of B cells encoded in the _Stan_ language;
 2. Original data from immunization experiments represented in the _Excel_ format;
 3. Scripts written in the _R_ language to generate data suitable to incorporate in Bayesian fitting in _Stan_ and to process the output from fitted models.
 
@@ -31,8 +31,7 @@ This runs a single MCMC chain on one core. Average runtime for one chain is 1-10
 #### Example code to run a model:
 
 ```
-make ProjectDIR/stan_models/Branched_timeinflux              ## call this from the cmdstan directory. ProjectDIR is the name of your working directory inside cmdstan directory.
-
+make ProjectDIR/stan_models/Branched_timeinflux               ## call this from the cmdstan directory. ProjectDIR is the name of your working directory inside cmdstan directory.
 cd ProjectDIR                                                 ## go to the project directory
 
 sh sh_files/single_run.sh -m Branched_neutral                 ## calling the model Branched_neutral
