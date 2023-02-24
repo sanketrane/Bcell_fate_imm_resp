@@ -33,7 +33,6 @@ This runs a single MCMC chain on one core. Average runtime for one chain is 1-10
 ```
 make ProjectDIR/stan_models/Branched_timeinflux               ## call this from the cmdstan directory. ProjectDIR is the name of your working directory inside cmdstan directory.
 cd ProjectDIR                                                 ## go to the project directory
-
 sh sh_files/single_run.sh -m Branched_neutral                 ## calling the model Branched_neutral
 
 ```
