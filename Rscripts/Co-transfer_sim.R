@@ -87,6 +87,7 @@ ts_pred <- seq(4, 35, length.out=100)
 
 boot_func <- function(eps){
   ## Sampling random numbers to select the row from posterior dist matrix
+  set.seed(1456)
   rowvec <- sample(1:nrow(fit_ss), 300, replace = FALSE) %>% sort()
   
   ## initiating emoty matrices to store the output
@@ -141,10 +142,10 @@ boot_func <- function(eps){
   ggplot(pooled_df) +
     geom_line(aes(x=timeseries, y=median, col=key))+
     geom_ribbon(aes(x = timeseries, ymin = lb, ymax = ub, fill=key), alpha = 0.25) +
-    scale_x_log10() + scale_y_log10()
+    scale_x_log10() + scale_y_log10(limits=c(1, 1e5))
 }
 
-boot_func(0.002)
+boot_func(0.01)
   
 
 
