@@ -1,4 +1,4 @@
-### Simulations of clonal dynamics using the model fits to immunization data
+## Simulations of clonal dynamics using the model fits to immunization data
 
 ## loading libraries
 library(tidyverse)
@@ -15,46 +15,68 @@ CAR_FoB <- function(Time){
 ## Assuming that antigen-specific B cell clones are distributed uniformly in the activated pool
 ## We are simulating for 30 different clones.
 ## The pool size of activated FoB cells varies with time. 
-uniform_dist <- function(Time){ 
-  rdunif(as.integer(CAR_FoB(Time)), a = 1, b = 30)
+uniform_dist <- function(Time, nClones){ 
+  rdunif(as.integer(CAR_FoB(Time)), a = 1, b = nClones)
 }
 
 ggplot()+
-  geom_histogram(aes(x=uniform_dist(10)), binwidth = 1, fill=4)
+  geom_histogram(aes(x=uniform_dist(10, 30)), binwidth = 1, fill=4)
 
 ## Assuming power-law distribution for the antigen-specific B cell clones in the activated pool
 ## We are simulating for 30 different clones.
 ## The pool size of activated FoB cells varies with time. 
-Norm_power_law <- function(Time, x){
-  k= 0.5; a=1; b=40;
- CAR_FoB(Time) * (x^-k)/((b^(-k+1) - a^(-k+1))/(-k+1))
+Norm_power_law <- function(Time, nClones){
+  k= 0.5; a=1; b=nClones;
+  
+  x_vec <- seq(1, nClones, 1)
+ as.integer(CAR_FoB(Time) * (x_vec^-k)/((b^(-k+1) - a^(-k+1))/(-k+1)))
 }
 
-clone_vec <- seq(1, 30, 1)
-clone_dist <- as.integer(Norm_power_law(10, clone_vec))
+power_law_dist <- function(Time, nClones){
+  ## generate a distribution
+  dist <-c()  ## start an empty vector
+  j=0
+  for (i in 1:nClones){
+    npl <- Norm_power_law(Time, nClones)
+    ### indices to distribute frequencies to each clone ID
+    ind_a = j + 1
+    j = j + npl[i]
+    ## assortment
+    dist[ind_a:j] <- rep(i, npl[i]) 
+  }
+  return(dist)
+}
+
+pl_dist <- power_law_dist(10, 30)
 
 ggplot()+
-  geom_line(aes(x=clone_vec, y=clone_dist), col=4)
+  geom_histogram(aes(x=pl_dist), binwidth = 1, fill=2)
+
 
 
 ## Cells that differentiate into MZ and GC phenotype within a short interval time dt
 ### from the activated clones sample cells with propensity mu * X for MZ and alpha(Time) * X for GC B cells,
-### Where X is the pool size of acivated FoB cells s
-MZ_time <- function(Time){
+### Where X is the pool size of activated FoB cells 
+MZ_time <- function(Time, distrib="powerlaw", nClones){
   mu= 0.000322374412043;
-  clone_sample <- sample(uniform_dist(Time), mu * CAR_FoB(Time))
+  
+  clone_sample <-  if(distrib == "unif"){
+    sample(uniform_dist(Time, nClones), mu * CAR_FoB(Time))
+  } else {
+    sample(power_law_dist(Time, nClones), mu * CAR_FoB(Time))
+  }
   return(sort(clone_sample))
 }
 
 
-singleRun <- function(nClones){
+singleRun <- function(nClones, distrib="powerlaw"){
   time_vec <- c(4, 7, 10, 14, 18, 21, 24, 27, 30)
   
   MZ_bin <- data.frame("CloneID" = as.factor(seq(1, nClones, 1)),
                        "T0" = rep(0, nClones))
   
   for (i in 1:length(time_vec)){
-    new_freq_df <- data.frame(table(MZ_time(time_vec[i]))) %>%
+    new_freq_df <- data.frame(table(MZ_time(Time = time_vec[i], distrib = distrib, nClones = nClones))) %>%
       rename(CloneID=Var1,
              !!paste0('TSTEP_', i) := Freq)
     MZ_bin <- MZ_bin %>%
@@ -74,16 +96,18 @@ singleRun <- function(nClones){
     select(-Timesteps)
 }
 
-#ggplot(single_run_plot)+
-#  geom_point(aes(x=Timeseries, y=Clonefreq, col=CloneID)) +
-#  guides(col='none') +
-#  facet_wrap(.~ CloneID, nrow = 5)
+single_run_plot <- singleRun(30)
+
+ggplot(single_run_plot)+
+  geom_point(aes(x=Timeseries, y=Clonefreq, col=CloneID)) +
+  guides(col='none') +
+  facet_wrap(.~ CloneID, nrow = 5)
 
 
-BatchRun <- function(nIter, nClones){
+BatchRun <- function(nIter, distrib="powerlaw", nClones){
   multiRun <- singleRun(nClones) 
   for (i in 1:nIter){
-    new_run <- singleRun(nClones) 
+    new_run <- singleRun(nClones = nClones, distrib = distrib) 
     multiRun <- multiRun %>%
       mutate(!!paste0("Clonefreq_", i) := new_run$Clonefreq)
   }
@@ -96,7 +120,7 @@ BatchRun <- function(nIter, nClones){
 }
 
   
-multiRun_plot <- BatchRun(30, 30)
+multiRun_plot <- BatchRun(30, distrib="unif", 30)
 
 Wes_pallete <- wesanderson::wes_palette('Darjeeling1', 30, type = "continuous")
 
@@ -109,17 +133,67 @@ ggplot(multiRun_plot)+
   facet_wrap(.~ CloneID, nrow = 5)
 
 
-GC_time <- function(Time){
-  t0=4
-  alpha = 0.1175329567; nu = 0.00536442741333333;
-  alpha_t= alpha/(1 + exp(nu * (Time-t0)^2));
+for (i in ) {
   
-  sample(uniform_dist(Time), alpha_t * CAR_FoB(Time))
+  TSTEP = 0.04; updated_time = 4;
+  current_time = updated_time + TSTEP;
+  lambda = 0.3; persist = 1 - lambda; mu = 0.00032;
+  prob_loss = 1- exp(-lambda * TSTEP)
+ 
+  ## pre-existing clones
+  start_clone_dist <- MZ_time(Time = updated_time, distrib = 'unif', nClones = 5)
+  poolsize = length(clone_dist)
+  binomial_loss <- rbinom(1, size = poolsize, prob = prob_loss)
+  clone_persist <- sample(start_clone_dist, poolsize - binomial_loss)
+  
+  ## influx
+  number_new_cells <- as.integer(mu * CAR_FoB(current_time) * TSTEP)
+  parent_dist <- MZ_time(Time = current_time, distrib = 'unif', nClones = 5)
+  new_clones <- sample(parent_dist, number_new_cells)
+  
+  final_clone_dist <- c(clone_persist, new_clones)
+  current_poolsize = length(final_clone_dist)
 }
 
+Stoch_sim <- function(){
+  
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
-ggplot()+
-  geom_histogram(aes(x=MZ_time(10)), binwidth = 1, fill=2)+
-  geom_histogram(aes(x=GC_time(10)), binwidth = 1, fill=4)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
