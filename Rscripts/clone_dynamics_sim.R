@@ -13,14 +13,28 @@ CAR_FoB <- function(Time){
 }
 
 ## Assuming that antigen-specific B cell clones are distributed uniformly in the activated pool
-## We are simulating for 40 different clones.
-## The pool size of acivated FoB cells varies with time. 
+## We are simulating for 30 different clones.
+## The pool size of activated FoB cells varies with time. 
 uniform_dist <- function(Time){ 
-  rdunif(as.integer(CAR_FoB(Time)), a = 1, b = 40)
+  rdunif(as.integer(CAR_FoB(Time)), a = 1, b = 30)
 }
 
 ggplot()+
-  geom_histogram(aes(x=uniform_dist(30)), binwidth = 1, fill=4)
+  geom_histogram(aes(x=uniform_dist(10)), binwidth = 1, fill=4)
+
+## Assuming power-law distribution for the antigen-specific B cell clones in the activated pool
+## We are simulating for 30 different clones.
+## The pool size of activated FoB cells varies with time. 
+Norm_power_law <- function(Time, x){
+  k= 0.5; a=1; b=40;
+ CAR_FoB(Time) * (x^-k)/((b^(-k+1) - a^(-k+1))/(-k+1))
+}
+
+clone_vec <- seq(1, 30, 1)
+clone_dist <- as.integer(Norm_power_law(10, clone_vec))
+
+ggplot()+
+  geom_line(aes(x=clone_vec, y=clone_dist), col=4)
 
 
 ## Cells that differentiate into MZ and GC phenotype within a short interval time dt
