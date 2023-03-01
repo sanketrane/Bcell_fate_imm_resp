@@ -136,65 +136,54 @@ boot_func <- function(eps){
     mutate(key = "MZB")
   
   
-  pooled_df <- rbind(Fo_summary, GC_summary, MZ_summary)%>%
+  rbind(Fo_summary, GC_summary, MZ_summary)%>%
     filter(timeseries >= 5)
-  
-  ggplot(pooled_df) +
-    geom_line(aes(x=timeseries, y=median, col=key))+
-    geom_ribbon(aes(x = timeseries, ymin = lb, ymax = ub, fill=key), alpha = 0.25) +
-    scale_x_log10() + scale_y_log10(limits=c(1, 1e5))
 }
 
-boot_func(0.01)
+pooled_df <- boot_func(0.01)
+  
+ggplot(pooled_df) +
+  geom_line(aes(x=timeseries, y=median, col=key))+
+  geom_ribbon(aes(x = timeseries, ymin = lb, ymax = ub, fill=key), alpha = 0.25) +
+  scale_x_log10() + scale_y_log10(limits=c(1, 1e5))
+
+
+sol_df <- pooled_df %>%
+  select(-lb, -ub) %>%
+  spread(key = key, value = median)
   
 
 
-
-ggplot(data = sol_df, aes(x= time_since_imm)) +
-  geom_area(aes(y= FO_counts+ GC_counts + CARMZ_WT, fill="FO_counts" ), alpha=0.6 , linewidth=.5, colour="white") +
-  geom_area(aes(y= GC_counts + CARMZ_WT, fill="GC_counts"), alpha=0.6 , linewidth=.5, colour="white") +
-  geom_area(aes(y= CARMZ_WT, fill="CARMZ_WT"), alpha=0.6 , linewidth=.5, colour="white") +
+ggplot(data = sol_df, aes(x= timeseries)) +
+  geom_area(aes(y= FoB+ GCB + MZB, fill="FO_counts" ), alpha=0.6 , linewidth=.5, colour="white") +
+  geom_area(aes(y= GCB + MZB, fill="GC_counts"), alpha=0.6 , linewidth=.5, colour="white") +
+  geom_area(aes(y= MZB, fill="CARMZ_WT"), alpha=0.6 , linewidth=.5, colour="white") +
   #scale_fill_viridis(discrete = T) +
   #theme_ipsum() + 
   scale_x_log10(limits = c(5, 35), breaks=c(7, 14, 35)) + scale_y_log10() + 
   labs(x='Days since immunization', y=NULL)  + 
   guides(fill="none")
 
-plot_df <- sol_df %>% 
-  gather(-time_since_imm, key = 'popln', value = 'counts') %>%
-  filter(popln != "FO_counts") %>%
-  filter(time_since_imm >= 5)
+plot_df <- pooled_df %>%
+  filter(key != "FoB") %>%
+  filter(timeseries >= 5)
 
 aresf <- plot_df %>%
-  group_by(time_since_imm) %>%
-  mutate(n_tot = sum(counts), 
-         percentage = counts/n_tot)
+  select(-lb, -ub) %>%
+  group_by(timeseries) %>%
+  mutate(n_tot = sum(median), 
+         percentage = median/n_tot)
 
 # Give a specific order:
-aresf$popln <- factor(aresf$popln , levels=c("CARMZ_WT", "GC_counts", "FO_counts") )
+aresf$popln <- factor(aresf$key , levels=c("CARMZ_WT", "GC_counts", "FO_counts") )
 
-ggplot(data = aresf, aes(x= (time_since_imm), y=percentage, fill=popln)) +
+ggplot(data = aresf, aes(x= (timeseries), y=percentage*100, fill=key)) +
   geom_area(alpha=0.6 , linewidth=.5, colour="white") +
   scale_fill_viridis(discrete = T) +
   theme_ipsum() + 
-  xlim(5, 95) + #scale_y_log10() + 
+  xlim(5, 35) + #scale_y_log10() + 
   labs(x='Days since immunization', y=NULL)  + 
   #facet_wrap(.~popln) + 
   guides(col="none")
   
-
-
-
-#### data transformation functions
-logit_trans <- function(x){
-  
-  #log(x/(1-x))
-  asin(sqrt(x))
-}
-
-expit_trans <- function(x){
-  
-  exp(x)/(1 + exp(x))
-}
-
 
