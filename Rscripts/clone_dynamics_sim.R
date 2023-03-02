@@ -69,6 +69,7 @@ MZ_time <- function(Time, distrib="powerlaw", nClones){
 }
 
 
+
 singleRun <- function(nClones, distrib="powerlaw"){
   time_vec <- c(4, 7, 10, 14, 18, 21, 24, 27, 30)
   
@@ -133,32 +134,68 @@ ggplot(multiRun_plot)+
   facet_wrap(.~ CloneID, nrow = 5)
 
 
-for (i in ) {
+TSTEP = 0.1; updated_time = 4; Tmax = 10; current_time = 0; NUM_Clones = 30
+start_clone_dist <- MZ_time(Time = updated_time, distrib = 'unif', nClones = NUM_Clones)
+
+initial_dist <- data.frame("CloneID" = as.factor(seq(1, NUM_Clones, 1)),
+                          "T0" = rep(0, NUM_Clones))
+start_dist <- data.frame(table(start_clone_dist)) %>%
+  rename(CloneID=start_clone_dist,
+         !!paste0('TS_', updated_time) := Freq)
+
+out_dist <- initial_dist %>%
+  left_join(start_dist, by="CloneID")
+
+time_vec <- c(updated_time)
+
+while(current_time <= Tmax){
   
-  TSTEP = 0.04; updated_time = 4;
-  current_time = updated_time + TSTEP;
+  current_time = round(updated_time + TSTEP, 2);
   lambda = 0.3; persist = 1 - lambda; mu = 0.00032;
   prob_loss = 1- exp(-lambda * TSTEP)
  
   ## pre-existing clones
-  start_clone_dist <- MZ_time(Time = updated_time, distrib = 'unif', nClones = 5)
-  poolsize = length(clone_dist)
+  poolsize <- length(start_clone_dist)
+  
+  ## update the pool
   binomial_loss <- rbinom(1, size = poolsize, prob = prob_loss)
   clone_persist <- sample(start_clone_dist, poolsize - binomial_loss)
   
   ## influx
   number_new_cells <- as.integer(mu * CAR_FoB(current_time) * TSTEP)
-  parent_dist <- MZ_time(Time = current_time, distrib = 'unif', nClones = 5)
+  parent_dist <- MZ_time(Time = current_time, distrib = 'unif', nClones = NUM_Clones)
   new_clones <- sample(parent_dist, number_new_cells)
   
+  ## update the pool
   final_clone_dist <- c(clone_persist, new_clones)
-  current_poolsize = length(final_clone_dist)
+  current_poolsize <- length(final_clone_dist)
+  
+  ## output
+  updated_dist <- data.frame(table(final_clone_dist)) %>%
+    rename(CloneID=final_clone_dist,
+           !!paste0('TS_', current_time) := Freq)
+  
+  out_dist <- out_dist %>%
+    left_join(updated_dist, by="CloneID")
+  
+  ## reset the time an clone dist
+  start_clone_dist <- final_clone_dist
+  updated_time <- current_time
+  
+  time_vec <- append(time_vec, values = updated_time)
+  
 }
 
-Stoch_sim <- function(){
-  
-}
-  
+single_run_plot <- out_dist %>%
+  select(- T0) %>%
+  gather(-CloneID, key="Timesteps", value = "Clonefreq")  %>%
+  bind_cols("Timeseries" = rep(time_vec, NUM_Clones))
+
+
+ggplot(single_run_plot)+
+  geom_line(aes(x=Timeseries, y=Clonefreq, col=CloneID)) +
+  guides(col='none') +
+  facet_wrap(.~ CloneID, nrow = 5)
   
   
   
