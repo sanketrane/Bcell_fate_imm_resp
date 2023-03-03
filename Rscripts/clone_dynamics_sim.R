@@ -134,8 +134,8 @@ ggplot(multiRun_plot)+
   facet_wrap(.~ CloneID, nrow = 5)
 
 
-TSTEP = 0.1; updated_time = 4; Tmax = 10; current_time = 0; NUM_Clones = 30
-start_clone_dist <- MZ_time(Time = updated_time, distrib = 'unif', nClones = NUM_Clones)
+TSTEP = 1; updated_time = 4; Tmax = 30; current_time = 0; NUM_Clones = 30
+start_clone_dist <- MZ_time(Time = updated_time, distrib = 'powerlaw', nClones = NUM_Clones)
 
 initial_dist <- data.frame("CloneID" = as.factor(seq(1, NUM_Clones, 1)),
                           "T0" = rep(0, NUM_Clones))
@@ -148,7 +148,7 @@ out_dist <- initial_dist %>%
 
 time_vec <- c(updated_time)
 
-while(current_time <= Tmax){
+while(current_time < Tmax){
   
   current_time = round(updated_time + TSTEP, 2);
   lambda = 0.3; persist = 1 - lambda; mu = 0.00032;
@@ -163,7 +163,7 @@ while(current_time <= Tmax){
   
   ## influx
   number_new_cells <- as.integer(mu * CAR_FoB(current_time) * TSTEP)
-  parent_dist <- MZ_time(Time = current_time, distrib = 'unif', nClones = NUM_Clones)
+  parent_dist <- MZ_time(Time = current_time, distrib = 'powerlaw', nClones = NUM_Clones)
   new_clones <- sample(parent_dist, number_new_cells)
   
   ## update the pool
@@ -188,22 +188,44 @@ while(current_time <= Tmax){
 
 single_run_plot <- out_dist %>%
   select(- T0) %>%
-  gather(-CloneID, key="Timesteps", value = "Clonefreq")  %>%
-  bind_cols("Timeseries" = rep(time_vec, NUM_Clones))
+  gather(-CloneID, key="Timesteps", value = "Clonefreq")  
 
 
 ggplot(single_run_plot)+
-  geom_line(aes(x=Timeseries, y=Clonefreq, col=CloneID)) +
-  guides(col='none') +
+  geom_line(aes(x=Timesteps, y=Clonefreq, col=CloneID)) +
+  guides(col='none') +  
   facet_wrap(.~ CloneID, nrow = 5)
   
+
+clonevec <- c()
+for (i in 1:30) {
+  clonevec[i] <- paste0("clone_", i)
+}
+clonerep <- rep(clonevec, 62)
   
+area_df <- out_dist %>%
+  select(-T0, -CloneID)
+
+area_dff <- t(area_df)  
+
+colnames(area_dff) <- clonevec
+
+area_plot <- area_dff %>%
+  bind_cols("Timeseries" = time_vec)
+
+
   
-  
-  
-  
-  
-  
+
+
+ggplot(data = area_plot, aes(x= Timeseries)) +
+  geom_area(aes(y= clone_1+ clone_2 + clone_3, fill="clone_3" ), alpha=0.6 , linewidth=.5, colour="white") +
+  geom_area(aes(y= clone_1 + clone_2, fill="clone_2"), alpha=0.6 , linewidth=.5, colour="white") +
+  geom_area(aes(y= clone_1, fill="clone_1"), alpha=0.6 , linewidth=.5, colour="white") +
+  #scale_fill_viridis(discrete = T) +
+  #theme_ipsum() + 
+  scale_x_log10(limits = c(4, 30), breaks=c(7, 14, 35)) + scale_y_log10() + 
+  labs(x='Days since immunization', y=NULL)  + 
+  guides(fill="none")
   
   
   
