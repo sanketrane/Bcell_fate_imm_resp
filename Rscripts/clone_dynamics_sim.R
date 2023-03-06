@@ -70,45 +70,151 @@ MZ_time <- function(Time, distrib="powerlaw", nClones){
 
 
 
-singleRun <- function(nClones, distrib="powerlaw"){
-  time_vec <- c(4, 7, 10, 14, 18, 21, 24, 27, 30)
+#singleRun <- function(nClones, distrib="powerlaw"){
+#  time_vec <- c(4, 7, 10, 14, 18, 21, 24, 27, 30)
+#  
+#  MZ_bin <- data.frame("CloneID" = as.factor(seq(1, nClones, 1)),
+#                       "T0" = rep(0, nClones))
+#  
+#  for (i in 1:length(time_vec)){
+#    new_freq_df <- data.frame(table(MZ_time(Time = time_vec[i], distrib = distrib, nClones = nClones))) %>%
+#      rename(CloneID=Var1,
+#             !!paste0('TSTEP_', i) := Freq)
+#    MZ_bin <- MZ_bin %>%
+#      left_join(new_freq_df, by="CloneID")
+#  }           
+#  
+#  MZ_bin_plot <- MZ_bin %>%
+#    select(-T0) %>%
+#    gather(-CloneID, key="Timesteps", value = "Clonefreq") %>%
+#    mutate(Timeseries = ifelse(Timesteps == "TSTEP_1", 4,
+#                               ifelse(Timesteps == "TSTEP_2", 7,
+#                                      ifelse(Timesteps == "TSTEP_3", 14,
+#                                             ifelse(Timesteps == "TSTEP_4", 21,
+#                                                    ifelse(Timesteps == "TSTEP_5", 18,
+#                                                           ifelse(Timesteps == "TSTEP_6", 24,
+#                                                                  ifelse(Timesteps == "TSTEP_7", 27, 30)))))))) %>%
+#    select(-Timesteps)
+#}
+#
+#single_run_plot <- singleRun(30)
+#
+#ggplot(single_run_plot)+
+#  geom_point(aes(x=Timeseries, y=Clonefreq, col=CloneID)) +
+#  guides(col='none') +
+#  facet_wrap(.~ CloneID, nrow = 5)
+#
+#
+#BatchRun <- function(nIter, distrib="powerlaw", nClones){
+#  multiRun <- singleRun(nClones) 
+#  for (i in 1:nIter){
+#    new_run <- singleRun(nClones = nClones, distrib = distrib) 
+#    multiRun <- multiRun %>%
+#      mutate(!!paste0("Clonefreq_", i) := new_run$Clonefreq)
+#  }
+#  multiRun_plot <- multiRun %>%
+#    gather(-c(CloneID, Timeseries), key='key', value = 'value') %>%
+#    group_by(CloneID, Timeseries) %>% replace(is.na(.), 0) %>%
+#    summarize(lb = quantile(value, probs = 0.045),
+#              median = quantile(value, probs = 0.5),
+#              ub = quantile(value, probs = 0.955)) 
+#}
+#
+#  
+#multiRun_plot <- BatchRun(30, distrib="unif", 30)
+#
+#Wes_pallete <- wesanderson::wes_palette('Darjeeling1', 30, type = "continuous")
+#
+#ggplot(multiRun_plot)+
+#  geom_line(aes(x=Timeseries, y=median, col=CloneID)) +
+#  geom_ribbon(aes(x = Timeseries, ymin = lb, ymax = ub, fill=CloneID), alpha = 0.25) +
+#  scale_color_manual(values = Wes_pallete)+ scale_fill_manual(values=Wes_pallete)+
+#  #scale_color_viridis_d()+ scale_fill_viridis_d()+
+#  guides(col='none', fill = 'none') +
+#  facet_wrap(.~ CloneID, nrow = 5)
+
+singleRun <- function(NUM_Clones, distrib){
   
-  MZ_bin <- data.frame("CloneID" = as.factor(seq(1, nClones, 1)),
-                       "T0" = rep(0, nClones))
+  TSTEP = 0.05; updated_time = 4; Tmax = 30; current_time = 0; NUM_Clones = NUM_Clones
+  start_clone_dist <- MZ_time(Time = updated_time, distrib = distrib, nClones = NUM_Clones)
   
-  for (i in 1:length(time_vec)){
-    new_freq_df <- data.frame(table(MZ_time(Time = time_vec[i], distrib = distrib, nClones = nClones))) %>%
-      rename(CloneID=Var1,
-             !!paste0('TSTEP_', i) := Freq)
-    MZ_bin <- MZ_bin %>%
-      left_join(new_freq_df, by="CloneID")
-  }           
+  initial_dist <- data.frame("CloneID" = as.factor(seq(1, NUM_Clones, 1)),
+                             "T0" = rep(0, NUM_Clones))
+  start_dist <- data.frame(table(start_clone_dist)) %>%
+    rename(CloneID=start_clone_dist,
+           !!paste0('TS_', updated_time) := Freq)
   
-  MZ_bin_plot <- MZ_bin %>%
-    select(-T0) %>%
-    gather(-CloneID, key="Timesteps", value = "Clonefreq") %>%
-    mutate(Timeseries = ifelse(Timesteps == "TSTEP_1", 4,
-                               ifelse(Timesteps == "TSTEP_2", 7,
-                                      ifelse(Timesteps == "TSTEP_3", 14,
-                                             ifelse(Timesteps == "TSTEP_4", 21,
-                                                    ifelse(Timesteps == "TSTEP_5", 18,
-                                                           ifelse(Timesteps == "TSTEP_6", 24,
-                                                                  ifelse(Timesteps == "TSTEP_7", 27, 30)))))))) %>%
-    select(-Timesteps)
+  out_dist <- initial_dist %>%
+    left_join(start_dist, by="CloneID")
+  
+  time_vec <- c(updated_time)
+  
+  while(current_time < Tmax){
+    
+    current_time = round(updated_time + TSTEP, 2);
+    lambda = 0.3; persist = 1 - lambda; mu = 0.00032;
+    prob_loss = 1- exp(-lambda * TSTEP)
+    
+    ## pre-existing clones
+    poolsize <- length(start_clone_dist)
+    
+    ## update the pool
+    binomial_loss <- rbinom(1, size = poolsize, prob = prob_loss)
+    clone_persist <- sample(start_clone_dist, poolsize - binomial_loss)
+    
+    ## influx
+    number_new_cells <- as.integer(mu * CAR_FoB(current_time) * TSTEP)
+    parent_dist <- MZ_time(Time = current_time, distrib = distrib, nClones = NUM_Clones)
+    new_clones <- sample(parent_dist, number_new_cells)
+    
+    ## update the pool
+    final_clone_dist <- c(clone_persist, new_clones)
+    current_poolsize <- length(final_clone_dist)
+    
+    ## output
+    updated_dist <- data.frame(table(final_clone_dist)) %>%
+      rename(CloneID=final_clone_dist,
+             !!paste0('TS_', current_time) := Freq)
+    
+    out_dist <- out_dist %>%
+      left_join(updated_dist, by="CloneID")
+    
+    ## reset the time an clone dist
+    start_clone_dist <- final_clone_dist
+    updated_time <- current_time
+    
+    time_vec <- append(time_vec, values = updated_time)
+    
+  }
+  
+  timeseries <- c()
+  for (i in 1: length(time_vec)){
+    ind_a = 1 + (i-1) * NUM_Clones
+    ind_b = NUM_Clones*i
+    timeseries[ind_a:ind_b] <- rep(time_vec[i], NUM_Clones)
+  }
+  
+  single_run_plot <- out_dist %>%
+    select(- T0) %>% replace(is.na(.), 0) %>%
+    gather(-CloneID, key="Timesteps", value = "Clonefreq")  %>%
+    bind_cols("Timeseries" = timeseries)%>%
+    select(- Timesteps)
+  
+  return(single_run_plot)
 }
 
-single_run_plot <- singleRun(30)
+single_run_plot <- singleRun(30, 'unif')
 
 ggplot(single_run_plot)+
-  geom_point(aes(x=Timeseries, y=Clonefreq, col=CloneID)) +
-  guides(col='none') +
+  geom_line(aes(x=Timeseries, y=Clonefreq, col=CloneID)) +
+  guides(col='none') +  
   facet_wrap(.~ CloneID, nrow = 5)
 
-
-BatchRun <- function(nIter, distrib="powerlaw", nClones){
-  multiRun <- singleRun(nClones) 
-  for (i in 1:nIter){
-    new_run <- singleRun(nClones = nClones, distrib = distrib) 
+nIter <- 4
+BatchRun <- function(nIter, NUM_Clones, distrib){
+  multiRun <- singleRun(NUM_Clones=30, distrib='unif') 
+  for (i in 1:nIter-1){
+    new_run <- singleRun(NUM_Clones = 30, distrib = "unif") 
     multiRun <- multiRun %>%
       mutate(!!paste0("Clonefreq_", i) := new_run$Clonefreq)
   }
@@ -118,10 +224,9 @@ BatchRun <- function(nIter, distrib="powerlaw", nClones){
     summarize(lb = quantile(value, probs = 0.045),
               median = quantile(value, probs = 0.5),
               ub = quantile(value, probs = 0.955)) 
+  return(multiRun)
 }
 
-  
-multiRun_plot <- BatchRun(30, distrib="unif", 30)
 
 Wes_pallete <- wesanderson::wes_palette('Darjeeling1', 30, type = "continuous")
 
@@ -134,77 +239,14 @@ ggplot(multiRun_plot)+
   facet_wrap(.~ CloneID, nrow = 5)
 
 
-TSTEP = 1; updated_time = 4; Tmax = 30; current_time = 0; NUM_Clones = 30
-start_clone_dist <- MZ_time(Time = updated_time, distrib = 'powerlaw', nClones = NUM_Clones)
-
-initial_dist <- data.frame("CloneID" = as.factor(seq(1, NUM_Clones, 1)),
-                          "T0" = rep(0, NUM_Clones))
-start_dist <- data.frame(table(start_clone_dist)) %>%
-  rename(CloneID=start_clone_dist,
-         !!paste0('TS_', updated_time) := Freq)
-
-out_dist <- initial_dist %>%
-  left_join(start_dist, by="CloneID")
-
-time_vec <- c(updated_time)
-
-while(current_time < Tmax){
-  
-  current_time = round(updated_time + TSTEP, 2);
-  lambda = 0.3; persist = 1 - lambda; mu = 0.00032;
-  prob_loss = 1- exp(-lambda * TSTEP)
- 
-  ## pre-existing clones
-  poolsize <- length(start_clone_dist)
-  
-  ## update the pool
-  binomial_loss <- rbinom(1, size = poolsize, prob = prob_loss)
-  clone_persist <- sample(start_clone_dist, poolsize - binomial_loss)
-  
-  ## influx
-  number_new_cells <- as.integer(mu * CAR_FoB(current_time) * TSTEP)
-  parent_dist <- MZ_time(Time = current_time, distrib = 'powerlaw', nClones = NUM_Clones)
-  new_clones <- sample(parent_dist, number_new_cells)
-  
-  ## update the pool
-  final_clone_dist <- c(clone_persist, new_clones)
-  current_poolsize <- length(final_clone_dist)
-  
-  ## output
-  updated_dist <- data.frame(table(final_clone_dist)) %>%
-    rename(CloneID=final_clone_dist,
-           !!paste0('TS_', current_time) := Freq)
-  
-  out_dist <- out_dist %>%
-    left_join(updated_dist, by="CloneID")
-  
-  ## reset the time an clone dist
-  start_clone_dist <- final_clone_dist
-  updated_time <- current_time
-  
-  time_vec <- append(time_vec, values = updated_time)
-  
-}
-
-single_run_plot <- out_dist %>%
-  select(- T0) %>%
-  gather(-CloneID, key="Timesteps", value = "Clonefreq")  
-
-
-ggplot(single_run_plot)+
-  geom_line(aes(x=Timesteps, y=Clonefreq, col=CloneID)) +
-  guides(col='none') +  
-  facet_wrap(.~ CloneID, nrow = 5)
-  
-
 clonevec <- c()
 for (i in 1:30) {
   clonevec[i] <- paste0("clone_", i)
 }
 clonerep <- rep(clonevec, 62)
   
-area_df <- out_dist %>%
-  select(-T0, -CloneID)
+area_df <- new_run %>%
+  select(-CloneID, -Timeseries)
 
 area_dff <- t(area_df)  
 
@@ -218,6 +260,9 @@ area_plot <- area_dff %>%
 
 
 ggplot(data = area_plot, aes(x= Timeseries)) +
+  geom_area(aes(y= clone_1+ clone_2 + clone_3, clone_4+ clone_5 + clone_6, fill="clone_3" ), alpha=0.6 , linewidth=.5, colour="white") +
+  geom_area(aes(y= clone_1+ clone_2 + clone_3, clone_4+ clone_5 , fill="clone_3" ), alpha=0.6 , linewidth=.5, colour="white") +
+  geom_area(aes(y= clone_1+ clone_2 + clone_3, clone_4, fill="clone_3" ), alpha=0.6 , linewidth=.5, colour="white") +
   geom_area(aes(y= clone_1+ clone_2 + clone_3, fill="clone_3" ), alpha=0.6 , linewidth=.5, colour="white") +
   geom_area(aes(y= clone_1 + clone_2, fill="clone_2"), alpha=0.6 , linewidth=.5, colour="white") +
   geom_area(aes(y= clone_1, fill="clone_1"), alpha=0.6 , linewidth=.5, colour="white") +
