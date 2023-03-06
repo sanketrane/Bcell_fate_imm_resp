@@ -3,6 +3,7 @@
 ## loading libraries
 library(tidyverse)
 library(wesanderson)
+library(parallel)
 
 ## Phenomenological function describing number of activated (CAR expressing) FoB cells varying with time
 CAR_FoB <- function(Time){
@@ -26,11 +27,49 @@ ggplot()+
 ## We are simulating for 30 different clones.
 ## The pool size of activated FoB cells varies with time. 
 Norm_power_law <- function(Time, nClones){
-  k= 0.5; a=1; b=nClones;
+  k0= 0.001; a=1; b=nClones;
+  alpha = 0.02
+  k = k0 + alpha * Time
   
   x_vec <- seq(1, nClones, 1)
  as.integer(CAR_FoB(Time) * (x_vec^-k)/((b^(-k+1) - a^(-k+1))/(-k+1)))
 }
+
+
+time_obs <- c(4, 7, 10, 14, 21, 28)
+NUM_Clones = 10
+pl_dist <- data.frame("Clone_Num" = (seq(1, NUM_Clones)))
+
+for (i in 1:length(time_obs)) {
+  pl_dist[1:NUM_Clones, paste0("Time_", time_obs[i])] <- Norm_power_law(time_obs[i], NUM_Clones)
+}
+
+pl_distPlot <- pl_dist %>%
+  gather(-Clone_Num, key = 'TimeObs', value = 'CloneDist') %>%
+  group_by(TimeObs) %>%
+  mutate(clone_freq = CloneDist/sum(CloneDist),
+         Time_obs = ifelse(TimeObs == "Time_4", 4, 
+                           ifelse(TimeObs == "Time_7", 7, 
+                                  ifelse(TimeObs == "Time_10", 10, 
+                                         ifelse(TimeObs == "Time_14", 14, 
+                                                ifelse(TimeObs == "Time_21", 21, 28))))))
+
+
+ggplot(pl_distPlot)+
+  geom_line(aes(x=Time_obs, y=clone_freq, col=as.factor(Clone_Num)))+ guides(col='none') +
+  ylim(0, 0.3)
+
+
+time_vec <- seq(4, 30, 0.5)
+pwvec <- data.frame(t(sapply(time_vec, Norm_power_law, nClones=10))) %>%
+  bind_cols("Timeseries" = time_vec) %>%
+  gather(-Timeseries, key='Clone_num', value="CloneSize")
+
+ggplot(pwvec)+
+  geom_line(aes(x=Timeseries, y=CloneSize, col=Clone_num)) +
+  scale_y_log10() + scale_x_log10() + guides(col='none')
+  
+
 
 power_law_dist <- function(Time, nClones){
   ## generate a distribution
@@ -47,10 +86,11 @@ power_law_dist <- function(Time, nClones){
   return(dist)
 }
 
-pl_dist <- power_law_dist(10, 30)
+pl_histPlot <- power_law_dist(10, 30)
 
 ggplot()+
-  geom_histogram(aes(x=pl_dist), binwidth = 1, fill=2)
+  geom_histogram(aes(x=pl_histPlot), binwidth = 1, fill=2) +
+  labs(x="Clone rank", y="Count")
 
 
 
@@ -133,9 +173,17 @@ MZ_time <- function(Time, distrib="powerlaw", nClones){
 #  guides(col='none', fill = 'none') +
 #  facet_wrap(.~ CloneID, nrow = 5)
 
+#influx_func <- function(s){
+#  mu = 0.0025;
+#  CAR_FoB(s) * mu * exp(-mu * s)
+#}
+#
+#integrate(influx_func, lower = 10, upper = 10.04)$value
+
+
 singleRun <- function(NUM_Clones, distrib){
-  
-  TSTEP = 0.05; updated_time = 4; Tmax = 30; current_time = 0; NUM_Clones = NUM_Clones
+  ### !!!TSTEP needs to be very small otherwise the propensities are not accurate!!!
+  TSTEP = 0.04; updated_time = 4; Tmax = 30; current_time = 0; NUM_Clones = NUM_Clones
   start_clone_dist <- MZ_time(Time = updated_time, distrib = distrib, nClones = NUM_Clones)
   
   initial_dist <- data.frame("CloneID" = as.factor(seq(1, NUM_Clones, 1)),
@@ -152,18 +200,19 @@ singleRun <- function(NUM_Clones, distrib){
   while(current_time < Tmax){
     
     current_time = round(updated_time + TSTEP, 2);
-    lambda = 0.3; persist = 1 - lambda; mu = 0.00032;
-    prob_loss = 1- exp(-lambda * TSTEP)
+    lambda = 0.81; persist = 1 - lambda; mu = 0.0025;
+    prob_loss = 1 - exp(-lambda * TSTEP)
     
     ## pre-existing clones
     poolsize <- length(start_clone_dist)
     
     ## update the pool
-    binomial_loss <- rbinom(1, size = poolsize, prob = prob_loss)
-    clone_persist <- sample(start_clone_dist, poolsize - binomial_loss)
+    binomial_persist <- rbinom(1, size = poolsize, prob = 1 - prob_loss)
+    clone_persist <- sample(start_clone_dist, binomial_persist)
     
     ## influx
-    number_new_cells <- as.integer(mu * CAR_FoB(current_time) * TSTEP)
+    prob_influx = 1 - exp(-mu * TSTEP)
+    number_new_cells <- as.integer(prob_influx * CAR_FoB(current_time))
     parent_dist <- MZ_time(Time = current_time, distrib = distrib, nClones = NUM_Clones)
     new_clones <- sample(parent_dist, number_new_cells)
     
@@ -203,34 +252,57 @@ singleRun <- function(NUM_Clones, distrib){
   return(single_run_plot)
 }
 
-single_run_plot <- singleRun(30, 'unif')
+single_run_plot <- singleRun(10, 'powerlaw')
 
 ggplot(single_run_plot)+
   geom_line(aes(x=Timeseries, y=Clonefreq, col=CloneID)) +
   guides(col='none') +  
   facet_wrap(.~ CloneID, nrow = 5)
 
-nIter <- 4
+
+singleRun_clonefreq <- single_run_plot %>%
+  group_by(Timeseries) %>%
+  mutate(clone_freq = Clonefreq/sum(Clonefreq))
+
+ggplot(singleRun_clonefreq)+
+  geom_line(aes(x=Timeseries, y=clone_freq, col=CloneID)) +
+  guides(col='none') +
+  ylim(0, 0.3)
+
 BatchRun <- function(nIter, NUM_Clones, distrib){
-  multiRun <- singleRun(NUM_Clones=30, distrib='unif') 
-  for (i in 1:nIter-1){
-    new_run <- singleRun(NUM_Clones = 30, distrib = "unif") 
-    multiRun <- multiRun %>%
-      mutate(!!paste0("Clonefreq_", i) := new_run$Clonefreq)
+  ## function to iterate
+  MultiRun_Func <- function(nIter, NUM_Clones, distrib){
+    new_run <- singleRun(NUM_Clones=NUM_Clones, distrib=distrib)
+    res1 <- data.frame(new_run$Clonefreq)
+    colnames(res1) <- paste0('Clonefreq_', nIter)
+    return(res1)
   }
-  multiRun_plot <- multiRun %>%
-    gather(-c(CloneID, Timeseries), key='key', value = 'value') %>%
-    group_by(CloneID, Timeseries) %>% replace(is.na(.), 0) %>%
-    summarize(lb = quantile(value, probs = 0.045),
-              median = quantile(value, probs = 0.5),
-              ub = quantile(value, probs = 0.955)) 
-  return(multiRun)
+  
+  InitRun <- singleRun(NUM_Clones=NUM_Clones, distrib=distrib) 
+  
+  ## iterate MultiRun_Func for nIter times using lapply 
+  iter_seq <- seq(1, nIter)
+  para_run <- data.frame(mclapply(iter_seq, MultiRun_Func, NUM_Clones=NUM_Clones, distrib=distrib,
+                                  mc.cores = detectCores()-2))
+  #para_run <- data.frame(lapply(iter_seq, MultiRun_Func, NUM_Clones=NUM_Clones, distrib=distrib))
+  MultiRun_df <- InitRun %>%
+    bind_cols(para_run) #%>%
+    #gather(-c(CloneID, Timeseries), key='key', value = 'value') %>%
+    #group_by(CloneID, Timeseries) %>% replace(is.na(.), 0) %>%
+    #summarize(lb = quantile(value, probs = 0.045),
+    #          median = quantile(value, probs = 0.5),
+    #          ub = quantile(value, probs = 0.955)) 
+  
+  return(MultiRun_df)
 }
 
+system.time(
+MultiRunPlot <- BatchRun(10, NUM_Clones = 30, distrib =  "powerlaw")
+)
 
 Wes_pallete <- wesanderson::wes_palette('Darjeeling1', 30, type = "continuous")
 
-ggplot(multiRun_plot)+
+ggplot(MultiRunPlot)+
   geom_line(aes(x=Timeseries, y=median, col=CloneID)) +
   geom_ribbon(aes(x = Timeseries, ymin = lb, ymax = ub, fill=CloneID), alpha = 0.25) +
   scale_color_manual(values = Wes_pallete)+ scale_fill_manual(values=Wes_pallete)+
