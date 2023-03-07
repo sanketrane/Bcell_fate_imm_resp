@@ -9,30 +9,27 @@ library(wesanderson)
 library(parallel)
 library(rstan)
 
-## model specific details that needs to be change for every run
-modelName <- "Branched_timeinflux"
-
-## Setting all the directories for opeartions
-projectDir <- getwd()
-saveDir <- file.path(projectDir, 'save_csv')
-# compiling multiple stan objects together that ran on different nodes
-stanfit1 <- read_stan_csv(file.path(saveDir, paste0(modelName, "_1", ".csv")))
-stanfit2 <- read_stan_csv(file.path(saveDir, paste0(modelName, "_2",".csv")))
-stanfit3 <- read_stan_csv(file.path(saveDir, paste0(modelName, "_3", ".csv")))
-stanfit4 <- read_stan_csv(file.path(saveDir, paste0(modelName, "_4",".csv")))
-
-fit <- sflist2stanfit(list(stanfit1, stanfit2, stanfit3, stanfit4))
-# finding the parameters used in the model 
-# using the last parameter("sigma4") in the array to get the total number of parameters set in the model
-num_pars <- which(fit@model_pars %in% "sigma1") -2      # the variable "sigma4" will change depdending on the data used
-parametersToPlot <- fit@model_pars[1:num_pars] 
-
-## extract posterior distribution  of parameters as a matrix
-fit_ss <- as.data.frame(fit, pars= parametersToPlot) # matrix of posterior samples
-write.csv(fit_ss, file = paste0("PostDF_", modelName, ".csv"), row.names = F)
-
-print("break!")
-stop() 
+### model specific details that needs to be change for every run
+#modelName <- "Branched_timeinflux"
+#
+### Setting all the directories for opeartions
+#projectDir <- getwd()
+#saveDir <- file.path(projectDir, 'save_csv')
+## compiling multiple stan objects together that ran on different nodes
+#stanfit1 <- read_stan_csv(file.path(saveDir, paste0(modelName, "_1", ".csv")))
+#stanfit2 <- read_stan_csv(file.path(saveDir, paste0(modelName, "_2",".csv")))
+#stanfit3 <- read_stan_csv(file.path(saveDir, paste0(modelName, "_3", ".csv")))
+#stanfit4 <- read_stan_csv(file.path(saveDir, paste0(modelName, "_4",".csv")))
+#
+#fit <- sflist2stanfit(list(stanfit1, stanfit2, stanfit3, stanfit4))
+## finding the parameters used in the model 
+## using the last parameter("sigma4") in the array to get the total number of parameters set in the model
+#num_pars <- which(fit@model_pars %in% "sigma1") -2      # the variable "sigma4" will change depdending on the data used
+#parametersToPlot <- fit@model_pars[1:num_pars] 
+#
+### extract posterior distribution  of parameters as a matrix
+#fit_ss <- as.data.frame(fit, pars= parametersToPlot) # matrix of posterior samples
+#write.csv(fit_ss, file = paste0("PostDF_", modelName, ".csv"), row.names = F)
 
 fit_ss <- read.csv(file = paste0("PostDF_", modelName, ".csv"))
 mu_med <- median(fit_ss$mu)
