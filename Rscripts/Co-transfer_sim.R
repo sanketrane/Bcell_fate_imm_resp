@@ -90,7 +90,7 @@ boot_func <- function(eps){
   set.seed(1456)
   rowvec <- sample(1:nrow(fit_ss), 300, replace = FALSE) %>% sort()
   
-  ## initiating emoty matrices to store the output
+  ## initiating empty matrices to store the output
   Fo_df <- matrix(nrow = length(rowvec), ncol = length(ts_pred))
   GC_df <- matrix(nrow = length(rowvec), ncol = length(ts_pred))
   MZ_df <- matrix(nrow = length(rowvec), ncol = length(ts_pred))
