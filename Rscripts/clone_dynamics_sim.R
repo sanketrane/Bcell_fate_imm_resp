@@ -36,68 +36,68 @@ mu_med <- median(fit_ss$mu)
 lambda_med <- median(fit_ss$lambda_WT)
 
 
-## Immune response dynamics of B cells -- reporter induction upon b cell activation
-B_cell_data <- read_excel("datafiles/New_dataCAR.xlsx", sheet =2) %>%
-  mutate(mouse.id = paste0('m_', seq(1, 72))) %>%
-  filter(mouse.id != "m_1")
-
-
-# generating data for fitting
-imm_data <- B_cell_data %>% filter(genotype == "CAR") %>%
-  select(days_post_imm, contains("CARpos"))  %>%
-  filter(days_post_imm > 0) %>%
-  select(days_post_imm, CARpos_FoB, CARpos_MZB) 
-
-## Immune response dynamics of B cells -- reporter induction upon b cell activation
-OLD_data <- read_excel("datafiles/TD_response_OD.xlsx", sheet =1) %>% 
-  filter(genotype == "CAR") %>%
-  mutate(tot_B_count = total_splenic_counts_millions * 1e6 * (total_B_cells/100),
-         tot_CARB_count = tot_B_count * (fraction_CAR_in_Bcells/100),
-         CARFoB = (total_FOBs/100) * tot_B_count * (fraction_CAR_in_FOBs/100),
-         CARMZB = (total_MZBs/100) * tot_B_count * (fraction_CAR_in_MZBs/100)) %>%
-  select(days.post.imm, CARFoB, CARMZB) %>%
-  gather(-days.post.imm, key = 'popln', value = 'cell_counts')
-
-FoB_baseline <- OLD_data %>% filter(popln == "CARFoB") %>% filter(days.post.imm == 0) %>% summarise(mean(cell_counts))
-MZB_baseline <- OLD_data %>% filter(popln == "CARMZB") %>% filter(days.post.imm == 0) %>% summarise(mean(cell_counts))
-
-norm_data <- imm_data %>%
-  mutate(norm_CARFoB = CARpos_FoB - FoB_baseline$`mean(cell_counts)`,
-         norm_CARMZB = CARpos_MZB - MZB_baseline$`mean(cell_counts)`) %>%
-  select(days_post_imm, contains('norm')) %>%
-  gather(-days_post_imm, key = 'popln', value = 'cell_counts')
-
-
-## Phenomenological function describing number of activated (CAR expressing) FoB cells varying with time
-CAR_FoB <- function(Time){
-  # spline fitted to FoB numbers 
-  F0 = exp(0); B0 = exp(5);  n = 4 ;  X = 9.4 ;  q = 6;
-  value = (B0 * Time^n) * (1 - ((Time^q)/((X^q) + (Time^q))));
-  return(value)
-}
-
-## Phenomenological function describing number of activated (CAR expressing) FoB cells varying with time
-CAR_MZB <- function(Time){
-  # spline fitted to FoB numbers 
-  #F0 = exp(11.722278); B0 = exp(4.475064);  n = 4.781548 ;  X = 6.943644 ;  q = 5;
-  F0 = exp(5); B0 = exp(5.5);  n = 3 ;  X = 9.2 ;  q = 4;
-  value =  (B0 * Time^n) * (1 - ((Time^q)/((X^q) + (Time^q)))) #- exp(11.7);
-  return(value)
-}
-
-time_vec <- seq(4, 30, 0.5)
-carFoB_vec <- sapply(time_vec, CAR_FoB)
-carMZB_vec <- sapply(time_vec, CAR_MZB)
-ggplot() +
-  geom_line(aes(x=time_vec, y=(carFoB_vec)), col=2, size=0.8) +
-  geom_line(aes(x=time_vec, y=(carMZB_vec)), col=4, size=0.8) +
-  geom_point(data=norm_data,
-             aes(x=days_post_imm, y=cell_counts, col=popln)) + 
-  scale_color_manual(values = c(2, 4))+
-  scale_x_continuous(limits=c(4, 30))+
-  scale_y_log10() +
-  labs(x='Days post immunization', y="Cell counts", title='CAR positive FoB Cells') 
-
+### Immune response dynamics of B cells -- reporter induction upon b cell activation
+#B_cell_data <- read_excel("datafiles/New_dataCAR.xlsx", sheet =2) %>%
+#  mutate(mouse.id = paste0('m_', seq(1, 72))) %>%
+#  filter(mouse.id != "m_1")
+#
+#
+## generating data for fitting
+#imm_data <- B_cell_data %>% filter(genotype == "CAR") %>%
+#  select(days_post_imm, contains("CARpos"))  %>%
+#  filter(days_post_imm > 0) %>%
+#  select(days_post_imm, CARpos_FoB, CARpos_MZB) 
+#
+### Immune response dynamics of B cells -- reporter induction upon b cell activation
+#OLD_data <- read_excel("datafiles/TD_response_OD.xlsx", sheet =1) %>% 
+#  filter(genotype == "CAR") %>%
+#  mutate(tot_B_count = total_splenic_counts_millions * 1e6 * (total_B_cells/100),
+#         tot_CARB_count = tot_B_count * (fraction_CAR_in_Bcells/100),
+#         CARFoB = (total_FOBs/100) * tot_B_count * (fraction_CAR_in_FOBs/100),
+#         CARMZB = (total_MZBs/100) * tot_B_count * (fraction_CAR_in_MZBs/100)) %>%
+#  select(days.post.imm, CARFoB, CARMZB) %>%
+#  gather(-days.post.imm, key = 'popln', value = 'cell_counts')
+#
+#FoB_baseline <- OLD_data %>% filter(popln == "CARFoB") %>% filter(days.post.imm == 0) %>% summarise(mean(cell_counts))
+#MZB_baseline <- OLD_data %>% filter(popln == "CARMZB") %>% filter(days.post.imm == 0) %>% summarise(mean(cell_counts))
+#
+#norm_data <- imm_data %>%
+#  mutate(norm_CARFoB = CARpos_FoB - FoB_baseline$`mean(cell_counts)`,
+#         norm_CARMZB = CARpos_MZB - MZB_baseline$`mean(cell_counts)`) %>%
+#  select(days_post_imm, contains('norm')) %>%
+#  gather(-days_post_imm, key = 'popln', value = 'cell_counts')
+#
+#
+### Phenomenological function describing number of activated (CAR expressing) FoB cells varying with time
+#CAR_FoB <- function(Time){
+#  # spline fitted to FoB numbers 
+#  F0 = exp(0); B0 = exp(5);  n = 4 ;  X = 9.4 ;  q = 6;
+#  value = (B0 * Time^n) * (1 - ((Time^q)/((X^q) + (Time^q))));
+#  return(value)
+#}
+#
+### Phenomenological function describing number of activated (CAR expressing) FoB cells varying with time
+#CAR_MZB <- function(Time){
+#  # spline fitted to FoB numbers 
+#  #F0 = exp(11.722278); B0 = exp(4.475064);  n = 4.781548 ;  X = 6.943644 ;  q = 5;
+#  F0 = exp(5); B0 = exp(5.5);  n = 3 ;  X = 9.2 ;  q = 4;
+#  value =  (B0 * Time^n) * (1 - ((Time^q)/((X^q) + (Time^q)))) #- exp(11.7);
+#  return(value)
+#}
+#
+#time_vec <- seq(4, 30, 0.5)
+#carFoB_vec <- sapply(time_vec, CAR_FoB)
+#carMZB_vec <- sapply(time_vec, CAR_MZB)
+#ggplot() +
+#  geom_line(aes(x=time_vec, y=(carFoB_vec)), col=2, size=0.8) +
+#  geom_line(aes(x=time_vec, y=(carMZB_vec)), col=4, size=0.8) +
+#  geom_point(data=norm_data,
+#             aes(x=days_post_imm, y=cell_counts, col=popln)) + 
+#  scale_color_manual(values = c(2, 4))+
+#  scale_x_continuous(limits=c(4, 30))+
+#  scale_y_log10() +
+#  labs(x='Days post immunization', y="Cell counts", title='CAR positive FoB Cells') 
+#
 
 
 ## Assuming that antigen-specific B cell clones are distributed uniformly in the activated pool
@@ -107,8 +107,8 @@ uniform_dist <- function(Time, nClones){
   rdunif(as.integer(CAR_FoB(Time)), a = 1, b = nClones)
 }
 
-ggplot()+
-  geom_histogram(aes(x=uniform_dist(10, 30)), binwidth = 1, fill=4)
+#ggplot()+
+#  geom_histogram(aes(x=uniform_dist(10, 30)), binwidth = 1, fill=4)
 
 ## Assuming power-law distribution for the antigen-specific B cell clones in the activated pool
 ## We are simulating for 30 different clones.
