@@ -10,11 +10,11 @@ library(parallel)
 library(rstan)
 
 ### model specific details that needs to be change for every run
-#modelName <- "Branched_timeinflux"
-#
-### Setting all the directories for opeartions
-#projectDir <- getwd()
-#saveDir <- file.path(projectDir, 'save_csv')
+modelName <- "Branched_timeinflux"
+
+## Setting all the directories for opeartions
+projectDir <- getwd()
+saveDir <- file.path(projectDir, 'save_csv')
 ## compiling multiple stan objects together that ran on different nodes
 #stanfit1 <- read_stan_csv(file.path(saveDir, paste0(modelName, "_1", ".csv")))
 #stanfit2 <- read_stan_csv(file.path(saveDir, paste0(modelName, "_2",".csv")))
@@ -68,14 +68,14 @@ lambda_med <- median(fit_ss$lambda_WT)
 #  gather(-days_post_imm, key = 'popln', value = 'cell_counts')
 #
 #
-### Phenomenological function describing number of activated (CAR expressing) FoB cells varying with time
-#CAR_FoB <- function(Time){
-#  # spline fitted to FoB numbers 
-#  F0 = exp(0); B0 = exp(5);  n = 4 ;  X = 9.4 ;  q = 6;
-#  value = (B0 * Time^n) * (1 - ((Time^q)/((X^q) + (Time^q))));
-#  return(value)
-#}
-#
+## Phenomenological function describing number of activated (CAR expressing) FoB cells varying with time
+CAR_FoB <- function(Time){
+  # spline fitted to FoB numbers 
+  F0 = exp(0); B0 = exp(5);  n = 4 ;  X = 9.4 ;  q = 6;
+  value = (B0 * Time^n) * (1 - ((Time^q)/((X^q) + (Time^q))));
+  return(value)
+}
+
 ### Phenomenological function describing number of activated (CAR expressing) FoB cells varying with time
 #CAR_MZB <- function(Time){
 #  # spline fitted to FoB numbers 
@@ -85,19 +85,20 @@ lambda_med <- median(fit_ss$lambda_WT)
 #  return(value)
 #}
 #
-#time_vec <- seq(4, 30, 0.5)
-#carFoB_vec <- sapply(time_vec, CAR_FoB)
+time_vec <- seq(4, 30, 0.5)
+carFoB_vec <- sapply(time_vec, CAR_FoB)
 #carMZB_vec <- sapply(time_vec, CAR_MZB)
-#ggplot() +
-#  geom_line(aes(x=time_vec, y=(carFoB_vec)), col=2, size=0.8) +
+ggplot() +
+  geom_line(aes(x=time_vec, y=(carFoB_vec)), col=2, size=0.8) +
 #  geom_line(aes(x=time_vec, y=(carMZB_vec)), col=4, size=0.8) +
 #  geom_point(data=norm_data,
 #             aes(x=days_post_imm, y=cell_counts, col=popln)) + 
-#  scale_color_manual(values = c(2, 4))+
-#  scale_x_continuous(limits=c(4, 30))+
-#  scale_y_log10() +
-#  labs(x='Days post immunization', y="Cell counts", title='CAR positive FoB Cells') 
-#
+  scale_color_manual(values = c(2, 4))+
+  scale_x_continuous(limits=c(4, 30))+
+  scale_y_log10() +
+  labs(x='Days post immunization', y="Cell counts", title='CAR positive FoB Cells') 
+
+ggsave("CARFoB_count.pdf", last_plot(), width = 6, height = 4.5, device = 'pdf')
 
 
 ## Assuming that antigen-specific B cell clones are distributed uniformly in the activated pool
@@ -113,6 +114,29 @@ uniform_dist <- function(Time, nClones){
 ## Assuming power-law distribution for the antigen-specific B cell clones in the activated pool
 ## We are simulating for 30 different clones.
 ## The pool size of activated FoB cells varies with time. 
+power_law_prob <- function(x, k, A, m, n){
+  value = (A * x^-k)/((n^(-k+1) - m^(-k+1))/(-k+1))
+  return(value)
+}
+
+power_law_prob(seq(1, 30), k=0.3, A=1, m=1, n=30)
+
+Dist_power_law <- function(Time, nClones){
+  m_dot=1; n_dot=nClones;
+  k0= 0.1; alpha = 0.03
+  x_vec <- seq(1, nClones, 1)
+  if (Time >= 4) {
+    A_dot = CAR_FoB(Time)
+    k_dot = k0 + alpha * (Time -4);
+    value = as.integer(power_law_prob(x = x_vec, k=k_dot, A=A_dot, m=m_dot, n=n_dot))
+  } else {
+    value = 0;
+  }
+  
+  return(value)
+}
+
+## The pool size of activated FoB cells varies with time. 
 Norm_power_law <- function(Time, nClones){
   k0= 0.1; a=1; b=nClones;
   alpha = 0.03
@@ -127,6 +151,43 @@ Norm_power_law <- function(Time, nClones){
   return(value)
 }
 
+
+power_law_dist <- function(Time, nClones){
+  ## generate a distribution
+  dist <-c()  ## start an empty vector
+  j=0
+  for (i in 1:nClones){
+    npl <- Norm_power_law(Time, nClones)
+    ### indices to distribute frequencies to each clone ID
+    ind_a = j + 1
+    j = j + npl[i]
+    ## assortment
+    dist[ind_a:j] <- rep(i, npl[i]) 
+  }
+  return(dist)
+}
+
+
+set.seed(1345)
+k_pow = 0.1 + 0.03 * 10
+app1 <- data.frame(f0 = sample(power_law_dist(10, 75), as.integer(mu_med * CAR_FoB(10))),
+                   keycol = "app1")
+app2 <- data.frame(f0 = sample(seq(1, 75), as.integer(mu_med * CAR_FoB(10)), 
+                               prob = power_law_prob(seq(1, 75), k_pow, A=1, 1, 75), replace = T),
+                   keycol = "app2")
+dat <- rbind(app1, app2)
+
+ap1 <- table(app1$f0)
+sum(ap1[1:30])
+
+ap2 <- table(app2$f0)
+sum(ap2[1:30])
+CAR_FoB(10) * mu_med
+
+ggplot(dat, aes(f0)) +
+  geom_histogram(data = subset(dat, keycol=="app1"),  fill=4, alpha=0.7, binwidth=1) +
+  geom_histogram(data = subset(dat, keycol=="app2"),  fill=2, alpha=0.4, binwidth=1) +
+  facet_wrap(~keycol)
 
 #time_obs <- c(4, 7, 10, 14, 21, 28)
 #NUM_Clones = 75
@@ -250,7 +311,7 @@ MZ_time <- function(Time, distrib="powerlaw", nClones){
 
 singleRun <- function(NUM_Clones, distrib){
   ### !!!TSTEP needs to be very small otherwise the propensities are not accurate!!!
-  TSTEP = 0.04; updated_time = 4; Tmax = 30; current_time = 0; NUM_Clones = NUM_Clones
+  TSTEP = 0.004; updated_time = 4; Tmax = 30; current_time = 0; NUM_Clones = NUM_Clones
   start_clone_dist <- MZ_time(Time = updated_time, distrib = distrib, nClones = NUM_Clones)
   
   initial_dist <- data.frame("CloneID" = as.factor(seq(1, NUM_Clones, 1)),
@@ -356,6 +417,8 @@ BatchRun <- function(nIter, NUM_Clones, distrib){
     bind_cols(para_run) 
   return(MultiRun_df)
 }
+
+print("START BATCH RUN!!")
 
 system.time(
 MultiRunPlot <- BatchRun(100, NUM_Clones = 75, distrib =  "powerlaw")
