@@ -168,28 +168,28 @@ power_law_dist <- function(Time, nClones){
 }
 
 
-set.seed(1345)
-k_pow = 0.1 + 0.03 * 10
-app1 <- data.frame(f0 = sample(power_law_dist(10, 75), as.integer(mu_med * CAR_FoB(10))),
-                   keycol = "app1")
-app2 <- data.frame(f0 = sample(seq(1, 75), as.integer(mu_med * CAR_FoB(10)), 
-                               prob = power_law_prob(seq(1, 75), k_pow, A=1, 1, 75), replace = T),
-                   keycol = "app2")
-dat <- rbind(app1, app2)
+Hist_plot_func <- function(Time){
+  set.seed(1345)
+  Time_week = Time * 7
+  k_pow = 0.1 + 0.03 * Time_week 
+  #app1 <- data.frame(f0 = sample(power_law_dist(Time, 75), as.integer(CAR_FoB(Time))),
+  #                   keycol = "app1")
+  app <- data.frame(f0 = sample(seq(1, 75), as.integer(CAR_FoB(Time_week)), 
+                                 prob = power_law_prob(seq(1, 75), k_pow, A=1, 1, 75), replace = T),
+                     keycol = paste0("Week_", Time))
+  return(app)
+}
+time_obs <- c(1, 2, 3, 4, 8, 25)
+dist_global <- data.frame()
+for (i in 1:length(time_obs)){
+  dist_global <- dist_global %>% rbind(Hist_plot_func(time_obs[i]))
+}
 
-ap1 <- table(app1$f0)
-sum(ap1[1:30])
+ggplot(dist_global, aes(f0)) +
+  geom_histogram(fill=4, alpha=0.7, binwidth=1) +
+  labs(x="Clone rank", y="Count") +
+  facet_wrap(~keycol, )
 
-ap2 <- table(app2$f0)
-sum(ap2[1:30])
-CAR_FoB(10) * mu_med
-
-ggplot(dat, aes(f0)) +
-  geom_histogram(data = subset(dat, keycol=="app1"),  fill=4, alpha=0.7, binwidth=1) +
-  geom_histogram(data = subset(dat, keycol=="app2"),  fill=2, alpha=0.4, binwidth=1) +
-  facet_wrap(~keycol)
-
-#time_obs <- c(4, 7, 10, 14, 21, 28)
 #NUM_Clones = 75
 #pl_dist <- data.frame("Clone_Num" = (seq(1, NUM_Clones)))
 #
