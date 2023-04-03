@@ -20,7 +20,7 @@ library(wesanderson)
 library(parallel)
 
 ### model specific details that needs to be change for every run
-modelName <- "Branched_timeinflux"
+modelName <- "Branched_timeinflux1"
 
 NITER = 300
 NUM_CLONES = 75
@@ -41,7 +41,6 @@ if (length(args)==0) {
 rUN_seed <- paste0("Run_", args[1])
 
 print(rUN_seed)
-
 
 Wes_pallete <- wesanderson::wes_palette('Darjeeling1', NUM_CLONES, type = "continuous")
 
@@ -78,12 +77,16 @@ power_law_prob <- function(x, k, A, m, n){
 
 K_Time <- function(Time){
   ## power law distribution of clones varying with time
-  #k0= 0.3; alpha = 0.025
-  #k_dot = k0 - alpha * (Time - 0)
-  #k0= 0.3; alpha = 0.3
-  #k_dot = k0 - alpha * (Time - 9)
-  k0= 0.15; alpha = 0.01
-  k_dot = k0+ alpha * (Time - 0)
+  if(rUN_seed == "Run_1"){
+    k0= 0.3; alpha = 0.025
+    k_dot = k0 - alpha * (Time - 0)
+  } else if (rUN_seed== "Run_2"){
+    k0= 0.3; alpha = 0.3
+    k_dot = k0 - alpha * (Time - 9)
+  } else if (rUN_seed == "Run_3"){
+    k0= 0.15; alpha = 0.01
+    k_dot = k0+ alpha * (Time - 0)
+  }
   return(k_dot)
 }
 
@@ -100,8 +103,6 @@ PLdist_Clone_Time <- function(Time, nClones){
   }
   return(value)
 }
-
-
 
 cloneid <-c()  ## start an empty vector
 j=0
@@ -231,8 +232,8 @@ singleRun <- function(nClones){
   while(current_time < Tmax){
     current_time = round(updated_time + TSTEP, 2);
     lambda = lambda_med; persist = 1 - lambda; mu = mu_med;
-    #lambda_Gauss = rnorm(nClones, lambda_med, lambda_sd)
-    #prob_loss_Gauss = 1 - exp(-lambda_Gauss * TSTEP)
+    lambda_Gauss = rnorm(nClones, lambda_med, lambda_sd)
+    prob_loss_Gauss = 1 - exp(-lambda_Gauss * TSTEP)
     prob_loss = 1 - exp(-lambda * TSTEP)
     
     ## pre-existing clones
@@ -240,8 +241,8 @@ singleRun <- function(nClones){
     
     ## update the pool
     binomial_persist <- rbinom(1, size = poolsize, prob = 1 - prob_loss)
-    #clone_persist <- sample(start_clone_dist, binomial_persist, prob = prob_loss_Gauss[start_clone_dist]) %>% sort()
-    clone_persist <- sample(start_clone_dist, binomial_persist) %>% sort()
+    clone_persist <- sample(start_clone_dist, binomial_persist, prob = prob_loss_Gauss[start_clone_dist]) %>% sort()
+    #clone_persist <- sample(start_clone_dist, binomial_persist) %>% sort()
     
 
     ## influx
