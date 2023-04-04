@@ -20,6 +20,29 @@ outputDir <- file.path(projectDir, "output_fit")
 saveDir <- file.path(projectDir, 'save_csv')
 LooDir <- file.path('loo_fit') 
 
+myTheme <- theme(text = element_text(size = 12), axis.text = element_text(size = 12), axis.title =  element_text(size = 12, face = "bold"),
+                 plot.title = element_text(size=12,  hjust = 0.5, face = "bold"),
+                 legend.background = element_blank(), legend.key = element_blank(),
+                 legend.text = element_text(size=11), legend.title = element_text(12))
+
+
+fancy_scientific <- function(l) {
+  # turn in to character string in scientific notation
+  l <- format(l, scientific = TRUE)
+  # quote the part before the exponent to keep all the digits
+  l <- gsub("^(.*)e", "'\\1'e", l)
+  # remove + after exponent, if exists. E.g.: (e^+2 -> e^2)
+  l <- gsub("e\\+","e",l)  
+  # turn the 'e' into plotmath format
+  l <- gsub("e", "%*%10^", l)
+  # convert 1x10^ or 1.000x10^ -> 10^
+  l <- gsub("\\'1[\\.0]*\\'\\%\\*\\%", "", l)
+  # return this as an expression
+  parse(text=l)
+}
+
+log10minorbreaks=as.numeric(1:10 %o% 10^(4:8))
+
 # loadiong the scr# loadiong the script that contains functions for plotting stan parameters
 source(file.path(toolsDir, "stanTools.R"))                # save results in new folder
 
@@ -78,17 +101,17 @@ ode_func <-  function(t, state, parms){
 }
 
 #initial conditions
-state <- c(Y1 = 1e5, Y2 = 0, Y3=0)
+state <- c(Y1 = 1e6, Y2 = 0, Y3=0)
 
 # time points for which conc is reported
 # include the points where data is available
-ts_pred <- seq(4, 35, length.out=100)
+ts_pred <- seq(4, 90, length.out=100)
 
 
 boot_func <- function(eps){
   ## Sampling random numbers to select the row from posterior dist matrix
   set.seed(1456)
-  rowvec <- sample(1:nrow(fit_ss), 300, replace = FALSE) %>% sort()
+  rowvec <- sample(1:nrow(fit_ss), 1000, replace = FALSE) %>% sort()
   
   ## initiating empty matrices to store the output
   Fo_df <- matrix(nrow = length(rowvec), ncol = length(ts_pred))
@@ -140,12 +163,13 @@ boot_func <- function(eps){
     filter(timeseries >= 5)
 }
 
-pooled_df <- boot_func(0.01)
+pooled_df <- boot_func(1.35)
   
-ggplot(pooled_df) +
-  geom_line(aes(x=timeseries, y=median, col=key))+
-  geom_ribbon(aes(x = timeseries, ymin = lb, ymax = ub, fill=key), alpha = 0.25) +
-  scale_x_log10() + scale_y_log10(limits=c(1, 1e5))
+#ggplot(pooled_df) +
+#  geom_line(aes(x=timeseries, y=median, col=key))+
+#  geom_ribbon(aes(x = timeseries, ymin = lb, ymax = ub, fill=key), alpha = 0.25) +
+#  labs(x="Days since immunization", y="Cell counts", title = NULL)+
+#  scale_x_log10() + scale_y_log10(limits=c(1, 1e5))
 
 
 sol_df <- pooled_df %>%
@@ -153,16 +177,20 @@ sol_df <- pooled_df %>%
   spread(key = key, value = median)
   
 
+lab_vc <- c("MZB", "FoB", "GCB")
 
 ggplot(data = sol_df, aes(x= timeseries)) +
-  geom_area(aes(y= FoB+ GCB + MZB, fill="FO_counts" ), alpha=0.6 , linewidth=.5, colour="white") +
-  geom_area(aes(y= GCB + MZB, fill="GC_counts"), alpha=0.6 , linewidth=.5, colour="white") +
+  geom_area(aes(y= FoB, fill="FO_counts" ), alpha=0.6 , linewidth=.5, colour="white") +
+  geom_area(aes(y= GCB, fill="GC_counts"), alpha=0.6 , linewidth=.5, colour="white") +
   geom_area(aes(y= MZB, fill="CARMZ_WT"), alpha=0.6 , linewidth=.5, colour="white") +
   #scale_fill_viridis(discrete = T) +
+  labs(x="Days since immunization", title="Cell counts", y = NULL)+
+  scale_fill_discrete(labels=lab_vc, name=NULL)+
   #theme_ipsum() + 
-  scale_x_log10(limits = c(5, 35), breaks=c(7, 14, 35)) + scale_y_log10() + 
+  scale_x_log10(limits = c(5, 100), breaks=c(7, 14, 35, 70)) + scale_y_log10(limits = c(1, 1e6)) + 
   labs(x='Days since immunization', y=NULL)  + 
-  guides(fill="none")
+  #guides(fill="none") + 
+  myTheme
 
 plot_df <- pooled_df %>%
   filter(key != "FoB") %>%
@@ -180,9 +208,9 @@ aresf$popln <- factor(aresf$key , levels=c("CARMZ_WT", "GC_counts", "FO_counts")
 ggplot(data = aresf, aes(x= (timeseries), y=percentage*100, fill=key)) +
   geom_area(alpha=0.6 , linewidth=.5, colour="white") +
   scale_fill_viridis(discrete = T) +
-  theme_ipsum() + 
+  #theme_ipsum() + 
   xlim(5, 35) + #scale_y_log10() + 
-  labs(x='Days since immunization', y=NULL)  + 
+  labs(x='Days since immunization', title ="% of differentiated cells in rep+ B cells", y=NULL)  + 
   #facet_wrap(.~popln) + 
   guides(col="none")
   
