@@ -6,7 +6,7 @@ library(hrbrthemes)
 library(rstan)
 
 ## model specific details that needs to be change for every run
-modelName <- "Branched_timeinflux"
+modelName <- "Linear_timeinflux1"
 data_der <- "Bcell_imm_data.csv"    
 data_der2 <- "N2KO_imm_data.csv"    
 
@@ -62,6 +62,7 @@ parametersToPlot <- fit@model_pars[1:num_pars]
 
 ## extract posterior distribution  of parameters as a matrix
 fit_ss <- as.matrix(fit, pars= parametersToPlot) # matrix of posterior samples
+write.csv(fit_ss, paste0("PostDF_", modelName, ".csv"), row.names = FALSE)
 
 #### donor CAR+ FO and GC B cells in recipients
 ## ode function for Branched model

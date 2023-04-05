@@ -4,18 +4,19 @@ library(hrbrthemes)
 library(rstan)
 
 ## model specific details that needs to be change for every run
-modelName <- "Branched_timeinflux1"
-modelName <- "Linear_timeinflux1"
+modelName1 <- "Branched_timeinflux1"
+modelName2 <- "Linear_timeinflux1"
 
 ### extract posterior distribution  of parameters as a df
-fit_ss <- read.csv(file = paste0("PostDF_", modelName, ".csv"))
+fit_ss <- read.csv(file = paste0("PostDF_", modelName1, ".csv"))
 mu_b <- median(fit_ss$mu)
 lambda_b <- median(fit_ss$lambda_WT)
 alpha_b <- median(fit_ss$alpha)
 nu_b <- median(fit_ss$nu)
+delta_b <- median(fit_ss$delta)
 
 
-fit_ss2 <- read.csv(file = paste0("PostDF_", modelName, ".csv"))
+fit_ss2 <- read.csv(file = paste0("PostDF_", modelName2, ".csv"))
 delta_l <- median(fit_ss2$delta)
 lambda_l <- median(fit_ss2$lambda_WT)
 mu_l <- median(fit_ss2$mu)
@@ -40,28 +41,31 @@ ode_func <-  function(t, state, parms){
     ## form for influx of activated FOB into GC varying with time
     alpha_tau = alpha/(1 + exp(nu * (t-t0)^2))
     
-    #Fo b cells cd45.1
+    #Fo B cells cd45.1
     ## epsilon denotes the loss of Activated FO B cells in addition to their conversion to GC and MZ
     dY1 <- - (alpha_tau + mu_branched + epsilon) * Y1
     
+    # CAR positive GCB cells cd45.1
+    dY2 = alpha_tau * Y1 - (delta + mu_linear)  * Y2;
+    
     # CAR positive MZB CD45.1
     ##influx into CAR+MZ is constant -- fitted better to immunization data!
-    dY2 = mu_branched * Y1 - lambda_Branched * Y2;
+    dY3 = mu_branched * Y1 + mu_linear * Y2 - lambda_Branched * Y3;
     
     # CAR positive GCB CD45.2
-    dY3 = - (delta + mu_linear) * Y3;
+    dY4 = - (delta + mu_linear) * Y4;
     
     # CAR positive MZB CD45.2
-    dY4 = mu_linear * Y3 - lambda_linear * Y4;
+    dY5 = mu_linear * Y4 - lambda_linear * Y5;
     
     #return the rate of change
-    list(c(dY1, dY2, dY3, dY4))
+    list(c(dY1, dY2, dY3, dY4, dY5))
     
   })  # end with(as.list ...
 }
 
 #initial conditions
-state <- c(Y1 = 1e5, Y2 = 0, Y3=1e5, Y4=0)
+state <- c(Y1 = 1e5, Y2 = 0,  Y3=0, Y4=1e5, Y5=0)
 
 # time points for which conc is reported
 # include the points where data is available
@@ -69,23 +73,24 @@ ts_pred <- seq(7, 60, length.out=100)
 
 
 out_df <- data.frame()
-eps_vec <- c(1/10, 1/4, 1/3, 1/2, 1, 2, 3, 4, 5)
+eps_vec <- c(0.01, 0.03, 0.1, 0.3, 1, 3)
 
 for(i in 1:length(eps_vec)) {
   parms_vec <- c("alpha" = alpha_b, "mu_branched" = mu_b , "mu_linear" = mu_l, 
                  "delta" = delta_l, "lambda_branched" = lambda_b, "lambda_linear" = lambda_l,
-                 "nu" = nu_b, "epsilon" = eps_vec[i] * alpha_b)  ## epsilon denotes the loss of Activated FO B cells in addition to their conversion to GC and MZ
+                 "nu" = nu_b, "epsilon" = eps_vec[i])  ## epsilon denotes the loss of Activated FO B cells in addition to their conversion to GC and MZ
   ### simulation using the selected params
   sol_ode <- data.frame(ode(y= state, times=ts_pred, func = ode_func, parms = parms_vec))
   
   sol_df <- sol_ode %>%
     rename(timeseries = time,
            FO.1 = Y1,
-           MZ.1 = Y2,
-           GC.2 = Y3,
-           MZ.2 = Y4) %>%
+           GC.1 = Y2,
+           MZ.1 = Y3,
+           GC.2 = Y4,
+           MZ.2 = Y5) %>%
     mutate(ratio_MZ = replace_na(MZ.2/MZ.1, 0),
-           EPS = round(eps_vec[i], 1))
+           EPS = round(eps_vec[i], 2))
   out_df <- rbind(out_df, sol_df)
   out_df
 }
@@ -108,17 +113,22 @@ plot_labl <- c(`0.1` = "eps=0.1", `0.2` = "eps=0.25", `0.3` = "eps=0.33", `0.5` 
                `1` = "eps=1", `2` = "eps=2", `3` = "eps=3", `4` = "eps=4", 
                `5` = "eps=5" )
 
+plot_labl <- c(`0.01` = "eps=0.01", `0.03` = "eps=0.03", `0.1` = "eps=0.1", `0.3` = "eps=0.3", 
+               `1` = "eps=1", `3` = "eps=3")
+
+
+
 ggplot(data = out_df, aes(x= timeseries)) +
-  geom_area(aes(y= FO.1 + MZ.1 + GC.2 + MZ.2, fill="FO CD45.1" ), alpha=0.6, colour="white") +
-  geom_area(aes(y= MZ.1 + GC.2 + MZ.2, fill="MZ CD45.1" ), alpha=0.6, colour="white") +
-  geom_area(aes(y= GC.2 + MZ.2, fill="GC CD45.2" ), alpha=0.5, colour="white") +
+  #geom_area(aes(y= FO.1 + GC.1 + MZ.1 + GC.2 + MZ.2, fill="FO CD45.1" ), alpha=0.6, colour="white") +
+  geom_area(aes(y= GC.1 , fill="GC CD45.1" ), alpha=0.6, colour="white") +
+  geom_area(aes(y= MZ.1 , fill="MZ CD45.1" ), alpha=0.6, colour="white") +
+  geom_area(aes(y= GC.2 , fill="GC CD45.2" ), alpha=0.5, colour="white") +
   geom_area(aes(y= MZ.2, fill="MZ CD45.2"), alpha=0.5, colour="white") +
   #scale_fill_viridis(discrete = T) +
-  #theme_ipsum() + 
-  scale_x_log10(limits = c(7, 60), breaks=c(7, 14, 28, 56)) + scale_y_log10() + 
-  labs(x='Days since immunization', y=NULL)  +  theme_ipsum() +
+  scale_x_log10(limits = c(7, 60), breaks=c(7, 14, 28, 56)) + scale_y_log10(limits = c(1, 1e6)) + 
+  labs(x='Days since immunization', y=NULL)  +  #theme_ipsum() +
   theme(legend.title = element_blank()) +
-  guides(fill='none')+
+  #guides(fill='none')+
   facet_wrap(~EPS, nrow = 3, labeller = as_labeller(plot_labl)) 
 
 
