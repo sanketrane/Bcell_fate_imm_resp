@@ -1,0 +1,200 @@
+% Typeset with XeTeX
+% Allows use of system fonts rather than just LaTeX's ones
+% NOTE - if you use TeXShop and Bibdesk (Mac), can complete citations
+%  - open your .bib file, type~\citep{xx... and then F5 or Option-Escape
+\documentclass[11pt]{article}
+\usepackage[margin=1in, letterpaper]{geometry} % set page layout
+%\geometry{letterpaper}  % or a4paper
+\usepackage[xetex]{graphicx} % allows us to manipulate graphics.
+% Replace option [] with pdftex if you don't use Xe(La)TeX
+\usepackage{color}
+\usepackage{indentfirst}
+\usepackage{hyphenat}
+\usepackage{epstopdf} % automatic conversion of eps to pdf 
+\usepackage{amsmath, amssymb} % Better maths support & more symbols
+\usepackage{textcomp} % provide lots of new symbols - see textcomp.pdf
+% line spacing: \doublespacing, \onehalfspacing, \singlespacing
+\usepackage{setspace}
+\usepackage[hidelinks]{hyperref}
+
+\usepackage[table]{xcolor}% http://ctan.org/pkg/xcolor
+
+\singlespacing
+\usepackage{pgfplotstable}
+% allows text flowing around figs
+% use \begin{wrapfigure}{x}{width} where x = r(ight) or l(eft)
+\usepackage{wrapfig}
+\usepackage[parfill]{parskip} % don't indent new paragraphs
+\usepackage{flafter}  % Don't place figs & tables before their definition 
+\usepackage{verbatim} % allows \begin and \end{comment} regions
+\usepackage{booktabs} % makes tables look good
+\usepackage{bm}  % Define \bm{} to use bold math fonts
+% linenumbers in L margin, start & end with \linenumbers \nolinenumbers,
+\usepackage{lineno} % use option [modulo] for steps of 5
+\usepackage[auth-sc]{authblk} % authors & institutions - see authblk.pdf
+%\renewcommand\Authands{ and } % separates the last 2 authors in the list
+% control how captions look; here, use small font and indent both margins by 20pt
+\usepackage[small]{caption} 
+\setlength{\captionmargin}{20pt}
+
+%: FONT
+% If you don't want to use system fonts, replace from here to 'Citation style' with \usepackage{Palatino} or similar
+%: ************ FANCY FONTS START HERE
+\usepackage[no-math]{fontspec} % 'no-math' = keep computer modern for math fonts
+\usepackage{xunicode} % needed by XeTeX for handling all the system fonts nicely
+\usepackage[no-sscript]{xltxtra} 
+%\setmonofont[Scale=0.8]{PT Serif} % typeface for \tt commands
+%\setsansfont[BoldFont={PT Serif Bold}, ItalicFont={PT Serif Italic}]{PT Serif} 
+\defaultfontfeatures{Mapping=tex-text}
+\setmainfont{Palatino Linotype}
+%\setmainfont{Source Sans Pro}
+
+%: ************ FANCY FONTS END HERE
+
+%:CITATION STYLE
+% natbib package: square,curly, angle(brackets)
+% colon (default), comma (to separate multiple citations)
+% authoryear (default),numbers (citations style)
+% super (for superscripted numerical citations, as in Nature)
+% sort (orders multiple cites into order of appearance in ref list, or year if authoryear)
+% sort&compress: as sort, + multiple citations compressed (as 3-6, 15)
+\usepackage[numbers,comma,sort&compress]{natbib}
+
+%:SHORTCUT COMMANDS
+% Maths
+\newcommand{\ddt}[1]{\ensuremath{\frac{{\rm d}#1}{{\rm d}t}}}  % d/dt
+\newcommand{\dd}[2]{\ensuremath{\frac{{\rm d}#1}{{\rm d}#2}}} % dy by dx  - \dd{y}{x}
+\newcommand{\ddsq}[2]{\ensuremath{\frac{{\rm d}^2#1}{{\rm d}#2^2}}} % second deriv
+\newcommand{\pp}[2]{\ensuremath{\frac{\partial #1}{\partial #2}}} % partial \pp{y}{x}
+\newcommand{\ppsq}[2]{\ensuremath{\frac{\partial^2 #1}{\partial {#2}^2}}}
+\newcommand{\superscript}[1]{\ensuremath{^{\textrm{#1}}}} %normal (non-math) font for super/subscripts in text
+\newcommand{\subscript}[1]{\ensuremath{_{\textrm{#1}}}}
+\newcommand{\positive}{\ensuremath{^+}}
+\newcommand{\negative}{\ensuremath{^-}}
+% Editing
+\newcommand{\gray}[1]{{\color{gray}{#1}}}
+\newcommand{\red}[1]{{\color{red}{#1}}}
+\newcommand{\redtext}[1]{{\color{red}{#1}}}
+\newcommand{\blue}[1]{{\color{blue}{#1}}}
+\newcommand{\bluetext}[1]{{\color{blue}{#1}}}
+\newcommand{\green}[1]{{\color{green}{#1}}}
+\newcommand{\scinot}[2]{\ensuremath{#1 \times 10^{#2}}}
+% Standard stuff
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\bea}{\begin{eqnarray}}
+\newcommand{\eea}{\end{eqnarray}}
+\newcommand{\ie}{\textit{i.e.}}
+\newcommand{\etal}{\textit{et al.}}
+\newcommand{\khi}{Ki67$^\text{hi}$}
+\newcommand{\klo}{Ki67$^\text{lo}$}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\title{Mathematical modelling of MZ B cells during an immune response}
+\author{}
+
+\date{}
+
+\begin{document} 
+	%\maketitle
+
+\gray{
+1) Are the `$\nu$'  parameters which appear throughout (for example in supplemental equation 1 and main text equations 2 and 6 taken to be the same). If not, can they be assigned separate symbols to avoid confusion.
+}
+
+Response: Thank you for noticing. We have corrected this in the revised version.
+
+
+\gray{
+2) It was unclear how the various processes in the model should depend on the existence of Notch2 signaling. If I correctly understood the details, aside from the decay of the CAR+MZB cells, these parameters seem to be taken to be the same for the “wild-type” and the knockout. It was not clear what the basis was for this assumption. why for example was the production rate not dependent on Notch2 signaling given the statement in the discussion that this signaling induces MZB development. In general, the model choices could have been connected better to the underlying biology.
+} 
+
+Response: 
+
+\gray{
+3) In general, I believe that mathematical models should try to predict new features rather than just recapitulate existing data. Are there any new predictions for further experiments that the authors can propose, as this would increase the usefulness of the modeling section.
+}
+
+Response: We agree with the reviewers that t
+
+
+\clearpage
+
+
+%: Supplementary Fig 9 - simulation of the co-transfer experiment
+\begin{figure}[htbp]
+\center
+\includegraphics[width=0.85\textwidth]{supp-9V2.pdf}
+\caption{
+    \textbf{Simulation of the co-transfer experiment using parameters derived from modeling the TD response in control/CAR mice.}
+    }
+       \label{fig:co-transf}
+ \end{figure}
+ 
+ 
+\clearpage
+
+
+\section*{Predicting B cell diversification patterns in response to immunization in an adoptive transfer strategy}
+
+We simulated an experimental strategy in which activated CAR$^{+}$ FoB (CD45.1) and CAR$^{+}$ GC (CD45.2) B cells from control/CAR mice are sorted on day 7 post immunization and then co-transferred in synchronously immunized CD45.1/CD45.2 WT recipient mice (Supplementary Fig.~\ref{fig:co-transf}A).
+We generated predictions for the \textit{de novo} MZ B cell generation in response to the immunization (up to 8 weeks post immunization) considering either (a) branched or (b) linear or (c) both branched + linear pathways govern B cell fate-decisions during an immune response.
+We assumed 10\% grafting efficiency for $10^{6}$ FoB (CD45.1) and $10^{6}$ GCB (CD45.1) transferred cells. 
+
+We used mean values of the parameters (shown in Supplementary table XX) estimated from fitting branched and linear models (Equation~3 and 4 in Materials and Methods section of the main text) to the CAR expression dynamics in B cells during the TD response in control/CAR and N2KO//CAR mice.
+Our models did not account for the loss of activated (CAR$^{+}$) FoB cells either by death or extra-follicular differentiation into plasma or memory fates.
+For the purpose of this simulation, we explored four values of the loss rate ($\phi$ = 0.01, 0.7,1 and 3) of the activated FoB cells.
+
+
+\textbf{(a) Branched model:}
+%If the branched pathway is the only mode of MZ B cell generation during a TD response then 
+CAR$^{+}$  MZ B cells are generated exclusively from FoB CD45.1 donor cells (supplementary figure~\ref{fig:co-transf}B, left panel).
+No MZ B cells from from CD45.2$^{+}$ GC B cells.
+The fraction of CD45.1$^{+}$ cells in donor CAR$^{+}$ MZ compartment would equal 100\% at all times (Supplementary Fig.~\ref{fig:co-transf}B, right panel).
+
+\textbf{(b) Linear model:}
+%In this scenario activated (CAR$^{+}$) MZ B cells are generated solely by the differentiation of GC B cells. 
+CAR$^{+}$ FoB CD45.1 donors differentiate into GC B cells, which in turn give rise to CD45.1 CAR$^{+}$ MZ B cells (Supplementary Fig.~\ref{fig:co-transf}C). 
+CAR$^{+}$ CD45.2 MZ B cells are generated from CD45.2 GC B cells (Supplementary Fig.~\ref{fig:co-transf}C, left panel).
+Our simulations predict that the CAR$^{+}$ MZ B cell compartment predominantly contains CD45.2$^{+}$ cells immediately post transfer.
+The CD45.2 fraction declines as CD45.1$^{+}$ MZ B cells gradually emerge from CD45.1 GC B cells (Supplementary Fig.~\ref{fig:co-transf}C, right panel).
+%Note that the rate of decline of CD45.2 fraction strongly depends on the loss rate of FoB (CD45.1) cells.
+
+\textbf{(c) Branched + linear model:}
+Two sources of CD45.1 CAR$^{+}$ MZ B cells -- (i) Bifurcation of CD45.1 CAR$^{+}$ FoB into MZ and GC phenotypes; and (ii)
+Linear differentiation of CD45.1 CAR$^{+}$ GC B cells in to MZ B cells  (Supplementary Fig.~\ref{fig:co-transf}D, left panel). 
+CAR$^{+}$ CD45.2 MZ B cells are generated from CD45.2 GC B cells (Supplementary Fig.~\ref{fig:co-transf}D).
+We predict the ratio of the CD45.1 and CD45.2 cells in CAR$^{+}$ MZ B cell compartment strongly relies on $\phi$ -- the loss rate of CAR$^{+}$ FoB cells (Supplementary Fig.~\ref{fig:co-transf}G).
+Lower eps values suggest high CD45.1 to CD45.2 ratio. This ratio declines with increasing values of $\phi$ and reverses around $\phi = 0.7$ (Supplementary Fig.~\ref{fig:co-transf}D, right panel).
+
+
+ 
+ 
+\clearpage
+
+%: Supplementary Fig 10 - Prediction of clonal dynamics
+\begin{figure}[htbp]
+\center
+\includegraphics[width=0.8\textwidth]{supp-10.pdf}
+\caption{
+    \textbf{Stochastic simulation of the clonal dynamics during the NP-CGG response.}
+    }
+       \label{fig:clone-dyn}
+       
+ \end{figure}
+
+
+
+
+\end{document}
+
+
+
+
+
+
+
+
