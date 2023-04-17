@@ -54,7 +54,7 @@ ode_func <-  function(t, state, parms){
     ## parameters estimated from modeling immunization data
     alpha = parms[1]
     mu_branched = parms[2]
-    mu_linear = 0#parms[3]
+    mu_linear = parms[3]
     delta = parms[4]
     lambda_Branched = parms[5]
     lambda_linear = parms[6]
@@ -76,7 +76,7 @@ ode_func <-  function(t, state, parms){
     
     # CAR positive MZB CD45.1
     ##influx into CAR+MZ is constant -- fitted better to immunization data!
-    dY3 = mu_branched * Y1 + mu_linear * Y2 - lambda_Branched * Y3;
+    dY3 = mu_branched * Y1 + mu_linear * Y2 - lambda_linear * Y3;
     
     # CAR positive GCB CD45.2
     dY4 = - (delta + mu_linear) * Y4;
@@ -99,7 +99,7 @@ ts_pred <- seq(7, 60, length.out=100)
 
 
 out_df <- data.frame()
-eps_vec <- c(0.01, 0.7, 1, 3)
+eps_vec <- c(0.01, 0.1, 0.7, 1)
 
 for(i in 1:length(eps_vec)) {
   parms_vec <- c("alpha" = alpha_b, "mu_branched" = mu_b , "mu_linear" = mu_l, 
@@ -128,9 +128,9 @@ plot_df <- out_df %>%
          GC.2 = replace(GC.2, GC.2 <= 1, 1),
          MZ.2 = replace(MZ.2, MZ.2 <= 1, 1))
 
-plot_df$EPS <- factor(plot_df$EPS, levels = c("0.01", "0.7", "1", "3"), ordered = TRUE,
-                      labels = c(expression(paste(phi, "=0.01")), expression(paste(phi, "=0.7")),
-                                 expression(paste(phi, "=1")), expression(paste(phi, "=3"))))
+plot_df$EPS <- factor(plot_df$EPS, levels = c("0.01", "0.1", "0.7", "1"), ordered = TRUE,
+                      labels = c(expression(paste(phi, "=0.01")), expression(paste(phi, "=0.1")),
+                                 expression(paste(phi, "=0.7")), expression(paste(phi, "=1"))))
 
 
 #ggplot(data = out_df, aes(x= timeseries)) +
@@ -166,9 +166,9 @@ aresf <- plot_df2 %>%
   mutate(n_tot = sum(counts), 
          percentage = counts/n_tot)
 
-aresf$EPS <- factor(aresf$EPS, levels = c("0.01", "0.7", "1", "3"), ordered = TRUE,
-                      labels = c(expression(paste(phi, "=0.01")), expression(paste(phi, "=0.7")),
-                                 expression(paste(phi, "=1")), expression(paste(phi, "=3"))))
+aresf$EPS <- factor(aresf$EPS, levels = c("0.01", "0.1", "0.7", "1"), ordered = TRUE,
+                      labels = c(expression(paste(phi, "=0.01")), expression(paste(phi, "=0.1")),
+                                 expression(paste(phi, "=0.7")), expression(paste(phi, "=1"))))
 
 # Give a specific order:
 aresf$popln <- factor(aresf$popl , levels=c("MZ 45.1", "MZ 45.2") )
