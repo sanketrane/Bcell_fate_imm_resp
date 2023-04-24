@@ -124,25 +124,6 @@ Response: We agree with the reviewers that t
 \clearpage
 
 
-%: Supplementary Fig 9 - simulation of the co-transfer experiment
-\begin{figure}[htbp]
-\center
-\includegraphics[width=0.825\textwidth]{supp-9V2.pdf}
-\caption{
-    \textbf{Simulation of the co-transfer experiment using parameters derived from modeling the TD response in control/CAR mice.}
-    \textbf{(A)} Experimental design of the adoptive transfer strategy.
-    \textbf{(B-D)} Results from the simulations of (B) branched, (C) linear and (D) branched + linear models of MZ B cell generation during an active immune response.
-    Plots on the left  show cell counts of GC (GC.1), MZ (MZ.1) B cells from CD45.1 and GC (GC.2), MZ (MZ.2) B cells from CD45.2 donors.
-    Plots on the right depict fraction of CD45.1 and CD45.2 donor cells in CAR$^+$ MZ B cell compartment.
-    Individual panels represent predictions generated using a fixed value of the loss rate ($\phi$) of transferred FoB cells.
-    }
-       \label{fig:co-transf}
- \end{figure}
- 
- 
-\clearpage
-
-
 \section*{Predicting B cell diversification patterns in response to immunization in an adoptive transfer strategy}
 
 We simulated an experimental strategy in which activated CAR$^{+}$ FoB (CD45.1) and CAR$^{+}$ GC (CD45.2) B cells from control/CAR mice are sorted on day 7 post immunization and then co-transferred in synchronously immunized CD45.1/CD45.2 WT recipient mice (Supplementary Fig.~\ref{fig:co-transf}A).
@@ -175,18 +156,59 @@ Single source for CD45.2$^{+}$ CAR$^{+}$  MZ B cells -- CD45.2$^{+}$ CAR$^{+}$ G
 Here, the fractions of CD45.1$^{+}$ and CD45.2$^{+}$ cells in CAR$^{+}$ MZ B cell compartment strongly relies on $\phi$ -- the loss rate of CAR$^{+}$ FoB cells (Supplementary Fig.~\ref{fig:co-transf}G).
 Lower eps values suggest high CD45.1 to CD45.2 ratio. This ratio declines with increasing values of $\phi$ and reverses around $\phi = 0.7$ (Supplementary Fig.~\ref{fig:co-transf}D, right panel).
 
-Distinct quantitative and qualitative outcomes in these simulations demonstrate that the co-transfer strategy (Supplementary Fig.~\ref{fig:co-transf}A) can be effctively used to model and dissect the branched, linear, and branched + linear pathways of activation induced MZ B cell generation.
+Distinct quantitative and qualitative outcomes in these simulations demonstrate that the co-transfer strategy (Supplementary Fig.~\ref{fig:co-transf}A) can be effectively used to model and dissect the branched, linear, and branched + linear pathways of activation induced MZ B cell generation.
 
  
  
 \clearpage
+
+
+%: Supplementary Fig 9 - simulation of the co-transfer experiment
+\begin{figure}[htbp]
+\center
+\includegraphics[width=0.85\textwidth]{supp-9V2.pdf}
+\caption{
+    \textbf{Simulation of the co-transfer experiment using parameters derived from modeling the TD response in control/CAR mice.}
+    \textbf{(A)} Experimental design of the adoptive transfer strategy.
+    \textbf{(B-D)} Results from the simulations of (B) branched, (C) linear and (D) branched + linear models of MZ B cell generation during an active immune response.
+    Plots on the left  show cell counts of GC (GC.1), MZ (MZ.1) B cells from CD45.1 and GC (GC.2), MZ (MZ.2) B cells from CD45.2 donors.
+    Plots on the right depict fraction of CD45.1 and CD45.2 donor cells in CAR$^+$ MZ B cell compartment.
+    Individual panels represent predictions generated using a fixed value of the loss rate ($\phi$) of transferred FoB cells.
+    }
+       \label{fig:co-transf}
+ \end{figure}
+ 
+ 
+\clearpage
+
+
+\section*{Predicting clonal structure of MZ B cells generated from antigen induced activation of FoB cells}
+
+To simulate the clonal dynamics of CAR-expressing MZ B cells, we defined a simple stochastic model that assumes identical kinetics of birth-loss for all newly generated antigen-specific MZ B cell clones.
+\begin{eqnarray*}
+\begin{aligned}
+&\text{Stochastic simulation of clonal dynamics} \\
+&\text{In a small time interval } h, \\
+&\text{Number of new clones recruited into the MZ} = \kappa  F^+(t) h \\
+&\text{Clones are lost from the pool with a binomial probability } = \kappa  F^+(t) h \\
+\end{aligned}
+\end{eqnarray*}
+  
+We used the 
+population average
+ (Supplementary Fig.~\ref{fig:clone-dyn}A).
+
+
+\clearpage
+
+
 
 %: Supplementary Fig 10 - Prediction of clonal dynamics
 \begin{figure}[htbp]
 \center
 \includegraphics[width=0.8\textwidth]{supp-10.pdf}
 \caption{
-    \textbf{Stochastic simulation of the clonal dynamics during the NP-CGG response.}
+    \textbf{Stochastic simulation of the clonal dynamics during the TD response.}
     }
        \label{fig:clone-dyn}
        
