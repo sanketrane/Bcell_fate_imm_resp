@@ -38,8 +38,8 @@ if (length(args)==0) {
   args[2] = "out.txt"
 }
 
-rUN_seed <- paste0("Run_", args[1])
-
+#rUN_seed <- paste0("Run_", args[1])
+rUN_seed <- paste0("Run_", 3)
 print(rUN_seed)
 
 Wes_pallete <- wesanderson::wes_palette('Darjeeling1', NUM_CLONES, type = "continuous")
@@ -54,18 +54,12 @@ lambda_sd <- sd(fit_ss$lambda_WT)
 ## Phenomenological function describing number of activated (CAR expressing) FoB cells varying with time
 CAR_FoB <- function(Time){
   # spline fitted to FoB numbers 
-  F0 = exp(0); B0 = exp(5);  n = 4 ;  X = 9.4 ;  q = 6;
-  value = (B0 * Time^n) * (1 - ((Time^q)/((X^q) + (Time^q))));
+  #F0 = exp(0); B0 = exp(5);  n = 4 ;  X = 9.4 ;  q = 6;
+  #value = (B0 * Time^n) * (1 - ((Time^q)/((X^q) + (Time^q))));
+  F0 = exp(11.722278);  B0 = exp(4.475064);  n = 4.781548 ;  X = 6.943644 ;  q = 5;
+  value = F0 + (B0 * Time^n) * (1 - ((Time^q)/((X^q) + (Time^q))))
   return(value)
 }
-
-### Phenomenological function describing number of activated (CAR expressing) FoB cells varying with time
-#CAR_MZB <- function(Time){
-#  # spline fitted to FoB numbers 
-#  #F0 = exp(11.722278); B0 = exp(4.475064);  n = 4.781548 ;  X = 6.943644 ;  q = 5;
-#  F0 = exp(5); B0 = exp(5.5);  n = 3 ;  X = 9.2 ;  q = 4;
-#  value =  (B0 * Time^n) * (1 - ((Time^q)/((X^q) + (Time^q)))) #- exp(11.7);
-#  return(value)
 
 ## Assuming power-law distribution for the antigen-specific B cell clones in the activated pool
 ## We are simulating for 30 different clones.
@@ -241,8 +235,8 @@ singleRun <- function(nClones){
     
     ## update the pool
     binomial_persist <- rbinom(1, size = poolsize, prob = 1 - prob_loss)
-    clone_persist <- sample(start_clone_dist, binomial_persist, prob = prob_loss_Gauss[start_clone_dist]) %>% sort()
-    #clone_persist <- sample(start_clone_dist, binomial_persist) %>% sort()
+    #clone_persist <- sample(start_clone_dist, binomial_persist, prob = prob_loss_Gauss[start_clone_dist]) %>% sort()
+    clone_persist <- sample(start_clone_dist, binomial_persist) %>% sort()
     
 
     ## influx
@@ -285,41 +279,41 @@ singleRun <- function(nClones){
   return(single_run_plot)
 }
 
-#single_run_plot <- singleRun(NUM_CLONES)
-#
-#ggplot(single_run_plot)+
-#  geom_line(aes(x=Timeseries, y=Clonefreq, col=as.factor(CloneID))) +
-#  #scale_y_log10() + scale_x_log10() +
-#  labs(x = "Time since immunization (days)", y = "Clone size") +
-#  scale_color_manual(values = Wes_pallete)+ scale_fill_manual(values=Wes_pallete) +
-#  #geom_text(aes(x=Timeseries, y=Clonefreq, label=CloneID, col=as.factor(CloneID)))+
-#  #scale_color_viridis_d() + +
-#  #facet_wrap(.~ CloneID, nrow = 5)
-#  guides(col='none')
-#
-#ggsave("MZ_count_dist.pdf", last_plot(), width = 6, height = 4.5, device = 'pdf')
-#
-#ggplot(single_run_plot)+
-#  geom_line(aes(x=Timeseries, y=Clonefreq, col=CloneID)) +
-#  labs(x = "Time since immunization (days)", y = "Clone size") +
-#  guides(col='none') +  
-#  facet_wrap(.~ CloneID, nrow = 5)
-#
-#
-#ggsave("MZ_clone_dist.pdf", last_plot(), width = 10, height = 9, device = 'pdf')
-#
-#singleRun_clonefreq <- single_run_plot %>%
-#  group_by(Timeseries) %>%
-#  mutate(clone_freq = Clonefreq/sum(Clonefreq))
-#
-#ggplot(singleRun_clonefreq)+
-#  geom_line(aes(x=Timeseries, y=clone_freq, col=CloneID)) +
-#  labs(x = "Time since immunization (days)", y = "Clone Frequency") +
-#  scale_color_manual(values = Wes_pallete)+ scale_fill_manual(values=Wes_pallete)+
-#  guides(col='none') + scale_y_log10(limits=c(0.0001, 1))
-#
-#
-#ggsave("MZ_freq_dist.pdf", last_plot(), width = 6, height = 4.5, device = 'pdf')
+single_run_plot <- singleRun(NUM_CLONES)
+
+ggplot(single_run_plot)+
+  geom_line(aes(x=Timeseries, y=Clonefreq, col=as.factor(CloneID))) +
+  #scale_y_log10() + scale_x_log10() +
+  labs(x = "Time since immunization (days)", y = "Clone size") +
+  scale_color_manual(values = Wes_pallete)+ scale_fill_manual(values=Wes_pallete) +
+  #geom_text(aes(x=Timeseries, y=Clonefreq, label=CloneID, col=as.factor(CloneID)))+
+  #scale_color_viridis_d() + +
+  #facet_wrap(.~ CloneID, nrow = 5)
+  guides(col='none')
+
+ggsave("MZ_count_dist.pdf", last_plot(), width = 6, height = 4.5, device = 'pdf')
+
+ggplot(single_run_plot)+
+  geom_line(aes(x=Timeseries, y=Clonefreq, col=CloneID)) +
+  labs(x = "Time since immunization (days)", y = "Clone size") +
+  guides(col='none') +  
+  facet_wrap(.~ CloneID, nrow = 5)
+
+
+ggsave("MZ_clone_dist.pdf", last_plot(), width = 10, height = 9, device = 'pdf')
+
+singleRun_clonefreq <- single_run_plot %>%
+  group_by(Timeseries) %>%
+  mutate(clone_freq = Clonefreq/sum(Clonefreq))
+
+ggplot(singleRun_clonefreq)+
+  geom_line(aes(x=Timeseries, y=clone_freq, col=CloneID)) +
+  labs(x = "Time since immunization (days)", y = "Clone Frequency") +
+  scale_color_manual(values = Wes_pallete)+ scale_fill_manual(values=Wes_pallete)+
+  guides(col='none') + scale_y_log10(limits=c(0.0001, 1))
+
+
+ggsave("MZ_freq_dist.pdf", last_plot(), width = 6, height = 4.5, device = 'pdf')
 
 BatchRun <- function(nIter, nClones){
   ## function to iterate

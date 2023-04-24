@@ -47,6 +47,13 @@ delta_l <- median(fit_ss2$delta)
 lambda_l <- median(fit_ss2$lambda_WT)
 mu_l <- median(fit_ss2$mu)
 
+gc_in <- function(Time){
+  v = ifelse(Time<7, 0,
+             ifelse(Time>7.25, 0, 1e5))
+  return(v)
+}
+gc_in(ts_pred)
+
 #### donor CAR+ FO and GC B cells in recipients
 ## ode function for Branched model
 ode_func <-  function(t, state, parms){
@@ -62,6 +69,10 @@ ode_func <-  function(t, state, parms){
     
     ## new parameter
     epsilon = parms[8]
+    
+    delta_gc = ifelse(t<=7, 0, delta)
+    mu_gc = ifelse(t<=7, 0, mu_linear)
+    lambda_gc = ifelse(t<=7, 0, lambda_linear)
     
     t0 = 4.0;
     ## form for influx of activated FOB into GC varying with time
@@ -79,10 +90,10 @@ ode_func <-  function(t, state, parms){
     dY3 = mu_branched * Y1 + mu_linear * Y2 - lambda_linear * Y3;
     
     # CAR positive GCB CD45.2
-    dY4 = - (delta + mu_linear) * Y4;
+    dY4 =  - (delta_gc + mu_gc) * Y4;
     
     # CAR positive MZB CD45.2
-    dY5 = mu_linear * Y4 - lambda_linear * Y5;
+    dY5 = mu_gc * Y4 - lambda_gc * Y5;
     
     #return the rate of change
     list(c(dY1, dY2, dY3, dY4, dY5))
@@ -95,11 +106,11 @@ state <- c(Y1 = 1e5, Y2 = 0,  Y3=0, Y4=1e5, Y5=0)
 
 # time points for which conc is reported
 # include the points where data is available
-ts_pred <- seq(7, 60, length.out=100)
+ts_pred <- c(4, 5, 6, seq(7, 60, length.out=100))
 
 
 out_df <- data.frame()
-eps_vec <- c(0.01, 0.1, 0.7, 1)
+eps_vec <- c(0.01, 0.55, 1, 3)
 
 for(i in 1:length(eps_vec)) {
   parms_vec <- c("alpha" = alpha_b, "mu_branched" = mu_b , "mu_linear" = mu_l, 
@@ -113,7 +124,7 @@ for(i in 1:length(eps_vec)) {
            FO.1 = Y1,
            GC.1 = Y2,
            MZ.1 = Y3,
-           GC.2 = Y4,
+           GC.2_pre = Y4,
            MZ.2 = Y5) %>%
     mutate(ratio_MZ = replace_na(MZ.2/MZ.1, 0),
            EPS = round(eps_vec[i], 4))
@@ -125,12 +136,14 @@ plot_df <- out_df %>%
   mutate(FO.1 = replace(FO.1, FO.1 <= 1, 1),
          GC.1 = replace(GC.1, GC.1 <= 1, 1),
          MZ.1 = replace(MZ.1, MZ.1 <= 1, 1),
-         GC.2 = replace(GC.2, GC.2 <= 1, 1),
-         MZ.2 = replace(MZ.2, MZ.2 <= 1, 1))
+         GC.2_pre = replace(GC.2_pre, GC.2_pre <= 1, 1),
+         MZ.2 = replace(MZ.2, MZ.2 <= 1, 1),
+         GC.2 = ifelse(timeseries < 7, 0, GC.2_pre)) 
+  
 
-plot_df$EPS <- factor(plot_df$EPS, levels = c("0.01", "0.1", "0.7", "1"), ordered = TRUE,
-                      labels = c(expression(paste(phi, "=0.01")), expression(paste(phi, "=0.1")),
-                                 expression(paste(phi, "=0.7")), expression(paste(phi, "=1"))))
+plot_df$EPS <- factor(plot_df$EPS, levels = c("0.01", "0.55", "1", "3"), ordered = TRUE,
+                      labels = c(expression(paste(phi, "=0.01")), expression(paste(phi, "=0.55")),
+                                 expression(paste(phi, "=1")), expression(paste(phi, "=3"))))
 
 
 #ggplot(data = out_df, aes(x= timeseries)) +
@@ -149,7 +162,7 @@ ggplot(data = plot_df, aes(x= timeseries)) +
   geom_area(aes(y= GC.2, fill="GC CD45.2" ), alpha=0.5, colour="white") +
   geom_area(aes(y= MZ.2, fill="MZ CD45.2"), alpha=0.5, colour="white") +
   geom_area(aes(y= MZ.1, fill="MZ CD45.1" ), alpha=0.6, colour="white") +
-  scale_x_log10(limits = c(7, 60), breaks=c(7, 14, 28, 56)) + 
+  scale_x_log10(limits = c(4, 60), breaks=c(7, 14, 28, 56)) + 
   scale_y_continuous(limits = c(1, 2e5), trans = "log10", labels = fancy_scientific, minor_breaks = log10minorbreaks) + 
   labs(x='Days since immunization', y=NULL)  +  #theme_ipsum() +
   guides(fill='none') +
@@ -166,9 +179,9 @@ aresf <- plot_df2 %>%
   mutate(n_tot = sum(counts), 
          percentage = counts/n_tot)
 
-aresf$EPS <- factor(aresf$EPS, levels = c("0.01", "0.1", "0.7", "1"), ordered = TRUE,
-                      labels = c(expression(paste(phi, "=0.01")), expression(paste(phi, "=0.1")),
-                                 expression(paste(phi, "=0.7")), expression(paste(phi, "=1"))))
+aresf$EPS <- factor(aresf$EPS, levels = c("0.01", "0.55", "1", "3"), ordered = TRUE,
+                    labels = c(expression(paste(phi, "=0.01")), expression(paste(phi, "=0.7")),
+                               expression(paste(phi, "=1")), expression(paste(phi, "=3"))))
 
 # Give a specific order:
 aresf$popln <- factor(aresf$popl , levels=c("MZ 45.1", "MZ 45.2") )

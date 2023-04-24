@@ -93,32 +93,46 @@
 %%%%%%%%%%%%%%%%%%%%%%%
 
 
-\title{Mathematical modelling of MZ B cells during an immune response}
+\title{Mathematical modeling of MZ B cells during an immune response}
 \author{}
 
 \date{}
 
 \begin{document} 
 	%\maketitle
+	
+\textbf{Response to the comments from reviewer - 3}
 
 \gray{
-1) Are the `$\nu$'  parameters which appear throughout (for example in supplemental equation 1 and main text equations 2 and 6 taken to be the same). If not, can they be assigned separate symbols to avoid confusion.
+1) Are the ``$\nu$''  parameters which appear throughout (for example in supplemental equation 1 and main text equations 2 and 6 taken to be the same). If not, can they be assigned separate symbols to avoid confusion.
 }
 
-Response: Thank you for noticing. We have corrected this in the revised version.
+Response: Thank you for pointing this out. We have corrected this in the revised version.
 
 
 \gray{
-2) It was unclear how the various processes in the model should depend on the existence of Notch2 signaling. If I correctly understood the details, aside from the decay of the CAR+MZB cells, these parameters seem to be taken to be the same for the “wild-type” and the knockout. It was not clear what the basis was for this assumption. why for example was the production rate not dependent on Notch2 signaling given the statement in the discussion that this signaling induces MZB development. In general, the model choices could have been connected better to the underlying biology.
+2) It was unclear how the various processes in the model should depend on the existence of Notch2 signaling. If I correctly understood the details, aside from the decay of the CAR+MZB cells, these parameters seem to be taken to be the same for the “wild-type” and the knockout. It was not clear what the basis was for this assumption. why for example was the $\mu$ production rate not dependent on Notch2 signaling given the statement in the discussion that this signaling induces MZB development. In general, the model choices could have been connected better to the underlying biology.
 } 
 
-Response: 
+Response: We appreciate the detailed scrutiny of our models by the reviewers but there seems to be a minor misunderstanding.
+%However, the concern that all parameters except the decay rate of the CAR$^{+}$ MZB cells are identical between wild-type and the knockout scenarios, is a misinterpretation.
+Our modeling schemes for wild-type and Notch2 knockout mice differ in two ways.
+\begin{enumerate}
+\item Different loss rates of CAR$^{+}$ MZB cells ($\lambda$ and $\lambda$', respectively).
+\item Differences in the generation of CAR$^{+}$ MZB cells:
+In N2KO//CAR mice, activation induces deletion of Notch2 receptor in B cells.
+Since, Notch2 is shown to be indispensable for MZB cell generation (PMID: 11967543, 12753744, 15146182), we assume complete absence of activation induced differentiation of FoB  or GCB cells into CAR$^{+}$ MZB cells in these mice (\textit{i.e.} $\mu=0$).
+To emphasize the block in differentiation of activated B cells into CAR$^{+}$ MZB cells in N2KO//CAR mice we have modified the Fig. 7 (panels C and D) and the description of mathematical models in the methods section.
+\end{enumerate} 
+%We consider activation of pre-existing MZB cells ($\beta$) to be Notch2 independent and is therefore described by same rate constant ($\beta$) in both wild-type and Notch2 knockout mice. 
+We are known in the field for taking great care in developing approaches with close integration of theory and biology; and would like to argue that our model-design here too is well tethered to the underlying biology of the experimental system and suited for the questions we are asking. 
 
 \gray{
 3) In general, I believe that mathematical models should try to predict new features rather than just recapitulate existing data. Are there any new predictions for further experiments that the authors can propose, as this would increase the usefulness of the modeling section.
 }
 
-Response: We agree with the reviewers that t
+Response: We fully agree with this viewpoint thank the reviewer for this suggestion. 
+We now include simulations of our models in two different 
 
 
 \clearpage
@@ -185,9 +199,10 @@ Distinct quantitative and qualitative outcomes in these simulations demonstrate 
 \section*{Predicting clonal structure of MZ B cells generated from antigen induced activation of FoB cells}
 
 To simulate the clonal dynamics of CAR-expressing MZ B cells, we defined a simple stochastic model that assumes identical kinetics of birth-loss for all newly generated antigen-specific MZ B cell clones.
+
+\textbf{Stochastic simulation of clonal dynamics} 
 \begin{eqnarray*}
 \begin{aligned}
-&\text{Stochastic simulation of clonal dynamics} \\
 &\text{In a small time interval } h, \\
 &\text{Number of new clones recruited into the MZ} = \kappa  F^+(t) h \\
 &\text{Clones are lost from the pool with a binomial probability } = \kappa  F^+(t) h \\

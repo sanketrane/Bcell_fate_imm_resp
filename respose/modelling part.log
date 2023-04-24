@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.8.18)  23 APR 2023 18:58
+This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.12.22)  24 APR 2023 17:32
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1084,12 +1084,12 @@ your preamble.
 
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 106
+LaTeX Font Info:    Trying to load font information for U+msa on input line 108
 .
 (/usr/local/texlive/2021/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 106
+LaTeX Font Info:    Trying to load font information for U+msb on input line 108
 .
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/amsfonts/umsb.fd
@@ -1097,13 +1097,13 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
 ]
-Overfull \hbox (13.84239pt too wide) in paragraph at lines 129--132
+Overfull \hbox (13.84239pt too wide) in paragraph at lines 143--146
 \TU/PalatinoLinotype(0)/m/n/10.95 transferred in synchronously immunized CD45.1
 /CD45.2 WT recipient mice (Supplementary Fig. []1[]A).
  []
 
 
-Overfull \hbox (1.48354pt too wide) in paragraph at lines 159--160
+Overfull \hbox (1.48354pt too wide) in paragraph at lines 173--174
 []\TU/PalatinoLinotype(0)/m/n/10.95 Distinct quantitative and qualitative outco
 mes in these simulations demonstrate that the co-transfer
  []
@@ -1115,15 +1115,9 @@ File: supp-9V2.pdf Graphic file (type pdf)
 <use supp-9V2.pdf>
 
 
-LaTeX Warning: Float too large for page by 11.33pt on input line 179.
+LaTeX Warning: Float too large for page by 11.33pt on input line 193.
 
-[3]
-Overfull \hbox (4.03549pt too wide) in paragraph at lines 187--188
-\TU/PalatinoLinotype(0)/m/n/10.95 model that assumes identical kinetics of birt
-h-loss among all antigen-specific MZ B cell clones. 
- []
-
-[4
+[3] [4
 
 
 ]
@@ -1132,19 +1126,16 @@ File: supp-10.pdf Graphic file (type pdf)
  [5
 
 ] (./modelling part.aux)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
 Package rerunfilecheck Info: File `"modelling part".out' has not changed.
 (rerunfilecheck)             Checksum: <no file>.
  ) 
 Here is how much of TeX's memory you used:
- 38057 strings out of 476919
- 885932 string characters out of 5821840
- 1317028 words of memory out of 5000000
- 57413 multiletter control sequences out of 15000+600000
- 415840 words of font info for 94 fonts, out of 8000000 for 9000
+ 38061 strings out of 476919
+ 886116 string characters out of 5821839
+ 1317023 words of memory out of 5000000
+ 57415 multiletter control sequences out of 15000+600000
+ 415856 words of font info for 96 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 117i,6n,116p,891b,479s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 117i,14n,116p,891b,479s stack positions out of 5000i,500n,10000p,200000b,80000s
 
 Output written on modelling part.pdf (5 pages).
