@@ -38,8 +38,8 @@ if (length(args)==0) {
   args[2] = "out.txt"
 }
 
-#rUN_seed <- paste0("Run_", args[1])
-rUN_seed <- paste0("Run_", 3)
+rUN_seed <- paste0("Run_", args[1])
+#rUN_seed <- paste0("Run_", 3)
 print(rUN_seed)
 
 Wes_pallete <- wesanderson::wes_palette('Darjeeling1', NUM_CLONES, type = "continuous")
@@ -98,6 +98,33 @@ PLdist_Clone_Time <- function(Time, nClones){
   return(value)
 }
 
+
+pl_df <- data.frame("d07" = PLdist_Clone_Time(7, NUM_CLONES),
+                    "d14" = PLdist_Clone_Time(14, NUM_CLONES),
+                    "d21" = PLdist_Clone_Time(21, NUM_CLONES),
+                    "d28" = PLdist_Clone_Time(28, NUM_CLONES),
+                    "d35" = PLdist_Clone_Time(35, NUM_CLONES),
+                    "d56" = PLdist_Clone_Time(56, NUM_CLONES), 
+                    "Clone.ID" = seq(1, 75)) %>%
+  gather(-Clone.ID,  key='Time.Days', value='Clone.Size')
+
+ggplot(pl_df)+
+  geom_line(aes(x=log(Clone.ID), y=log(Clone.Size), col = Clone.ID)) +
+  scale_color_viridis_c() + 
+  labs(x = "log(Clone Rank)", y = "log(Clone Size)") +
+  guides(col='none') + #scale_x_log10()+
+  facet_wrap(~Time.Days)
+
+ggplot(pl_df)+
+  geom_line(aes(x=log(Clone.ID), y=log(Clone.Size), col = Time.Days), size=0.75) +
+  #scale_color_viridis_d(option = "D") + 
+  scale_color_discrete(name = "Time since \n immunization")+
+  labs(x = "log(Clone Rank)", y = "log(Clone Size)") +
+  theme(legend.position = c(0.9, 0.75), legend.background = element_blank(), legend.title.align=0.5)
+
+ggsave(paste0(rUN_seed, "_parent_Hist.pdf"), last_plot(), width = 6, height = 4.5, device = 'pdf')
+
+
 cloneid <-c()  ## start an empty vector
 j=0
 for (i in 1:NUM_CLONES){
@@ -139,7 +166,7 @@ p2 <- ggplot(pwvec)+
 
 ggsave(paste0(rUN_seed, "_parent_count_dist.pdf"), p2, width = 6, height = 4.5, device = 'pdf')
 
-
+### ditribution of antigen-specific clones in FoB population
 PL_parent_dist <- function(Time, nClones){
   ## generate a distribution
   dist <-c()  ## start an empty vector
@@ -154,47 +181,6 @@ PL_parent_dist <- function(Time, nClones){
   }
   return(dist)
 }
-
-## Cells that differentiate into MZ and GC phenotype within a short interval time dt
-### from the activated clones sample cells with propensity mu * X for MZ and alpha(Time) * X for GC B cells,
-### Where X is the pool size of activated FoB cells 
-MZ_Clone_dist_Time <- function(Time, nClones){
-  #mu_med --- median value of recruitment rate
-  clone_sample = sample(PL_parent_dist(Time, nClones), mu_med * CAR_FoB(Time))
-  return(sort(clone_sample))
-}
-
-Hist_plot_func <- function(nClones, popln){
-  time_obs <- c(7, 14, 21, 28, 35, 56)
-  
-  dist_global <- data.frame()
-  app <- data.frame()
-  for (i in 1:length(time_obs)){
-    if (popln == "Fo"){
-      distrib = PL_parent_dist(time_obs[i], nClones)
-    } else if (popln == "MZ"){
-     distrib = MZ_Clone_dist_Time(time_obs[i], nClones)
-    }
-    
-    app <- data.frame(f0 = distrib,
-                      Timecol = paste0("Day_", time_obs[i]),
-                      polncol = popln)
-    dist_global <- dist_global %>% rbind(app)
-  }
-  dist_global
-}
-
-Fo_dist <- Hist_plot_func(NUM_CLONES, "Fo")
-
-p3 <- ggplot(Fo_dist, aes(f0, fill= as.factor(f0))) +
-  geom_histogram(binwidth=1) +
-  #scale_fill_manual(values = MP)+
-  scale_color_manual(values = Wes_pallete)+ scale_fill_manual(values=Wes_pallete)+
-  labs(x="Clone rank", y="Count") + guides(fill = 'none')+
-  facet_wrap(~factor(Timecol, levels = c("Day_7", "Day_14", "Day_21", "Day_28", "Day_35", "Day_56")))
-
-
-ggsave(paste0(rUN_seed, "_parent_Hist.pdf"), p3, width = 6, height = 4.5, device = 'pdf')
 
 
 singleRun <- function(nClones){
@@ -229,6 +215,7 @@ singleRun <- function(nClones){
     lambda_Gauss = rnorm(nClones, lambda_med, lambda_sd)
     prob_loss_Gauss = 1 - exp(-lambda_Gauss * TSTEP)
     prob_loss = 1 - exp(-lambda * TSTEP)
+    prob_influx = 1 - exp(-mu * TSTEP)
     
     ## pre-existing clones
     poolsize <- length(start_clone_dist)
@@ -238,9 +225,9 @@ singleRun <- function(nClones){
     #clone_persist <- sample(start_clone_dist, binomial_persist, prob = prob_loss_Gauss[start_clone_dist]) %>% sort()
     clone_persist <- sample(start_clone_dist, binomial_persist) %>% sort()
     
-
     ## influx
-    new_clones <- MZ_Clone_dist_Time(Time = current_time, nClones = nClones)
+    size_of_recruit <- rbinom(1, size = as.integer(CAR_FoB(current_time)), prob = prob_influx)
+    new_clones <- sample(PL_parent_dist(current_time, nClones), size_of_recruit)
     
     ## update the pool
     final_clone_dist <- c(clone_persist, new_clones)
@@ -279,41 +266,41 @@ singleRun <- function(nClones){
   return(single_run_plot)
 }
 
-single_run_plot <- singleRun(NUM_CLONES)
-
-ggplot(single_run_plot)+
-  geom_line(aes(x=Timeseries, y=Clonefreq, col=as.factor(CloneID))) +
-  #scale_y_log10() + scale_x_log10() +
-  labs(x = "Time since immunization (days)", y = "Clone size") +
-  scale_color_manual(values = Wes_pallete)+ scale_fill_manual(values=Wes_pallete) +
-  #geom_text(aes(x=Timeseries, y=Clonefreq, label=CloneID, col=as.factor(CloneID)))+
-  #scale_color_viridis_d() + +
-  #facet_wrap(.~ CloneID, nrow = 5)
-  guides(col='none')
-
-ggsave("MZ_count_dist.pdf", last_plot(), width = 6, height = 4.5, device = 'pdf')
-
-ggplot(single_run_plot)+
-  geom_line(aes(x=Timeseries, y=Clonefreq, col=CloneID)) +
-  labs(x = "Time since immunization (days)", y = "Clone size") +
-  guides(col='none') +  
-  facet_wrap(.~ CloneID, nrow = 5)
-
-
-ggsave("MZ_clone_dist.pdf", last_plot(), width = 10, height = 9, device = 'pdf')
-
-singleRun_clonefreq <- single_run_plot %>%
-  group_by(Timeseries) %>%
-  mutate(clone_freq = Clonefreq/sum(Clonefreq))
-
-ggplot(singleRun_clonefreq)+
-  geom_line(aes(x=Timeseries, y=clone_freq, col=CloneID)) +
-  labs(x = "Time since immunization (days)", y = "Clone Frequency") +
-  scale_color_manual(values = Wes_pallete)+ scale_fill_manual(values=Wes_pallete)+
-  guides(col='none') + scale_y_log10(limits=c(0.0001, 1))
-
-
-ggsave("MZ_freq_dist.pdf", last_plot(), width = 6, height = 4.5, device = 'pdf')
+#single_run_plot <- singleRun(NUM_CLONES)
+#
+#ggplot(single_run_plot)+
+#  geom_line(aes(x=Timeseries, y=Clonefreq, col=as.factor(CloneID))) +
+#  #scale_y_log10() + scale_x_log10() +
+#  labs(x = "Time since immunization (days)", y = "Clone size") +
+#  scale_color_manual(values = Wes_pallete)+ scale_fill_manual(values=Wes_pallete) +
+#  #geom_text(aes(x=Timeseries, y=Clonefreq, label=CloneID, col=as.factor(CloneID)))+
+#  #scale_color_viridis_d() + +
+#  #facet_wrap(.~ CloneID, nrow = 5)
+#  guides(col='none')
+#
+#ggsave("MZ_count_dist.pdf", last_plot(), width = 6, height = 4.5, device = 'pdf')
+#
+#ggplot(single_run_plot)+
+#  geom_line(aes(x=Timeseries, y=Clonefreq, col=CloneID)) +
+#  labs(x = "Time since immunization (days)", y = "Clone size") +
+#  guides(col='none') +  
+#  facet_wrap(.~ CloneID, nrow = 5)
+#
+#
+#ggsave("MZ_clone_dist.pdf", last_plot(), width = 10, height = 9, device = 'pdf')
+#
+#singleRun_clonefreq <- single_run_plot %>%
+#  group_by(Timeseries) %>%
+#  mutate(clone_freq = Clonefreq/sum(Clonefreq))
+#
+#ggplot(singleRun_clonefreq)+
+#  geom_line(aes(x=Timeseries, y=clone_freq, col=CloneID)) +
+#  labs(x = "Time since immunization (days)", y = "Clone Frequency") +
+#  scale_color_manual(values = Wes_pallete)+ scale_fill_manual(values=Wes_pallete)+
+#  guides(col='none') + scale_y_log10(limits=c(0.0001, 1))
+#
+#
+#ggsave("MZ_freq_dist.pdf", last_plot(), width = 6, height = 4.5, device = 'pdf')
 
 BatchRun <- function(nIter, nClones){
   ## function to iterate

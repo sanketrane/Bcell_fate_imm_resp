@@ -46,7 +46,7 @@
 %\setmonofont[Scale=0.8]{PT Serif} % typeface for \tt commands
 %\setsansfont[BoldFont={PT Serif Bold}, ItalicFont={PT Serif Italic}]{PT Serif} 
 \defaultfontfeatures{Mapping=tex-text}
-\setmainfont{Palatino Linotype}
+\setmainfont{Helvetica}
 %\setmainfont{Source Sans Pro}
 
 %: ************ FANCY FONTS END HERE
@@ -114,25 +114,35 @@ Response: Thank you for pointing this out. We have corrected this in the revised
 2) It was unclear how the various processes in the model should depend on the existence of Notch2 signaling. If I correctly understood the details, aside from the decay of the CAR+MZB cells, these parameters seem to be taken to be the same for the “wild-type” and the knockout. It was not clear what the basis was for this assumption. why for example was the $\mu$ production rate not dependent on Notch2 signaling given the statement in the discussion that this signaling induces MZB development. In general, the model choices could have been connected better to the underlying biology.
 } 
 
-Response: We appreciate the detailed scrutiny of our models by the reviewers but there seems to be a minor misunderstanding.
-%However, the concern that all parameters except the decay rate of the CAR$^{+}$ MZB cells are identical between wild-type and the knockout scenarios, is a misinterpretation.
-Our modeling schemes for wild-type and Notch2 knockout mice differ in two ways.
-\begin{enumerate}
-\item Different loss rates of CAR$^{+}$ MZB cells ($\lambda$ and $\lambda$', respectively).
-\item Differences in the generation of CAR$^{+}$ MZB cells:
-In N2KO//CAR mice, activation induces deletion of Notch2 receptor in B cells.
-Since, Notch2 is shown to be indispensable for MZB cell generation (PMID: 11967543, 12753744, 15146182), we assume complete absence of activation induced differentiation of FoB  or GCB cells into CAR$^{+}$ MZB cells in these mice (\textit{i.e.} $\mu=0$).
-To emphasize the block in differentiation of activated B cells into CAR$^{+}$ MZB cells in N2KO//CAR mice we have modified the Fig. 7 (panels C and D) and the description of mathematical models in the methods section.
-\end{enumerate} 
+Response: We appreciate the detailed scrutiny of our models but there seems to be a minor misunderstanding.
+We indeed do consider differences in generation of CAR$^{+}$ MZB cells between wild-type (control/CAR) and Notch2 knockout (N2KO//CAR) mice.
+In N2KO//CAR mice, we assume complete absence of differentiation of CAR$^{+}$ (activated) FoB  or GCB cells into MZB cells, since activation induces deletion of Notch2 receptor in their B cells.(\textit{i.e.} $\mu=0$).
+%In control/CAR mice $\mu \neq 0$.
+Notch2 is indispensable for MZB cell generation (PMID: 11967543, 12753744, 15146182).
+To clarify this point further we have modified the Fig. 7 (panels C and D) and the description of mathematical models in the methods section.
+%%The concern that all parameters except the decay rate of the CAR$^{+}$ MZB cells are identical between wild-type and the knockout scenarios, is a misinterpretation.
+%Our startegies to model data from for wild-type (control/CAR) and Notch2 knockout (N2KO//CAR) mice differ in two ways:
+%\begin{enumerate}
+%\item %Differences in loss of CAR$^{+}$ MZB cells.
+%We define different loss rates CAR$^{+}$ MZB cells in control/CAR and N2KO//CAR mice, $\lambda$ and $\lambda$' respectively).
+%\item Differences in the generation of CAR$^{+}$ MZB cells.
+%In N2KO//CAR mice, activation induces deletion of Notch2 receptor in B cells.
+%We assume complete absence of differentiation of CAR$^{+}$ (activated) FoB  or GCB cells into MZB cells in these mice (\textit{i.e.} $\mu=0$), since Notch2 is shown to be indispensable for MZB cell generation (PMID: 11967543, 12753744, 15146182).
+%To clarify this point further we have modified the Fig. 7 (panels C and D) and the description of mathematical models in the methods section.
+%\end{enumerate} 
 %We consider activation of pre-existing MZB cells ($\beta$) to be Notch2 independent and is therefore described by same rate constant ($\beta$) in both wild-type and Notch2 knockout mice. 
-We are known in the field for taking great care in developing approaches with close integration of theory and biology; and would like to argue that our model-design here too is well tethered to the underlying biology of the experimental system and suited for the questions we are asking. 
+
+We believe we are known in the field for taking great care in developing approaches that integrate theory and biology closely; and would like to argue that our model-design here too is well tethered to the underlying biology of the experimental system and suited for the questions we are asking. 
 
 \gray{
 3) In general, I believe that mathematical models should try to predict new features rather than just recapitulate existing data. Are there any new predictions for further experiments that the authors can propose, as this would increase the usefulness of the modeling section.
 }
 
-Response: We fully agree with this viewpoint thank the reviewer for this suggestion. 
-We now include simulations of our models in two different 
+Response: We fully agree with this viewpoint and thank the reviewer for this suggestion. 
+We now include simulations of our models in an adoptive transfer setting, where B cell differentiation patterns are mapped during an immune response.
+The details of simulation and model predictions are outlined  in the supplementary text \red{XX}.
+%generated using parameters estimated from fitting the data derived from immunization experiments in control/CAR and N2KO//CAR mice, in the supplementary text.
+
 
 
 \clearpage
@@ -140,35 +150,36 @@ We now include simulations of our models in two different
 
 \section*{Predicting B cell diversification patterns in response to immunization in an adoptive transfer strategy}
 
-We simulated an experimental strategy in which activated CAR$^{+}$ FoB (CD45.1) and CAR$^{+}$ GC (CD45.2) B cells from control/CAR mice are sorted on day 7 post immunization and then co-transferred in synchronously immunized CD45.1/CD45.2 WT recipient mice (Supplementary Fig.~\ref{fig:co-transf}A).
-We generated predictions for the \textit{de novo} MZ B cell generation in response to the immunization (up to 8 weeks post immunization) considering either (a) branched or (b) linear or (c) both branched + linear pathways govern B cell fate-decisions during an immune response.
+We simulated an experimental strategy in which we sort FoB (CD45.1) and GC (CD45.2) B cells from congenic control/CAR mice on day 4 and day 7 post immunization, respectively.
+Sorted cells are then co-transferred in CD45.1/CD45.2 double positive recipients that were immunized synchronously with donors~(Supplementary Fig.~\ref{fig:co-transf}A). 
+%immunized  and the counts of MZB and GCB cells in donor compartments are observed for up to 8 weeks post immunization
+We generated predictions for the dynamics of transferred CAR$^{+}$ MZB and GCB cells (for upto 8 weeks post immunization) considering that either (a) branched or (b) linear or (c) both branched + linear pathways govern B cell fate-decisions during an immune response.
 We assumed 10\% grafting efficiency for $10^{6}$ FoB (CD45.1) and $10^{6}$ GCB (CD45.2) transferred cells. 
 
-We used mean values of the parameters estimated from fitting branched and linear models (Equation~3 and 4 in Materials and Methods section of the main text) to the CAR expression dynamics in B cells during the TD response in control/CAR mice.
+We used mean values of the parameters estimated from fitting branched and linear models to the CAR expression dynamics in control/CAR mice during the TD response .
 %Our models did not account for the loss of activated (CAR$^{+}$) FoB cells either by death or extra-follicular differentiation into plasma or memory fates.
-Our fitting procedure did not explicitly estimated the loss (either by death or extra-follicular differentiation into plasma or memory fates) rate of activated (CAR$^{+}$) FoB cells.
-For the purpose of this simulation, we explored four values of this loss rate \textit{viz.} $\phi$ = 0.01, 0.7,1 and 3.
+Our fitting procedure did not explicitly estimated the loss (either by death or by differentiation into plasma or memory fates) rate of activated FoB cells.
+For the purpose of this simulation, we explored four values of the loss rate of transferred FoB cells \textit{viz.} $\phi$ = 0.01, 0.5, 1 and 5 day$^{-1}$.
 
+\textbf{Results from the simulations:}
 
 \textbf{(a) Branched model:}
-If the branched pathway is the only mode of MZ B cell generation during a TD response then 
-CAR$^{+}$  MZ B cells are generated exclusively from FoB CD45.1 donor cells (supplementary figure~\ref{fig:co-transf}B, left panel).
-Since, CD45.2$^{+}$ MZ B cells are not generated.%, since no linear differentiation of CD45.2$^{+}$ GC B cells.
-the fraction of CD45.1$^{+}$ cells in donor CAR$^{+}$ MZ compartment is always 100\% (Supplementary Fig.~\ref{fig:co-transf}B, right panel).
+In this model CAR$^{+}$  MZ B cells are generated exclusively from FoB CD45.1$^{+}$ donor cells.
+Since, the linear pathway is not permitted CD45.2$^{+}$ MZB cells are not generated from differentiation of CD45.2$^{+}$ GC B cells.  
+The fraction of CD45.1$^{+}$ cells in donor CAR$^{+}$ MZB cell compartment always equals 100\% (Supplementary Fig.~\ref{fig:co-transf}B).
 
 \textbf{(b) Linear model:}
-In this scenario, CAR$^{+}$ CD45.1$^{+}$ FoB cells differentiate into GC B cells, which in turn give rise to CD45.1$^{+}$ CAR$^{+}$ MZ B cells (Supplementary Fig.~\ref{fig:co-transf}C). 
-CAR$^{+}$ CD45.2$^{+}$ MZ B cells are generated from CD45.2$^{+}$ GC B cells (Supplementary Fig.~\ref{fig:co-transf}C, left panel).
-Our simulations predict that the CAR$^{+}$ MZ B cell compartment predominantly contains CD45.2$^{+}$ cells immediately post transfer.
-The CD45.2 fraction then declines over time as CD45.1$^{+}$ MZ B cells emerge from CD45.1 GC B cells (Supplementary Fig.~\ref{fig:co-transf}C, right panel).
-At high values of $\phi$, CAR$^{+}$ MZ B cell compartment is mostly made up of CD45.2$^{+}$ fraction. 
+In this model, CAR$^{+}$ CD45.1$^{+}$ MZB cells are generated from CD45.1$^{+}$ GCB cells, which come from differentiation of transferred CD45.1$^{+}$ FoB cells. 
+CAR$^{+}$ CD45.2$^{+}$ MZB cells are generated from linear differentiation of transferred CD45.2$^{+}$ GCB cells.
+Our simulations predict that the CAR$^{+}$ MZB cell compartment predominantly contains CD45.2$^{+}$ cells immediately post transfer~(Supplementary Fig.~\ref{fig:co-transf}C).
+The CD45.2 fraction then declines over time as CD45.1$^{+}$ MZB cells gradually emerge from CD45.1$^{+}$ GCB cells.
+At high values of $\phi$, CAR$^{+}$ MZB cell compartment mostly contains CD45.2$^{+}$ fraction. 
 
 \textbf{(c) Branched + linear model:}
-Two sources of CD45.1$^{+}$ CAR$^{+}$ MZ B cells -- (i) bifurcation of CD45.1$^{+}$ CAR$^{+}$ FoB into MZ and GC phenotypes; and (ii)
-linear differentiation of CD45.1$^{+}$ CAR$^{+}$ GC B cells (Supplementary Fig.~\ref{fig:co-transf}D, left panel). 
-Single source for CD45.2$^{+}$ CAR$^{+}$  MZ B cells -- CD45.2$^{+}$ CAR$^{+}$ GC B cells (Supplementary Fig.~\ref{fig:co-transf}D).
-Here, the fractions of CD45.1$^{+}$ and CD45.2$^{+}$ cells in CAR$^{+}$ MZ B cell compartment strongly relies on $\phi$ -- the loss rate of CAR$^{+}$ FoB cells (Supplementary Fig.~\ref{fig:co-transf}G).
-Lower eps values suggest high CD45.1 to CD45.2 ratio. This ratio declines with increasing values of $\phi$ and reverses around $\phi = 0.7$ (Supplementary Fig.~\ref{fig:co-transf}D, right panel).
+Here, CD45.1$^{+}$ CAR$^{+}$ MZ B cells have two sources -- (i) bifurcation of CD45.1$^{+}$ FoB cells and (ii) linear differentiation of CD45.1$^{+}$ GCB cells that are generated from tranfserred FoBs. 
+CD45.2$^{+}$ CAR$^{+}$  MZ B cells come from CD45.2$^{+}$ GCB cells.
+The kinetic of CD45.1$^{+}$ and CD45.2$^{+}$ fractions in CAR$^{+}$ MZ B cell compartment relies strongly on $\phi$.
+Lower $\phi$ values predict high CD45.1 to CD45.2 ratio, which declines as $\phi$ increases and reverses to high CD45.2 fraction around $\phi \approx 0.5$~(Supplementary Fig.~\ref{fig:co-transf}D).
 
 Distinct quantitative and qualitative outcomes in these simulations demonstrate that the co-transfer strategy (Supplementary Fig.~\ref{fig:co-transf}A) can be effectively used to model and dissect the branched, linear, and branched + linear pathways of activation induced MZ B cell generation.
 
@@ -198,17 +209,36 @@ Distinct quantitative and qualitative outcomes in these simulations demonstrate 
 
 \section*{Predicting clonal structure of MZ B cells generated from antigen induced activation of FoB cells}
 
-To simulate the clonal dynamics of CAR-expressing MZ B cells, we defined a simple stochastic model that assumes identical kinetics of birth-loss for all newly generated antigen-specific MZ B cell clones.
+To simulate the dynamics of antigen-specific clones in the MZ B cell pool during the TD response, we reformulated our best-fit branched model into a probabilistic approach.
+We considered $n$ clones respond to the TD antigen and no clone-specific differences in their kinetics of recruitment and retention in the MZ B cell pool. % \ie no clone-specific differences in responding B cells' ability to be recruited into and retain in the MZ B cell pool. 
+%The model can be easily adopted to include clone-specific differences in these processes.
+We used the mean estimates of the \textit{per capita} rates of influx ($\mu = 0.0014$) and loss ($\lambda = 0.49$) derived from our model fits to data from control/CAR mice.
+We used power-law  to define the initial distribution of antigen-specific clones in the FoB cell compartment and assumed that it varied with time. 
+Here, we simulated 75 clones considering a scenario in which clones that are highly ranked (based on their size) at the beginning of the response are enriched over time in the FoB pool~(\textbf{Fig.~\ref{fig:clone-dyn}A}).
+We then made predictions of their clone size distributions for up to 2 months post immunization~(\textbf{Fig.~\ref{fig:clone-dyn}B}).
+
+%We considered that birth and loss of MZ B clones are poisson processes and therefore their wait times follow the exponential distribution.
+%For example, the probability of a loss (by death or differentiation) event in a small time-interval $\tau$ is $1-e^{-\lambda\,\tau}$.
+
 
 \textbf{Stochastic simulation of clonal dynamics} 
-\begin{eqnarray*}
-\begin{aligned}
-&\text{In a small time interval } h, \\
-&\text{Number of new clones recruited into the MZ} = \kappa  F^+(t) h \\
-&\text{Clones are lost from the pool with a binomial probability } = \kappa  F^+(t) h \\
-\end{aligned}
-\end{eqnarray*}
-  
+
+Number of FoB cells and newly generated MZ B cell at time $t = F(t) \text{ and } M(t)$, respectively. 
+
+\begin{tabular}{ll}
+In a small time interval $\tau$, \\
+&$P_\text{recruit} = 1-e^{-\mu \,\tau} $ \\
+&$P_\text{loss} = 1-e^{-\lambda \,\tau} $ \\
+
+
+
+At time  $t + \tau$, &\\
+&number of new clones recruited into the MZ $x \sim \text{Binom}(F(t), P_\text{recruit})$ \\
+&number clones are lost from the pool $y \sim \text{Binom}(M(t), P_\text{loss})$  \\
+
+\end{tabular}
+
+We simulated   
 We used the 
 population average
  (Supplementary Fig.~\ref{fig:clone-dyn}A).
@@ -228,11 +258,10 @@ population average
        \label{fig:clone-dyn}
        
  \end{figure}
+ 
+ 
+ \end{document}
 
-
-
-
-\end{document}
 
 
 

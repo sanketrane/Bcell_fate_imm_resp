@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.12.22)  24 APR 2023 17:32
+This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.12.22)  5 JUN 2023 16:21
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -940,40 +940,24 @@ LaTeX Info: Redefining \textsuperscript on input line 60.
 \g__xetex_show_hyphens_word_box=\box70
 )
 
-Package fontspec Info: Font family 'PalatinoLinotype(0)' created for font
-(fontspec)             'Palatino Linotype' with options
-(fontspec)             [Mapping=tex-text,Ligatures=TeX].
+Package fontspec Info: Font family 'Helvetica(0)' created for font 'Helvetica'
+(fontspec)             with options [Mapping=tex-text,Ligatures=TeX].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"Palatino
-(fontspec)             Linotype/OT:script=latn;language=dflt;mapping=tex-text;"
-
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"Palatino
-(fontspec)             Linotype/OT:script=latn;language=dflt;+smcp;mapping=tex-
-text;"
-(fontspec)             - 'bold' (b/n) with NFSS spec.: <->"Palatino
-(fontspec)             Linotype/B/OT:script=latn;language=dflt;mapping=tex-text
-;"
-(fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.:
-(fontspec)             <->"Palatino
-(fontspec)             Linotype/B/OT:script=latn;language=dflt;+smcp;mapping=te
-x-text;"
-(fontspec)             - 'italic' (m/it) with NFSS spec.: <->"Palatino
-(fontspec)             Linotype/I/OT:script=latn;language=dflt;mapping=tex-text
-;"
-(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.:
-(fontspec)             <->"Palatino
-(fontspec)             Linotype/I/OT:script=latn;language=dflt;+smcp;mapping=te
-x-text;"
-(fontspec)             - 'bold italic' (b/it) with NFSS spec.: <->"Palatino
-(fontspec)             Linotype/BI/OT:script=latn;language=dflt;mapping=tex-tex
-t;"
-(fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.:
-(fontspec)             <->"Palatino
-(fontspec)             Linotype/BI/OT:script=latn;language=dflt;+smcp;mapping=t
-ex-text;"
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"Helvetica/AAT:mapping=tex-text;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
+(fontspec)             - 'bold' (b/n) with NFSS spec.:
+(fontspec)             <->"Helvetica/B/AAT:mapping=tex-text;"
+(fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.: 
+(fontspec)             - 'italic' (m/it) with NFSS spec.:
+(fontspec)             <->"Helvetica/I/AAT:mapping=tex-text;"
+(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.: 
+(fontspec)             - 'bold italic' (b/it) with NFSS spec.:
+(fontspec)             <->"Helvetica/BI/AAT:mapping=tex-text;"
+(fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.: 
 
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/natbib/natbib.sty
@@ -1096,28 +1080,21 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 108
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
-]
-Overfull \hbox (13.84239pt too wide) in paragraph at lines 143--146
-\TU/PalatinoLinotype(0)/m/n/10.95 transferred in synchronously immunized CD45.1
-/CD45.2 WT recipient mice (Supplementary Fig. []1[]A).
- []
-
-
-Overfull \hbox (1.48354pt too wide) in paragraph at lines 173--174
-[]\TU/PalatinoLinotype(0)/m/n/10.95 Distinct quantitative and qualitative outco
-mes in these simulations demonstrate that the co-transfer
- []
-
-[2
+] [2
 
 ]
 File: supp-9V2.pdf Graphic file (type pdf)
 <use supp-9V2.pdf>
 
 
-LaTeX Warning: Float too large for page by 11.33pt on input line 193.
+LaTeX Warning: Float too large for page by 11.33pt on input line 204.
 
-[3] [4
+[3]
+Overfull \hbox (34.979pt too wide) in paragraph at lines 228--240
+[][] 
+ []
+
+[4
 
 
 ]
@@ -1130,12 +1107,12 @@ Package rerunfilecheck Info: File `"modelling part".out' has not changed.
 (rerunfilecheck)             Checksum: <no file>.
  ) 
 Here is how much of TeX's memory you used:
- 38061 strings out of 476919
- 886116 string characters out of 5821839
- 1317023 words of memory out of 5000000
- 57415 multiletter control sequences out of 15000+600000
- 415856 words of font info for 96 fonts, out of 8000000 for 9000
+ 38049 strings out of 476919
+ 884654 string characters out of 5821839
+ 1314458 words of memory out of 5000000
+ 57405 multiletter control sequences out of 15000+600000
+ 415848 words of font info for 95 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 117i,14n,116p,891b,479s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 117i,11n,116p,892b,479s stack positions out of 5000i,500n,10000p,200000b,80000s
 
 Output written on modelling part.pdf (5 pages).
