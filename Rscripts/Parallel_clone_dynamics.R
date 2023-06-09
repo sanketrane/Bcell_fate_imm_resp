@@ -28,18 +28,18 @@ T_MAX = 60
 
 
 #!/usr/bin/env Rscript
-args = commandArgs(trailingOnly = TRUE)
+#args = commandArgs(trailingOnly = TRUE)
+#
+## test if there is at least one argument: if not, return an error
+#if (length(args)==0) {
+#  stop("At least one argument must be supplied (input file).\n", call.=FALSE)
+#} else if (length(args)==1) {
+#  # default output file
+#  args[2] = "out.txt"
+#}
 
-# test if there is at least one argument: if not, return an error
-if (length(args)==0) {
-  stop("At least one argument must be supplied (input file).\n", call.=FALSE)
-} else if (length(args)==1) {
-  # default output file
-  args[2] = "out.txt"
-}
-
-rUN_seed <- paste0("Run_", args[1])
-#rUN_seed <- paste0("Run_", 3)
+#rUN_seed <- paste0("Run_", args[1])
+rUN_seed <- paste0("Run_", 3)
 print(rUN_seed)
 
 Wes_pallete <- wesanderson::wes_palette('Darjeeling1', NUM_CLONES, type = "continuous")
@@ -109,17 +109,17 @@ pl_df <- data.frame("d07" = PLdist_Clone_Time(7, NUM_CLONES),
   gather(-Clone.ID,  key='Time.Days', value='Clone.Size')
 
 ggplot(pl_df)+
-  geom_line(aes(x=log(Clone.ID), y=log(Clone.Size), col = Clone.ID)) +
+  geom_line(aes(x=(Clone.ID), y=log(Clone.Size), col = Clone.ID)) +
   scale_color_viridis_c() + 
   labs(x = "log(Clone Rank)", y = "log(Clone Size)") +
-  guides(col='none') + #scale_x_log10()+
+  guides(col='none') + scale_x_log10()+
   facet_wrap(~Time.Days)
 
 ggplot(pl_df)+
-  geom_line(aes(x=log(Clone.ID), y=log(Clone.Size), col = Time.Days), size=0.75) +
+  geom_line(aes(x=(Clone.ID), y=log(Clone.Size), col = Time.Days), size=0.75) +
   #scale_color_viridis_d(option = "D") + 
   scale_color_discrete(name = "Time since \n immunization")+
-  labs(x = "log(Clone Rank)", y = "log(Clone Size)") +
+  labs(x = "log(Clone Rank)", y = "log(Clone Size)") + scale_x_log10()+
   theme(legend.position = c(0.9, 0.75), legend.background = element_blank(), legend.title.align=0.5)
 
 ggsave(paste0(rUN_seed, "_parent_Hist.pdf"), last_plot(), width = 6, height = 4.5, device = 'pdf')

@@ -49,7 +49,7 @@ mu_l <- median(fit_ss2$mu)
 
 gc_in <- function(Time){
   v = ifelse(Time<7, 0,
-             ifelse(Time>7.25, 0, 1e5))
+             ifelse(Time>7.25, 0, 5e5))
   return(v)
 }
 gc_in(ts_pred)
@@ -74,7 +74,7 @@ ode_func <-  function(t, state, parms){
     mu_gc = ifelse(t<=7, 0, mu_linear)
     lambda_gc = ifelse(t<=7, 0, lambda_linear)
     
-    t0 = 4.0;
+    t0 = 7.0;
     ## form for influx of activated FOB into GC varying with time
     alpha_tau = alpha/(1 + exp(nu * (t-t0)^2))
     
@@ -102,11 +102,11 @@ ode_func <-  function(t, state, parms){
 }
 
 #initial conditions
-state <- c(Y1 = 1e5, Y2 = 0,  Y3=0, Y4=1e5, Y5=0)
+state <- c(Y1 = 3e5, Y2 = 0,  Y3=0, Y4=3e5, Y5=0)
 
 # time points for which conc is reported
 # include the points where data is available
-ts_pred <- c(4, 5, 6, seq(7, 60, length.out=100))
+ts_pred <- c(seq(7, 60, length.out=100))
 
 
 out_df <- data.frame()
@@ -162,7 +162,7 @@ ggplot(data = plot_df, aes(x= timeseries)) +
   geom_area(aes(y= GC.2, fill="GC CD45.2" ), alpha=0.5, colour="white") +
   geom_area(aes(y= MZ.2, fill="MZ CD45.2"), alpha=0.5, colour="white") +
   geom_area(aes(y= MZ.1, fill="MZ CD45.1" ), alpha=0.6, colour="white") +
-  scale_x_log10(limits = c(4, 60), breaks=c(7, 14, 28, 56)) + 
+  scale_x_log10(limits = c(7, 60), breaks=c(7, 14, 28, 56)) + 
   scale_y_continuous(limits = c(1, 2e5), trans = "log10", labels = fancy_scientific, minor_breaks = log10minorbreaks) + 
   labs(x='Days since immunization', y=NULL)  +  #theme_ipsum() +
   guides(fill='none') +
