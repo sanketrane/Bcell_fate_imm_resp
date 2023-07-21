@@ -113,14 +113,14 @@ ggplot(pl_df)+
   scale_color_viridis_c() + 
   labs(x = "log(Clone Rank)", y = "log(Clone Size)") +
   guides(col='none') + scale_x_log10()+
-  facet_wrap(~Time.Days)
+  facet_wrap(~Time.Days) + theme_bw()
 
 ggplot(pl_df)+
-  geom_line(aes(x=(Clone.ID), y=log(Clone.Size), col = Time.Days), size=0.75) +
+  geom_line(aes(x=(Clone.ID), y=log(Clone.Size), col = Time.Days)) +
   #scale_color_viridis_d(option = "D") + 
   scale_color_discrete(name = "Time since \n immunization")+
   labs(x = "log(Clone Rank)", y = "log(Clone Size)") + scale_x_log10()+
-  theme(legend.position = c(0.9, 0.75), legend.background = element_blank(), legend.title.align=0.5)
+  theme(legend.position = c(0.9, 0.75), legend.background = element_blank(), legend.title.align=0.5)+ theme_bw()
 
 ggsave(paste0(rUN_seed, "_parent_Hist.pdf"), last_plot(), width = 6, height = 4.5, device = 'pdf')
 
@@ -182,7 +182,7 @@ PL_parent_dist <- function(Time, nClones){
   return(dist)
 }
 
-
+nClones = NUM_CLONES
 singleRun <- function(nClones){
   ### !!!TSTEP needs to be very small otherwise the propensities are not accurate!!!
   TSTEP = 0.04; updated_time = 1; Tmax = T_MAX; current_time = 0; nClones = nClones
@@ -266,7 +266,7 @@ singleRun <- function(nClones){
   return(single_run_plot)
 }
 
-#single_run_plot <- singleRun(NUM_CLONES)
+single_run_plot <- singleRun(NUM_CLONES)
 #
 #ggplot(single_run_plot)+
 #  geom_line(aes(x=Timeseries, y=Clonefreq, col=as.factor(CloneID))) +

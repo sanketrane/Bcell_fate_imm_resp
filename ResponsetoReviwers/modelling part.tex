@@ -141,15 +141,23 @@ We believe we are known in the field for taking a great care in developing appro
 }
 
 Response: We fully agree with this viewpoint and thank the reviewer for suggesting it. 
-We now include simulations (supplementary text \red{XX}) of an adoptive transfer experiment in which we predict the dynamics of MZB cell generation upon immunization from FoB and/or GCB cells.
-We compared the simulations generated using the branched and linear models and a hybrid model, in which both branched and linear pathways dictate B cell fate decisions during an immune response.
-Our analysis demonstrates that the adoptive transfer strategy, described in detail in the supplementary text \red{XX}, can effectively dissect the contributions of the branched and linear pathways to activation-induced MZ B cell generation.
-%The details of th simulation are outlined  in the supplementary text \red{XX}.
+\blue{
+The models described here can be adopted to predict immune-response dynamics of MZB cells in diverse experimental settings.
+Such To demonstrate this and as an example, we now include simulations from our models in supplementary text \red{XX} in which we predict immune-response dynamics of MZB cells in an adoptive transfer setting.
+Specifically, we simulated a transplantation experiment in which MZB cell generation from donor FOB and GCB cells (CD45.1 and CD45.2 backgrounds, respectively) was tracked in a CD45.1/CD45.2 double positive recipient.
+Virtual transplantation experiment is described schematically in the supplementary figure \red{XX}.
+Using the parameters derived from our model-fitting to the CAR-expression data, we generated predictions for the contribution of the branched and linear models and a hybrid model, in which both branched and linear pathways dictate B cell fate decisions, to MZB cell generation during an immune response.
+hitheoretical forecasting is used routinely in systems immunology to limit and select potential experiments, to identify critical components of their design, and to provide external validation once the experiments are performed. 
+
+This analysis demonstrates that the adoptive transfer strategy, described in detail in t, can effectively dissect the contributions of the branched and linear pathways to activation-induced MZ B cell generation.
+}
+
 \clearpage
 
 
 \section*{Predicting B cell diversification patterns in response to immunization in an adoptive transfer strategy}
-
+%Our fitting procedure identified branched model as the dominant pathway of CAR$^{+}$ MZB cell generation during NP-CGG response. 
+%However, the true causal structure of immunization induced MZB generation may include contributions from both branched and linear models.
 We simulated an experiment in which CAR$^{+}$ FoB and GCB cells are sorted on day 7 post immunization from congenic control/CAR mice of CD45.1 and CD45.2 backgrounds, respectively. 
 Sorted cells are then co-transferred in equal proportions in wild-type recipient mice (CD45.1 CD45.2 double positive background) that were immunized synchronously with donor mice (Supplementary Fig. XXA). 
 In this system, CAR expression identifies activated donor-derived B cells. Within CAR$^{+}$ subset, CD45.1/CD45.2 expression distinguishes MZB cells developed from either FoB or GCB cells.
@@ -204,22 +212,28 @@ Our analysis here suggests that mathematically modeling the data-derived from th
     Plots on the right depict fraction of CD45.1 and CD45.2 donor cells in CAR$^+$ MZ B cell compartment.
     Individual panels represent predictions generated using a fixed value of the loss rate ($\phi$) of CAR$^{+}$ FoB cells.
     }
-       \label{fig:co-transf}
+    \label{fig:co-transf}
  \end{figure}
  
-
+ 
 \end{document}
-
-\clearpage
-
-
 \section*{Predicting clonal structure of MZ B cells generated from antigen induced activation of FoB cells}
+
+
+%: Supplementary Fig 10 - Prediction of clonal dynamics
+\begin{figure}[htbp]
+\includegraphics[width=0.8\textwidth]{sim_2.pdf}
+\caption{
+    \textbf{Stochastic simulation of the clonal dynamics during the TD response.}
+    }
+\label{fig:clone-dyn} 
+\end{figure}
 
 To simulate the dynamics of antigen-specific clones in the MZ B cell pool during the TD response, we reformulated our best-fit branched model into a probabilistic approach.
 We considered $n$ clones respond to the TD antigen and no clone-specific differences in their kinetics of recruitment and retention in the MZ B cell pool. % \ie no clone-specific differences in responding B cells' ability to be recruited into and retain in the MZ B cell pool. 
 %The model can be easily adopted to include clone-specific differences in these processes.
 We used the mean estimates of the \textit{per capita} rates of influx ($\mu = 0.0014$) and loss ($\lambda = 0.49$) derived from our model fits to data from control/CAR mice.
-We used power-law  to define the initial distribution of antigen-specific clones in the FoB cell compartment and assumed that it varied with time. 
+%We used power-law  to define the initial distribution of antigen-specific clones in the FoB cell compartment and assumed that it varied with time. 
 Here, we simulated 75 clones considering a scenario in which clones that are highly ranked (based on their size) at the beginning of the response are enriched over time in the FoB pool~(\textbf{Fig.~\ref{fig:clone-dyn}A}).
 We then made predictions of their clone size distributions for up to 2 months post immunization~(\textbf{Fig.~\ref{fig:clone-dyn}B}).
 
@@ -236,36 +250,15 @@ Number of FoB cells and newly generated MZ B cell at time $t = F(t) \text{ and }
 In a small time interval $\tau$, \\
 &$P_\text{recruit} = 1-e^{-\mu \,\tau} $ \\
 &$P_\text{loss} = 1-e^{-\lambda \,\tau} $ \\
-
-
-
 At time  $t + \tau$, &\\
 &number of new clones recruited into the MZ $x \sim \text{Binom}(F(t), P_\text{recruit})$ \\
 &number clones are lost from the pool $y \sim \text{Binom}(M(t), P_\text{loss})$  \\
-
 \end{tabular}
-
-We simulated   
-We used the 
-population average
- (Supplementary Fig.~\ref{fig:clone-dyn}A).
 
 
 \clearpage
 
-
-
-%: Supplementary Fig 10 - Prediction of clonal dynamics
-\begin{figure}[htbp]
-\center
-\includegraphics[width=0.8\textwidth]{supp-10.pdf}
-\caption{
-    \textbf{Stochastic simulation of the clonal dynamics during the TD response.}
-    }
-       \label{fig:clone-dyn}
-       
- \end{figure}
-
+\end{document}
 
 
 
