@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.12.22)  21 JUL 2023 15:19
+This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.12.22)  1 AUG 2023 16:49
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1080,26 +1080,41 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 108
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
-] [2
-
 ]
 File: supp-9V2.pdf Graphic file (type pdf)
 <use supp-9V2.pdf>
 
 
-LaTeX Warning: Float too large for page by 11.33pt on input line 215.
+LaTeX Warning: Float too large for page by 11.33pt on input line 211.
 
-[3] (./modelling part.aux)
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[2
+
+] [3]
+Overfull \hbox (34.39491pt too wide) in paragraph at lines 251--260
+[][] 
+ []
+
+File: sim_2.pdf Graphic file (type pdf)
+<use sim_2.pdf>
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[4
+
+] [5] (./modelling part.aux)
 Package rerunfilecheck Info: File `"modelling part".out' has not changed.
 (rerunfilecheck)             Checksum: <no file>.
  ) 
 Here is how much of TeX's memory you used:
- 38038 strings out of 476919
- 884441 string characters out of 5821839
- 1317353 words of memory out of 5000000
- 57397 multiletter control sequences out of 15000+600000
- 415832 words of font info for 93 fonts, out of 8000000 for 9000
+ 38053 strings out of 476919
+ 884753 string characters out of 5821839
+ 1319456 words of memory out of 5000000
+ 57407 multiletter control sequences out of 15000+600000
+ 415864 words of font info for 97 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 117i,6n,116p,889b,479s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 117i,11n,116p,889b,479s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on modelling part.pdf (3 pages).
+Output written on modelling part.pdf (5 pages).

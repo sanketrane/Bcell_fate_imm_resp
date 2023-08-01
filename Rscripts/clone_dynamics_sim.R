@@ -10,7 +10,7 @@ library(parallel)
 library(rstan)
 
 ### model specific details that needs to be change for every run
-modelName <- "Branched_timeinflux"
+modelName <- "Branched_timeinflux1"
 
 ## Setting all the directories for opeartions
 projectDir <- getwd()
@@ -71,8 +71,10 @@ lambda_med <- median(fit_ss$lambda_WT)
 ## Phenomenological function describing number of activated (CAR expressing) FoB cells varying with time
 CAR_FoB <- function(Time){
   # spline fitted to FoB numbers 
-  F0 = exp(0); B0 = exp(5);  n = 4 ;  X = 9.4 ;  q = 6;
-  value = (B0 * Time^n) * (1 - ((Time^q)/((X^q) + (Time^q))));
+  # F0 = exp(0); B0 = exp(5);  n = 4 ;  X = 9.4 ;  q = 6;
+  # value = (B0 * Time^n) * (1 - ((Time^q)/((X^q) + (Time^q))));
+  F0 = exp(16.7);  nu = 0.004;  b0 = 20;
+  value = F0 * (1 + exp(-nu * (Time - b0)^2));
   return(value)
 }
 
@@ -308,11 +310,10 @@ MZ_time <- function(Time, distrib="powerlaw", nClones){
   return(sort(clone_sample))
 }
 
-
 singleRun <- function(NUM_Clones, distrib){
   ### !!!TSTEP needs to be very small otherwise the propensities are not accurate!!!
-  TSTEP = 0.004; updated_time = 4; Tmax = 30; current_time = 0; NUM_Clones = NUM_Clones
-  start_clone_dist <- MZ_time(Time = updated_time, distrib = distrib, nClones = NUM_Clones)
+  TSTEP = 0.01; updated_time = 4; Tmax = 30; current_time = 0; NUM_Clones = NUM_Clones
+  start_clone_dist <- MZ_time(Time = updated_time, distrib = "powerlaw", nClones = NUM_Clones)
   
   initial_dist <- data.frame("CloneID" = as.factor(seq(1, NUM_Clones, 1)),
                              "T0" = rep(0, NUM_Clones))
@@ -357,8 +358,9 @@ singleRun <- function(NUM_Clones, distrib){
       left_join(updated_dist, by="CloneID")
     
     ## reset the time an clone dist
-    start_clone_dist <- final_clone_dist
+    start_clone_dist <- final_clone_dist %>% sort()
     updated_time <- current_time
+    if (updated_time %% 5 == 0) print(updated_time)
     
     time_vec <- append(time_vec, values = updated_time)
     
@@ -379,23 +381,39 @@ singleRun <- function(NUM_Clones, distrib){
   
   return(single_run_plot)
 }
-
-#single_run_plot <- singleRun(75, 'powerlaw')
-#
-#ggplot(single_run_plot)+
+# 
+# single_run_plot <- singleRun(75, 'powerlaw')
+# ggplot(single_run_plot)+
+#  geom_line(aes(x=Timeseries, y=Clonefreq, col=as.factor(CloneID))) +
+#  #scale_y_log10() + scale_x_log10() +
+#  labs(x = "Time since immunization (days)", y = "Clone size") +
+#  scale_color_manual(values = Wes_pallete)+ scale_fill_manual(values=Wes_pallete) +
+#  #geom_text(aes(x=Timeseries, y=Clonefreq, label=CloneID, col=as.factor(CloneID)))+
+#  #scale_color_viridis_d() + +
+#  #facet_wrap(.~ CloneID, nrow = 5)
+#  guides(col='none')
+# 
+# ggsave("MZ_count_dist.pdf", last_plot(), width = 6, height = 4.5, device = 'pdf')
+# 
+# ggplot(single_run_plot)+
 #  geom_line(aes(x=Timeseries, y=Clonefreq, col=CloneID)) +
-#  guides(col='none') +  
+#  labs(x = "Time since immunization (days)", y = "Clone size") +
+#  guides(col='none') +
 #  facet_wrap(.~ CloneID, nrow = 5)
-#
-#
-#singleRun_clonefreq <- single_run_plot %>%
+# 
+# 
+# ggsave("MZ_clone_dist.pdf", last_plot(), width = 10, height = 9, device = 'pdf')
+# 
+# singleRun_clonefreq <- single_run_plot %>%
 #  group_by(Timeseries) %>%
 #  mutate(clone_freq = Clonefreq/sum(Clonefreq))
-#
-#ggplot(singleRun_clonefreq)+
+# 
+# ggplot(singleRun_clonefreq)+
 #  geom_line(aes(x=Timeseries, y=clone_freq, col=CloneID)) +
-#  guides(col='none') +
-#  ylim(0, 0.3)
+#  labs(x = "Time since immunization (days)", y = "Clone Frequency") +
+#  scale_color_manual(values = Wes_pallete)+ scale_fill_manual(values=Wes_pallete)+
+#  guides(col='none') + scale_y_log10(limits=c(0.0001, 1))
+
 
 BatchRun <- function(nIter, NUM_Clones, distrib){
   ## function to iterate
@@ -421,7 +439,7 @@ BatchRun <- function(nIter, NUM_Clones, distrib){
 print("START BATCH RUN!!")
 
 system.time(
-MultiRunPlot <- BatchRun(100, NUM_Clones = 75, distrib =  "powerlaw")
+MultiRunPlot <- BatchRun(200, NUM_Clones = 75, distrib =  "powerlaw")
 )
 
 MultiRunPlot <- MultiRunPlot %>% 

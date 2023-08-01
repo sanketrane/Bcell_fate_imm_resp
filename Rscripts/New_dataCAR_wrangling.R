@@ -137,27 +137,27 @@ phi_func <- function(Time, basl, theta, n, X, q){
   return( basl_exp + (theta_exp * t^n) * (1 - ((t^q)/((X^q) + (t^q)))))
 }
 
-sol_time <- seq(0, 30, length.out=100)
+sol_time <- seq(4, 30, length.out=100)
 qplot(sol_time, y= log(phi_func(sol_time, basl = 17.2, theta = 7.5, n = 3 , X = 10, q = 5)))+
   geom_line()+
   geom_point(data = B_cell_data, aes(x=days_post_imm, y=log(total_FoB)), col=2)
 
 
-repFOB_nlm <- nls(log(total_FoB) ~ log(phi_func(days_post_imm, basl, theta, n, X, q)),
+repFOB_nlm <- nls(log(CARpos_FoB) ~ log(phi_func(days_post_imm, basl, theta, n, X, q)),
                   data = B_cell_data,
                   start = list(basl = 11.2, theta = 7.5, n = 3 , X = 10, q = 5))
 
 par_est <- coef(repFOB_nlm)
 phi_vec_m1 <- phi_func(sol_time, basl = par_est[1], theta =  par_est[2], n =  par_est[3] , X =  par_est[4], q =  par_est[5])
-phi_vec_m <- phi_func(sol_time, basl = 11.2, theta = 7.5, n = 3 , X = 10, q = 5)
+phi_vec_m <- phi_func(sol_time, basl = 11.3, theta = 7.2, n = 3, X = 11, q = 5)
 
 ggplot() +
-  #geom_line(aes(x=sol_time, y=(phi_vec_m)), col="#6082B6", size=0.8) +
-  geom_line(aes(x=sol_time, y=(phi_vec_m1)), col=2, size=0.8) +
+  geom_line(aes(x=sol_time, y=(phi_vec_m)), col="#6082B6", linewidth=0.8) +
+  geom_line(aes(x=sol_time, y=(phi_vec_m1)), col=2, linewidth=0.8) +
   geom_point(data=filter(B_cell_data, days_post_imm >=4),
-             aes(x=days_post_imm, y=(total_FoB)), size=2, col="#6082B6") + 
+             aes(x=days_post_imm, y=(CARpos_FoB)), size=2, col="#6082B6") + 
   scale_x_continuous(limits=c(3.9, 30))+
-  scale_y_log10(limits = c(5e6, 1e8), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
+  scale_y_log10(limits = c(5e4, 5e6), minor_breaks = log10minorbreaks, labels =fancy_scientific) +
   labs(x='Days post immunization', y="Cell counts", title='CAR positive FoB Cells') + myTheme
 
 ggsave('plots/New_plotsNatComm/CARposFOB.pdf', last_plot(), device = 'pdf', width = 6, height = 4.5)

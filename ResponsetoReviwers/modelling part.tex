@@ -119,7 +119,7 @@ We indeed do consider differences in generation of CAR$^{+}$ MZB cells between w
 In N2KO//CAR mice, we assume complete absence of differentiation of CAR$^{+}$ (activated) FoB  or GCB cells into MZB cells, since activation induces deletion of Notch2 receptor in their B cells.(\textit{i.e.} $\mu=0$).
 %In control/CAR mice $\mu \neq 0$.
 Notch2 is indispensable for MZB cell generation (PMID: 11967543, 12753744, 15146182).
-To clarify this point further we have modified the Fig. 7 (panels C and D) and the description of mathematical models in the methods section.
+To clarify this point further we have modified \red{Fig. 7 (panels C and D)} and the description of mathematical models in the methods section.
 %%The concern that all parameters except the decay rate of the CAR$^{+}$ MZB cells are identical between wild-type and the knockout scenarios, is a misinterpretation.
 %Our startegies to model data from for wild-type (control/CAR) and Notch2 knockout (N2KO//CAR) mice differ in two ways:
 %\begin{enumerate}
@@ -133,7 +133,7 @@ To clarify this point further we have modified the Fig. 7 (panels C and D) and t
 %We consider activation of pre-existing MZB cells ($\beta$) to be Notch2 independent and is therefore described by same rate constant ($\beta$) in both wild-type and Notch2 knockout mice. 
 
 \blue{Depending on the tone that you are going for you may either keep or remove this: \\
-We believe we are known in the field for taking a great care in developing approaches that integrate theory and biology closely; and would like to argue that our model-design here too is well tethered to the underlying biology of the experimental system and suited for the questions we are asking. 
+We believe we are known in the field for taking great care in developing approaches that integrate theory and biology closely; and would like to argue that our model-design here too is well tethered to the underlying biology of the experimental system and suited for the questions we are asking. 
 }
 
 \gray{
@@ -142,14 +142,13 @@ We believe we are known in the field for taking a great care in developing appro
 
 Response: We fully agree with this viewpoint and thank the reviewer for suggesting it. 
 \blue{
-The models described here can be adopted to predict immune-response dynamics of MZB cells in diverse experimental settings.
-Such To demonstrate this and as an example, we now include simulations from our models in supplementary text \red{XX} in which we predict immune-response dynamics of MZB cells in an adoptive transfer setting.
-Specifically, we simulated a transplantation experiment in which MZB cell generation from donor FOB and GCB cells (CD45.1 and CD45.2 backgrounds, respectively) was tracked in a CD45.1/CD45.2 double positive recipient.
-Virtual transplantation experiment is described schematically in the supplementary figure \red{XX}.
-Using the parameters derived from our model-fitting to the CAR-expression data, we generated predictions for the contribution of the branched and linear models and a hybrid model, in which both branched and linear pathways dictate B cell fate decisions, to MZB cell generation during an immune response.
-hitheoretical forecasting is used routinely in systems immunology to limit and select potential experiments, to identify critical components of their design, and to provide external validation once the experiments are performed. 
-
-This analysis demonstrates that the adoptive transfer strategy, described in detail in t, can effectively dissect the contributions of the branched and linear pathways to activation-induced MZ B cell generation.
+%The models described here can be adopted to predict immune-response dynamics of MZB cells in diverse experimental settings.
+We now include simulations in which we adopt our models to predict immune-response dynamics of MZB cells in an adoptive transfer setting. 
+Specifically, we simulated a transplantation experiment in which MZB cell generation from donor FOB and GCB cells (CD45.1 and CD45.2 backgrounds, respectively) is tracked in congenic (CD45.1/CD45.2 background) recipient mice.
+The virtual transplantation experiment is described in detail in supplementary text \red{XX} and schematically in the supplementary figure \red{XX}.
+Using the parameters derived from our model-fitting to the CAR-expression data, we generated predictions for donor MZB cell developmental dynamics during an immune response, assuming either (i) the branched model or (ii) the linear model or (ii) a hybrid model in which both branched and linear pathways operate to govern B cell fate decisions.
+This theoretical forecasting, identified critical components of the adoptive transfer experimental design and provides a means to limit and select potential outcomes once the experiment is performed. 
+%Such theoretical forecasting is used routinely in systems immunology to limit and select potential experiments, to identify critical components of their design, and to provide external validation once the experiments are performed. 
 }
 
 \clearpage
@@ -159,7 +158,7 @@ This analysis demonstrates that the adoptive transfer strategy, described in det
 %Our fitting procedure identified branched model as the dominant pathway of CAR$^{+}$ MZB cell generation during NP-CGG response. 
 %However, the true causal structure of immunization induced MZB generation may include contributions from both branched and linear models.
 We simulated an experiment in which CAR$^{+}$ FoB and GCB cells are sorted on day 7 post immunization from congenic control/CAR mice of CD45.1 and CD45.2 backgrounds, respectively. 
-Sorted cells are then co-transferred in equal proportions in wild-type recipient mice (CD45.1 CD45.2 double positive background) that were immunized synchronously with donor mice (Supplementary Fig. XXA). 
+Sorted cells are then co-transferred in equal proportions in wild-type recipient mice (CD45.1 CD45.2 double positive background) that were immunized synchronously with donor mice (Supplementary Fig. \red{XX}A). 
 In this system, CAR expression identifies activated donor-derived B cells. Within CAR$^{+}$ subset, CD45.1/CD45.2 expression distinguishes MZB cells developed from either FoB or GCB cells.
 We generated predictions for the dynamics of CAR$^{+}$  MZB and GCB cells, considering either (a) branched model, (b) linear model, or (c) a hybrid model in which both branched and linear pathways govern B cell dynamics during immune responses. 
 We assumed 10\% grafting efficiency for $10^{6}$ FoB (CD45.1) and $10^{6}$ GCB (CD45.2) transferred cells. 
@@ -195,13 +194,9 @@ This pattern reverses for values of $\phi \ge$ 0.7, and the number of CD45.2$^{+
 Our simulations predict distinct quantitative and qualitative outcomes for the branched, linear and hybrid models.
 Our analysis here suggests that mathematically modeling the data-derived from this co-transfer experiment can effectively untangle the contributions of branched and linear pathways to MZ B cell generation during immune responses.
 
- 
- 
-\clearpage
-
 
 %: Supplementary Fig 9 - simulation of the co-transfer experiment
-\begin{figure}[htbp]
+\begin{figure}[h!]
 \center
 \includegraphics[width=0.85\textwidth]{supp-9V2.pdf}
 \caption{
@@ -215,13 +210,58 @@ Our analysis here suggests that mathematically modeling the data-derived from th
     \label{fig:co-transf}
  \end{figure}
  
+
+\clearpage
+
+
+
+\section*{Predicting the clonal structure of MZ B cells generated from antigen induced activation of FoB cells}
+
+To simulate the dynamics of antigen-specific clones in the MZ B cell pool during the TD response, we reformulated our best-fit branched model into a probabilistic approach.
+We considered that `$N$' clones in FoB population respond to the TD antigen and explored a simple scenario in which responding clones exhibit similar kinetics of recruitment and retention in the MZ B cell pool.
+%We considered that CAR$^{+}$ FoB cell pool is  
+We described the dynamics in CAR$^{+}$ FoB cells using a time-varying function $B_0 + B_1 \, t^p  (1 - \frac{t^q}{X^q + t^q})$. %Fig.
+The total size of CAR$^{+}$ FoB cells is an aggregate of sizes of responding $N$ clones, at any give time.
+The initial distribution of antigen-specific clones in the FoB cell compartment is defined using the power-law.
+We further considered that this distribution of antigen-specific FoB cell clones varies with time, potentially due to differences in antigen accessibility and/or clonal response dynamics. 
+We used the mean estimates of the \textit{per capita} rates of influx ($\mu = 0.0014$) and loss ($\lambda = 0.49$) derived from fitting the branched time-varying influx model to the data from control/CAR mice.
+As an example, we simulated 75 clones considering a scenario in which clones that are highly ranked (based on their size) at the beginning of the response are enriched over time in the FoB pool~(\textbf{Fig.~\ref{fig:clone-dyn}A}).
+We considered that all 75 clones can enter MZB pool and generated predictions of their clone size distributions for up to 2 months post immunization~(\textbf{Fig.~\ref{fig:clone-dyn}B}), following a probabilistic model described below.
+
+%We considered that birth and loss of MZ B clones are poisson processes and therefore their wait times follow the exponential distribution.
+%For example, the probability of a loss (by death or differentiation) event in a small time-interval $\tau$ is $1-e^{-\lambda\,\tau}$.
  
-\end{document}
-\section*{Predicting clonal structure of MZ B cells generated from antigen induced activation of FoB cells}
+\subsection*{Stochastic simulation of clonal dynamics:} 
+%Number of CAR-expressing FoB cells at time $t$ are given as, $F(t) \text{ and } M(t)$, respectively.
+Consider in a small time interval $s$, the probabilities of recruitment and persistence of an antigen-specific B cell clone in the MZB cell pool are $P_\text{recruit} = 1-e^{-\mu \, s} $  and $P_\text{persist} = 1 - P_\text{loss} =  e^{-\lambda \, s} $.
+
+The normalized density $(x)$ and the total size $(X)$ of a clone $n$ in the CAR$^{+}$ FoB pool at time $t$ are defined as,
+$$
+x(n, t) = \frac{n^{-k} \, (1-k)}{N^{1-k}} \quad  \text{ and }  %\quad  \text{where } n = 1 \dots N. 
+\quad 
+X(n,t) = F(t) \, x(n,t),
+$$
+where $F(t)$ is the number of total CAR$^{+}$ FoB cells at time $t$.
+We define the distribution of antigen-specific clones in the CAR$^{+}$ MZB pool as $M(n,t)$, such that the total CAR$^{+}$ MZB pool size at time $t$ is $\int_{0}^{N} M(n, t) \,dn = M(t)$. We initiate this distribution at $t_0$ as $M(n, 0) = 0$ for clones $n=1, \dots, N$.
+The model then takes small time-steps of size $\tau$ to update $M(n, t)$ for $t = s, 2\,s, \dots ,T_\text{max}$ by modeling influx and loss events sequentially:
 
 
-%: Supplementary Fig 10 - Prediction of clonal dynamics
-\begin{figure}[htbp]
+At time step $t + s$, %(for $t = 0, \dots ,60$), \\
+
+\begin{tabular}{ll}
+\textbf{Influx} & Number of new clones recruited into the CAR$^{+}$ MZB pool: $y \sim \text{Binom}(F(t+s), P_\text{recruit})$. \\
+& We draw a random sample of $y$ clones from $F(n, t+s)$ as $Y(n)$. \\
+& The clonal distribution and the pool size of CAR$^{+}$ MZB cells are: \\ 
+& $\qquad U(n, t+s) = M(n, t) + Y(n)$ for $n=1, \dots, N \; $ and \\
+& $\qquad U(t+s) = \int_{0}^{N} U(n, t+s) \, dn$. \\
+\\
+\textbf{Loss} & Number clones that persist in the pool: $z \sim \text{Binom}(U(t+s), P_\text{persist})$.  
+\end{tabular}
+
+The updated clonal distribution $M(n, t+s)$ of the CAR$^{+}$ MZB cells at the end of time-step $t+s$ is generated by drawing a random sample of $z$ clones from $U(n, t+s)$. Their updated pool size is given as,
+$M(t+s) = \int_{0}^{N} M(n, t+s) \, dn.$
+\begin{figure}[!h]
+\centering
 \includegraphics[width=0.8\textwidth]{sim_2.pdf}
 \caption{
     \textbf{Stochastic simulation of the clonal dynamics during the TD response.}
@@ -229,37 +269,8 @@ Our analysis here suggests that mathematically modeling the data-derived from th
 \label{fig:clone-dyn} 
 \end{figure}
 
-To simulate the dynamics of antigen-specific clones in the MZ B cell pool during the TD response, we reformulated our best-fit branched model into a probabilistic approach.
-We considered $n$ clones respond to the TD antigen and no clone-specific differences in their kinetics of recruitment and retention in the MZ B cell pool. % \ie no clone-specific differences in responding B cells' ability to be recruited into and retain in the MZ B cell pool. 
-%The model can be easily adopted to include clone-specific differences in these processes.
-We used the mean estimates of the \textit{per capita} rates of influx ($\mu = 0.0014$) and loss ($\lambda = 0.49$) derived from our model fits to data from control/CAR mice.
-%We used power-law  to define the initial distribution of antigen-specific clones in the FoB cell compartment and assumed that it varied with time. 
-Here, we simulated 75 clones considering a scenario in which clones that are highly ranked (based on their size) at the beginning of the response are enriched over time in the FoB pool~(\textbf{Fig.~\ref{fig:clone-dyn}A}).
-We then made predictions of their clone size distributions for up to 2 months post immunization~(\textbf{Fig.~\ref{fig:clone-dyn}B}).
-
-%We considered that birth and loss of MZ B clones are poisson processes and therefore their wait times follow the exponential distribution.
-%For example, the probability of a loss (by death or differentiation) event in a small time-interval $\tau$ is $1-e^{-\lambda\,\tau}$.
- 
-
-
-\textbf{Stochastic simulation of clonal dynamics} 
-
-Number of FoB cells and newly generated MZ B cell at time $t = F(t) \text{ and } M(t)$, respectively. 
-
-\begin{tabular}{ll}
-In a small time interval $\tau$, \\
-&$P_\text{recruit} = 1-e^{-\mu \,\tau} $ \\
-&$P_\text{loss} = 1-e^{-\lambda \,\tau} $ \\
-At time  $t + \tau$, &\\
-&number of new clones recruited into the MZ $x \sim \text{Binom}(F(t), P_\text{recruit})$ \\
-&number clones are lost from the pool $y \sim \text{Binom}(M(t), P_\text{loss})$  \\
-\end{tabular}
-
-
-\clearpage
 
 \end{document}
-
 
 
 
