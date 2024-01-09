@@ -4,7 +4,7 @@
 *.Rhistory
 *.csv
 *.rds
-datafiles/old_data/
+datafiles/
 Information/
 output_fit/
 save_csv/
